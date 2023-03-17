@@ -1,7 +1,6 @@
 import datetime
 
 import requests
-from DataBase import DataBaseTools as DBtools
 from Log import Logger as ol
 from bs4 import BeautifulSoup
 from vkbottle.bot import Bot, BotLabeler, Message
@@ -44,23 +43,22 @@ async def check_age(message: Message):
             time_value = ''
             time_type = 'permanent'
 
-            if DBtools.add_permanent_ban(message, message.from_id):
-                title = f'@id{mute_users_info[0].id} (Пользователь) ' \
-                        f'был заблокирован на {time_value} {time_type}\n' \
-                        f'Причина: {reason}\n' \
-                        f'Блокировка будет снята: --\n' \
-                        f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+            title = f'@id{mute_users_info[0].id} (Пользователь) ' \
+                    f'был заблокирован на {time_value} {time_type}\n' \
+                    f'Причина: {reason}\n' \
+                    f'Блокировка будет снята: --\n' \
+                    f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
 
-                await message.answer(title)
-                await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
+            await message.answer(title)
+            await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
 
-                message_id = message.conversation_message_id
-                await bot.api.messages.delete(
-                    group_id=GROUP,
-                    peer_id=message.peer_id,
-                    cmids=message_id,
-                    delete_for_all=True
-                )
-                message.deleted = True
+            message_id = message.conversation_message_id
+            await bot.api.messages.delete(
+                group_id=GROUP,
+                peer_id=message.peer_id,
+                cmids=message_id,
+                delete_for_all=True
+            )
+            message.deleted = True
 
-                await bot.api.messages.remove_chat_user(message.chat_id, message.from_id)
+            await bot.api.messages.remove_chat_user(message.chat_id, message.from_id)
