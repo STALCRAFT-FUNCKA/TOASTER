@@ -1,6 +1,7 @@
 import datetime
 
 import requests
+from DataBase import DataBaseTools as DBtools
 from Log import Logger as ol
 from bs4 import BeautifulSoup
 from vkbottle.bot import Bot, BotLabeler, Message
@@ -14,51 +15,52 @@ bl = BotLabeler()
     blocking=False
 )
 async def check_age(message: Message):
+    if DBtools.get_setting(message, 'Allow_AgeCheck'):
 
-    response = requests.get(f'https://vk.com/foaf.php?id={message.from_id}')
-    user_xml = response.text
+        response = requests.get(f'https://vk.com/foaf.php?id={message.from_id}')
+        user_xml = response.text
 
-    soup = BeautifulSoup(user_xml, "xml")
+        soup = BeautifulSoup(user_xml, "xml")
 
-    if 'banned' not in soup.Person.profileState:
-        created_at = str(soup.Person.created)
-        created_at = created_at[created_at.find('\"') + 1:]
-        created_at = created_at[:created_at.find('\"')].replace('T', ' ')
-        created_at = created_at[:created_at.find('+')]
+        if 'banned' not in soup.Person.profileState:
+            created_at = str(soup.Person.created)
+            created_at = created_at[created_at.find('\"') + 1:]
+            created_at = created_at[:created_at.find('\"')].replace('T', ' ')
+            created_at = created_at[:created_at.find('+')]
 
-        aca = datetime.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
-        n = datetime.datetime.now()
+            aca = datetime.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+            n = datetime.datetime.now()
 
-        delta = n - aca
-        delta_seconds = int(delta.total_seconds())
+            delta = n - aca
+            delta_seconds = int(delta.total_seconds())
 
-        week = 60 * 60 * 24 * 7
+            week = 60 * 60 * 24 * 7
 
-        if delta_seconds < week:
+            if delta_seconds < week:
 
-            reason = 'Аккаунт моложе недели'
+                reason = 'Аккаунт моложе недели'
 
-            mute_users_info = await bot.api.users.get(message.from_id)
+                mute_users_info = await bot.api.users.get(message.from_id)
 
-            time_value = ''
-            time_type = 'permanent'
+                time_value = ''
+                time_type = 'permanent'
 
-            title = f'@id{mute_users_info[0].id} (Пользователь) ' \
-                    f'был заблокирован на {time_value} {time_type}\n' \
-                    f'Причина: {reason}\n' \
-                    f'Блокировка будет снята: --\n' \
-                    f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+                title = f'@id{mute_users_info[0].id} (Пользователь) ' \
+                        f'был заблокирован на {time_value} {time_type}\n' \
+                        f'Причина: {reason}\n' \
+                        f'Блокировка будет снята: --\n' \
+                        f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
 
-            await message.answer(title)
-            await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
+                await message.answer(title)
+                await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
 
-            message_id = message.conversation_message_id
-            await bot.api.messages.delete(
-                group_id=GROUP,
-                peer_id=message.peer_id,
-                cmids=message_id,
-                delete_for_all=True
-            )
-            message.deleted = True
+                message_id = message.conversation_message_id
+                await bot.api.messages.delete(
+                    group_id=GROUP,
+                    peer_id=message.peer_id,
+                    cmids=message_id,
+                    delete_for_all=True
+                )
+                message.deleted = True
 
-            await bot.api.messages.remove_chat_user(message.chat_id, message.from_id)
+                await bot.api.messages.remove_chat_user(message.chat_id, message.from_id)

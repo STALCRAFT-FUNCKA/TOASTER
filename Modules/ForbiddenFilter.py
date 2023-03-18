@@ -116,6 +116,19 @@ async def check_forbidden(message: Message):
                         reason = 'Стикер'
                         break
 
+        if not spotted and not DBtools.get_setting(message, 'Allow_Reply'):
+            if message.reply_message is not None:
+                if message.from_id != message.reply_message.from_id:
+                    spotted = True
+                    reason = 'Пересланное сообщение'
+
+            elif message.fwd_messages:
+                for msg in message.fwd_messages:
+                    if message.from_id != msg.from_id:
+                        spotted = True
+                        reason = 'Пересланное сообщение'
+                        break
+
         if spotted:
             warn_users_info = await bot.api.users.get(message.from_id)
             warn_count = DBtools.get_warn_count(message, message.from_id)

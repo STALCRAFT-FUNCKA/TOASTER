@@ -61,7 +61,9 @@ def add_conversation(message: Message):
             'Allow_Files': True,
             'Allow_Miniapp': True,
             'Allow_Graffiti': True,
-            'Allow_Sticker': True
+            'Allow_Sticker': True,
+            'Allow_Reply': True,
+            'Allow_AgeCheck': False
         },
         'PermanentBannedUsers': [],
         'TempBannedUsers': [],
