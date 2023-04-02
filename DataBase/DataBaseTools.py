@@ -63,7 +63,8 @@ def add_conversation(message: Message):
             'Allow_Graffiti': True,
             'Allow_Sticker': True,
             'Allow_Reply': True,
-            'Allow_AgeCheck': False
+            'Allow_AgeCheck': False,
+            'Allow_URLCheck': True
         },
         'PermanentBannedUsers': [],
         'TempBannedUsers': [],
