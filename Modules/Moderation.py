@@ -88,7 +88,7 @@ async def ban(message: Message, args: Tuple[str]):
             title = f'@id{ban_users_info[0].id} (Пользователь) ' \
                     f'был заблокирован на {time_value} {time_type}.\n' \
                     f'Блокировка будет снята: {Moscow_time}\n' \
-                    f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+                    f'По снятию блокировки обращаться к @id{STUFF_ADMIN} (Администратору)'
 
             if time_value == '' and time_type == 'permanent':
                 if DBtools.add_permanent_ban(message, ban_users_info[0].id):
@@ -183,7 +183,7 @@ async def ban_url(message: Message, args: Tuple[str]):
                 title = f'@id{ban_users_info[0].id} (Пользователь) ' \
                         f'был заблокирован на {time_value} {time_type}.\n' \
                         f'Блокировка будет снята: {Moscow_time}\n' \
-                        f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+                        f'По снятию блокировки обращаться к @id{STUFF_ADMIN} (Администратору)'
 
                 if time_value == '' and time_type == 'permanent':
                     if DBtools.add_permanent_ban(message, ban_users_info[0].id):
@@ -248,8 +248,9 @@ async def mute(message: Message, args: Tuple[str]):
             Moscow_time = str(datetime.datetime.fromtimestamp(epoch, tz=tz)).split('+')[0]
 
             title = f'@id{mute_users_info[0].id} (Пользователь) ' \
-                    f'был заглушен на {time_value} {time_type}.' \
-                    f'Заглушение будет снято: {Moscow_time}'
+                    f'был заглушен на {time_value} {time_type}.\n' \
+                    f'Заглушение будет снято: {Moscow_time}\n' \
+                    f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
 
             if DBtools.add_mute(message, mute_users_info[0].id, time_value, time_type):
                 await message.answer(title)
@@ -322,7 +323,8 @@ async def mute_url(message: Message, args: Tuple[str]):
 
                 title = f'@id{mute_users_info[0].id} (Пользователь) ' \
                         f'был заглушен на {time_value} {time_type}\n' \
-                        f'Заглушение будет снято: {Moscow_time}'
+                        f'Заглушение будет снято: {Moscow_time}\n' \
+                        f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
 
                 if DBtools.add_mute(message, mute_users_info[0].id, time_value, time_type):
                     await message.answer(title)
@@ -368,7 +370,8 @@ async def warn(message: Message):
                 if DBtools.add_mute(message, warn_users_info[0].id, time_value, time_type):
                     title = f'@id{warn_users_info[0].id} (Пользователь) ' \
                             f'был заглушен на {time_value} {time_type}.\n' \
-                            f'Заглушение будет снято: {Moscow_time}'
+                            f'Заглушение будет снято: {Moscow_time}\n' \
+                            f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
                     await message.answer(title)
                     await ol.log_system_muted(message, warn_users_info, time_value, time_type, reason)
 
@@ -432,7 +435,8 @@ async def warn_url(message: Message, args: Tuple[str]):
                     if DBtools.add_mute(message, warn_users_info[0].id, time_value, time_type):
                         title = f'@id{warn_users_info[0].id} (Пользователь) ' \
                                 f'был заглушен на {time_value} {time_type}.\n' \
-                                f'Заглушение будет снято: {Moscow_time}'
+                                f'Заглушение будет снято: {Moscow_time}\n' \
+                                f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
                         await message.answer(title)
                         await ol.log_system_muted(message, warn_users_info, time_value, time_type, reason)
 
@@ -555,10 +559,6 @@ async def unwarn(message: Message):
 
             if warn_count != 0:
                 DBtools.remove_warn(message, user_id, warn_count)
-
-                title = f'С @id{unwarn_users_info[0].id} (пользователя) снято предупреждение.\n' \
-                        f'Текущее кол-во предупреждений [{warn_count - 1}/3]'
-                await message.answer(title)
                 await ol.log_unwarned(message, unwarn_users_info, warn_count - 1)
 
 
@@ -590,10 +590,6 @@ async def unwarn_url(message: Message, args: Tuple[str]):
 
                 if warn_count != 0:
                     DBtools.remove_warn(message, user_id, warn_count)
-
-                    title = f'С @id{unwarn_users_info[0].id} (пользователя) снято предупреждение.\n' \
-                            f'Текущее кол-во предупреждений [{warn_count - 1}/3]'
-                    await message.answer(title)
                     await ol.log_unwarned_url(message, unwarn_users_info, warn_count - 1)
 
 
