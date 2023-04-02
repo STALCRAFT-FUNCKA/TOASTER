@@ -35,7 +35,10 @@ SETTINGS = [
     'Allow_Files',
     'Allow_Miniapp',
     'Allow_Graffiti',
-    'Allow_Sticker'
+    'Allow_Sticker',
+    'Allow_Reply',
+    'Allow_AgeCheck',
+    'Allow_URLCheck'
 ]
 
 ALIASES = {
