@@ -12,25 +12,25 @@ bot = Bot(token=TOKEN)
 bl = BotLabeler()
 
 exceptions = [
-    'https://forum.exbo.net',
-    'https://vk.com/funcka',
-    'https://vk.cc/ca5l9d',
-    'https://stalcalc.ru',
-    'https://vk.cc/c9RYhW',
-    'https://vk.com/write-2677092',
-    'https://stalcraft.net',
-    'https://exbo.net',
-    'https://support.exbo.net',
-    'https://t.me/stalcraft',
-    'https://discord.com/invite/stalcraft',
-    'https://store.steampowered.com/app/1818450/STALCRAFT',
-    'https://www.twitch.tv/exbo_official',
-    'https://www.youtube.com/c/EXBO_official',
-    'https://www.tiktok.com/@stalcraft_official',
-    'https://www.facebook.com/stalcraft.official',
-    'https://twitter.com/STALCRAFT_ENG',
-    'https://www.instagram.com/stalcraft_official',
-    'https://www.instagram.com/exbo_studio'
+    'https://forum.exbo.net',  # Форум
+    'https://vk.com/funcka',  # Фанка
+    'https://vk.cc/ca5l9d',  # Таблица расщепления
+    'https://stalcalc.ru',  # Сталкалк от Вируса
+    'https://vk.cc/c9RYhW', 'https://disk.yandex.ru/d/2LNeePtemDTsNg',  # Музыка с радио
+    'https://vk.com/write-2677092',  # Техническая поддержка в ВК
+    'https://stalcraft.net',  # Сайт сталкрафта
+    'https://exbo.net',  # Сайт EXBO
+    'https://support.exbo.net',  # Техническая поддержка на сайте EXBO
+    'https://t.me/stalcraft',  # Канал сталкрафта в телеграмме
+    'https://discord.com/invite/stalcraft',   # Дискорд сталкрафта
+    'https://store.steampowered.com/app/1818450/STALCRAFT',  # Ссылка на сталкрафт в стиме
+    'https://www.twitch.tv/exbo_official',  # Твитч канал EXBO
+    'https://www.youtube.com/c/EXBO_official',  # Ютуб канал EXBO
+    'https://www.tiktok.com/@stalcraft_official',   # Тикток сталкрафта
+    'https://www.facebook.com/stalcraft.official',  # Фейсбук сталкрафта
+    'https://twitter.com/STALCRAFT_ENG',  # Твиттер сталкрафта
+    'https://www.instagram.com/stalcraft_official',  # Инстаграм сталкрафта
+    'https://www.instagram.com/exbo_studio'  # Инстаграм EXBO
  ]
 
 
@@ -40,48 +40,50 @@ exceptions = [
     blocking=False
 )
 async def check_URL(message: Message):
-    if message.deleted is None:
+    if DBtools.get_setting(message, 'Allow_URLCheck'):
 
-        extractor = URLExtract()
+        if message.deleted is None:
 
-        if extractor.has_urls(message.text):
-            found = False
+            extractor = URLExtract()
 
-            for url in exceptions:
-                if message.text.startswith(url):
-                    found = True
+            if extractor.has_urls(message.text):
+                found = False
 
-            if not found:
-                mute_users_info = await bot.api.users.get(message.from_id)
+                for url in exceptions:
+                    if message.text.startswith(url):
+                        found = True
 
-                message_id = message.conversation_message_id
-                await bot.api.messages.delete(
-                    group_id=GROUP,
-                    peer_id=message.peer_id,
-                    cmids=message_id,
-                    delete_for_all=True
-                )
-                message.deleted = True
+                if not found:
+                    mute_users_info = await bot.api.users.get(message.from_id)
 
-                time_value = '1'
-                time_type = 'hour(s)'
+                    message_id = message.conversation_message_id
+                    await bot.api.messages.delete(
+                        group_id=GROUP,
+                        peer_id=message.peer_id,
+                        cmids=message_id,
+                        delete_for_all=True
+                    )
+                    message.deleted = True
 
-                reason = 'Внешние ссылки'
+                    time_value = '1'
+                    time_type = 'hour(s)'
 
-                epoch = int(time.time()) + (24 * 60 * 60 * 1)
+                    reason = 'Внешние ссылки'
 
-                offset = datetime.timedelta(hours=3)
-                tz = datetime.timezone(offset, name='МСК')
+                    epoch = int(time.time()) + (24 * 60 * 60 * 1)
 
-                Moscow_time = str(datetime.datetime.fromtimestamp(epoch, tz=tz)).split('+')[0]
+                    offset = datetime.timedelta(hours=3)
+                    tz = datetime.timezone(offset, name='МСК')
 
-                await ol.log_system_muted(message, mute_users_info, time_value, time_type, reason)
+                    Moscow_time = str(datetime.datetime.fromtimestamp(epoch, tz=tz)).split('+')[0]
 
-                title = f'Подозрительная активность @id{mute_users_info[0].id} (участника) (Внешние ссылки)\n'\
-                        f'@id{mute_users_info[0].id} (Пользователь) ' \
-                        f'был заглушен на {time_value} {time_type} в целях безопасности\n' \
-                        f'Заглушение будет снято: {Moscow_time}'
+                    await ol.log_system_muted(message, mute_users_info, time_value, time_type, reason)
 
-                await message.answer(title)
+                    title = f'Подозрительная активность @id{mute_users_info[0].id} (участника) (Внешние ссылки)\n'\
+                            f'@id{mute_users_info[0].id} (Пользователь) ' \
+                            f'был заглушен на {time_value} {time_type} в целях безопасности\n' \
+                            f'Заглушение будет снято: {Moscow_time}'
 
-                DBtools.add_mute(message, message.from_id, time_value, time_type)
+                    await message.answer(title)
+
+                    DBtools.add_mute(message, message.from_id, time_value, time_type)
