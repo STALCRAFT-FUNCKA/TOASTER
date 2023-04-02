@@ -819,7 +819,7 @@ async def log_setting_changed(message: Message, setting, value):
 
     Moscow_time = str(datetime.datetime.fromtimestamp(epoch, tz=tz)).split('+')[0]
 
-    title = f'@id{author_id} ({author_permission}) ({author_info[0].first_name} {author_info[0].last_name})' \
+    title = f'@id{author_id} ({author_permission}) ({author_info[0].first_name} {author_info[0].last_name}) ' \
             f'изменил настройку ' \
             f'{setting} на значение {value}\n' \
             f'Источник: {conversations_name}\n' \
