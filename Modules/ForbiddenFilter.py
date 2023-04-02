@@ -120,13 +120,13 @@ async def check_forbidden(message: Message):
             if message.reply_message is not None:
                 if message.from_id != message.reply_message.from_id:
                     spotted = True
-                    reason = 'Пересланное сообщение'
+                    reason = 'Переслано чужое сообщение'
 
             elif message.fwd_messages:
                 for msg in message.fwd_messages:
                     if message.from_id != msg.from_id:
                         spotted = True
-                        reason = 'Пересланное сообщение'
+                        reason = 'Переслано чужое сообщение'
                         break
 
         if spotted:
@@ -168,7 +168,8 @@ async def check_forbidden(message: Message):
                 if DBtools.add_mute(message, message.from_id, time_value, time_type):
                     title = f'@id{mute_users_info[0].id} (Пользователь) ' \
                             f'был заглушен на {time_value} {time_type}\n' \
-                            f'Заглушение будет снято: {Moscow_time}'
+                            f'Заглушение будет снято: {Moscow_time}\n' \
+                            f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
 
                     await message.answer(title)
                     await ol.log_system_muted(message, mute_users_info, time_value, time_type, reason)
