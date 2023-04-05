@@ -41,7 +41,7 @@ async def check_message_queue(message: Message):
                 title = f'@id{mute_users_info[0].id} (Пользователь) ' \
                         f'был заблокирован на {time_value} {time_type}\n' \
                         f'Блокировка будет снята: {Moscow_time}\n' \
-                        f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+                        f'По снятию блокировки обращаться к @id{STUFF_ADMIN} (Администратору)'
                 await message.answer(title)
                 await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
 
@@ -102,7 +102,8 @@ async def check_message_queue(message: Message):
                     if DBtools.add_mute(message, message.from_id, time_value, time_type):
                         title = f'@id{mute_users_info[0].id} (Пользователь) ' \
                                 f'был заглушен на {time_value} {time_type}\n' \
-                                f'Заглушение будет снято: {Moscow_time}'
+                                f'Заглушение будет снято: {Moscow_time}\n' \
+                                f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
 
                         await message.answer(title)
                         await ol.log_system_muted(message, mute_users_info, time_value, time_type, reason)

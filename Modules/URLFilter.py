@@ -82,7 +82,8 @@ async def check_URL(message: Message):
                     title = f'Подозрительная активность @id{mute_users_info[0].id} (участника) (Внешние ссылки)\n'\
                             f'@id{mute_users_info[0].id} (Пользователь) ' \
                             f'был заглушен на {time_value} {time_type} в целях безопасности\n' \
-                            f'Заглушение будет снято: {Moscow_time}'
+                            f'Заглушение будет снято: {Moscow_time}\n' \
+                            f'(При повторной попытке отправить сообщение, пользователь будет заблокирован)'
 
                     await message.answer(title)
 

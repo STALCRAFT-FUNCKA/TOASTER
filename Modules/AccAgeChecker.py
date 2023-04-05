@@ -51,7 +51,7 @@ async def check_age(message: Message):
                             f'был заблокирован на {time_value} {time_type}\n' \
                             f'Причина: {reason}\n' \
                             f'Блокировка будет снята: --\n' \
-                            f'По снятию блокировки общаться к @id{STUFF_ADMIN} (Администратору)'
+                            f'По снятию блокировки обращаться к @id{STUFF_ADMIN} (Администратору)'
 
                     await message.answer(title)
                     await ol.log_system_banned(message, mute_users_info, time_value, time_type, reason)
