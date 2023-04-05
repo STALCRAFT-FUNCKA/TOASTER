@@ -16,6 +16,7 @@ exceptions = [
     'https://vk.com/funcka',  # Фанка
     'https://vk.cc/ca5l9d',  # Таблица расщепления
     'https://stalcalc.ru',  # Сталкалк от Вируса
+    'https://stalcraft.wiki',  # Сталкрафт.вики от Вируса
     'https://vk.cc/c9RYhW', 'https://disk.yandex.ru/d/2LNeePtemDTsNg',  # Музыка с радио
     'https://vk.com/write-2677092',  # Техническая поддержка в ВК
     'https://stalcraft.net',  # Сайт сталкрафта

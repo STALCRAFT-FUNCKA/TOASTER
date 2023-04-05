@@ -467,6 +467,7 @@
                 'https://vk.com/funcka',
                 'https://vk.cc/ca5l9d',
                 'https://stalcalc.ru',
+                'https://stalcraft.wiki',
                 'https://vk.cc/c9RYhW',
                 'https://vk.com/write-2677092',
                 'https://stalcraft.net',
