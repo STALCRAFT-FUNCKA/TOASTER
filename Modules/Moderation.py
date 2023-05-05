@@ -418,7 +418,7 @@ async def warn_url(message: Message, args: Tuple[str]):
 
                 title = f'@id{warn_users_info[0].id} (Пользователь) ' \
                         f'получил предупреждение [{warn_count + 1}/3].\n'
-                if warn_count + 1 == 3:
+                if warn_count + 1 != 3:
                     title += f'Предупреждения будут сняты: {Moscow_time}'
 
                 await message.answer(title)
@@ -426,7 +426,7 @@ async def warn_url(message: Message, args: Tuple[str]):
                 if DBtools.add_warn(message, warn_users_info[0].id, warn_count + 1):
                     await ol.log_warned_url(message, warn_users_info, warn_count + 1)
 
-                if warn_count + 1 != 3:
+                if warn_count + 1 == 3:
                     reason = 'Получено 3 предупреждения'
 
                     time_value = '3'
