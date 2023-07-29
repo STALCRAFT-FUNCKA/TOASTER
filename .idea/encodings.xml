@@ -3,16 +3,16 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Config.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/DataBase/DataBaseTools.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Log/Logger.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/DataBase/Utils.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/AccAgeChecker.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/Commands.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/ConversationRegistrator.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/ForbiddenFilter.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/MessageQueueHandler.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/URLFilter.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Labelers/__init__.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Logger/Logger.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Main.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/AccAgeChecker.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/ConversationRegistrator.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/ForbiddenFilter.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/MessageQueueHandler.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/Moderation.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/URLFilter.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Modules/__init__.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Rules/CustomRules.py" charset="UTF-8" />
     <file url="PROJECT" charset="windows-1251" />
   </component>

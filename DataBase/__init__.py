@@ -1,7 +1,7 @@
 conversation = """CREATE TABLE IF NOT EXISTS conversation
                (
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   PeerID INTEGER UNIQUE ON CONFLICT IGNORE,
+                   PeerID INTEGER UNIQUE ON CONFLICT REPLACE,
                    PeerName TEXT
                );"""
 
@@ -73,7 +73,9 @@ warned = """CREATE TABLE IF NOT EXISTS warned
                     WarnedByID INTEGER,
                     WarnedByName TEXT,
                     WarnedByURL TEXT,
-                    WarnCount INTEGER ,
+                    WarnTime INTEGER,
+                    UnwarnTime INTEGER,
+                    WarnCount INTEGER,
                     FOREIGN KEY (PeerID)  REFERENCES conversation (PeerID) ON DELETE CASCADE 
                 );"""
 

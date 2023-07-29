@@ -1,18 +1,13 @@
-from DataBase import DataBaseTools as DBtools
 from vkbottle.bot import Bot
 from Config import TOKEN
-from Modules import labelers
+from Labelers import labelers
 
+bot = Bot(token=TOKEN)
 
 if __name__ == "__main__":
-    DBtools.check_db()
-
-    bot = Bot(token=TOKEN)
-
-
     @bot.loop_wrapper.interval(seconds=1)
-    async def check_provisional_punish():
-        await DBtools.check_provisional_punish()
+    async def check_punish_state():
+        Ellipsis # TODO: Сделать проверку наказаний каждую секунду
 
 
     for custom_labeler in labelers:
