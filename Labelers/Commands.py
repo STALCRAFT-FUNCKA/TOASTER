@@ -3,7 +3,7 @@ from typing import Tuple
 
 from vkbottle.bot import Bot, BotLabeler, Message
 from DataBase.Utils import Connection
-from Config import ALIASES, TOKEN, GROUP, SETTINGS, PERMISSION_LVL
+from Config import ALIASES, TOKEN, GROUP, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT
 from Logger.Logger import Logger
 from Rules.CustomRules import (HandleCommand, CollapseCommand, AnswerCommand, CheckPermission, HandleIn, OnlyEnrolled,
                                IgnorePermission)
@@ -24,7 +24,7 @@ bl = BotLabeler()
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=1), # Moderator
-    HandleIn(handle_log=True, handle_chat=True)
+    HandleIn(handle_log=True, handle_chat=False)
 )
 async def reference(message: Message):
     url = 'https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md'
@@ -46,7 +46,9 @@ async def reference(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def enroll(message: Message):
-    # TODO: Логи
+    def _log():
+        ...
+
     PeerID = message.peer_id
     Destination = "CHAT"
 
@@ -74,6 +76,9 @@ async def enroll(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def drop(message: Message):
+    def _log():
+        ...
+
     PeerID = message.peer_id
     Destination = "CHAT"
 
@@ -102,6 +107,9 @@ async def drop(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def enroll_log(message: Message):
+    def _log():
+        ...
+
     PeerID = message.peer_id
     Destination = "LOG"
 
@@ -127,18 +135,23 @@ async def enroll_log(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def drop_log(message: Message):
+    def _log():
+        ...
+
+    async def _say(title):
+        await message.answer(title)
+
     PeerID = message.peer_id
     Destination = "LOG"
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
-        title = f"Данный лог-чат упразднён."
-
+        await _say("Данный лог-чат упразднён.")
         database.remove_conversation(PeerID=PeerID)
 
     else:
-        title = f"Беседа не является лог-чатом."
+        await _say("Беседа не является лог-чатом.")
 
-    await message.answer(title)
+
 
 
 """
@@ -154,6 +167,9 @@ async def drop_log(message: Message):
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
+    def _log():
+        ...
+
     PeerID = message.peer_id
     UserID = message.reply_message.from_id
 
@@ -182,6 +198,14 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message):
+    def _log():
+        ...
+
+    async def _say():
+        title = f""
+        # TODO: Вывод в общий чат о наказании
+        await message.answer(title)
+
     PeerID = Message.peer_id
     UserID = message.reply_message.from_id
     KickedByID = message.from_id
@@ -193,15 +217,12 @@ async def kick(message: Message):
         UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
         UserURL = f"https://vk.com/id{UserID}"
 
-        KickedByName = KickedByInfo[0].first_name + KickedByInfo[0].last_name
-        KickedByURL = KickedByInfo[0].nickname
+        KickedByName = f"{KickedByInfo[0].first_name} {KickedByInfo[0].last_name}"
+        KickedByURL = f"https://vk.com/id{KickedByID}"
 
         KickTime = int(time.time())
 
-        title = f""
-        # TODO: Вывод в общий чат о кике
-        await message.answer(title)
-
+        await _say()
         database.add_kick(PeerID, UserID, UserName, UserURL, KickedByID, KickedByName, KickedByURL, KickTime)
         await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
 
@@ -221,7 +242,42 @@ async def kick(message: Message):
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    pass # TODO: Сделать код
+    def _log():
+        ...
+
+    async def _say():
+        title = f""
+        # TODO: Вывод в общий чат о наказании
+        await message.answer(title)
+
+    PeerID = Message.peer_id
+    UserID = message.reply_message.from_id
+    BannedByID = message.from_id
+
+    try:
+        BanDeltaTime = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
+            else (int(args[0]) + 1 * TIME_COEFFICENT[args[1]])
+
+    except Exception:
+        return
+
+    if not database.get_kick(PeerID=PeerID, UserID=UserID):
+        UserInfo = await bot.api.users.get(UserID)
+        BannedByInfo = await bot.api.users.get(BannedByID)
+
+        UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
+        UserURL = f"https://vk.com/id{UserID}"
+
+        BannedByName = f"{BannedByInfo[0].first_name} {BannedByInfo[0].last_name}"
+        BannedByURL = f"https://vk.com/id{BannedByInfo}"
+
+        BanTime = int(time.time())
+        UnbanTime = BanTime + BanDeltaTime
+
+        await _say()
+        database.add_ban(PeerID, UserID, UserName, UserURL, BannedByID, BannedByName, BannedByURL, BanTime, UnbanTime)
+        await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
+
 
 @bl.chat_message(
     HandleCommand(ALIASES['unban'], ['!', '/'], 0),
@@ -233,6 +289,9 @@ async def ban(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unban(message: Message):
+    def _log():
+        ...
+
     pass # TODO: Сделать код
 
 
@@ -251,7 +310,40 @@ async def unban(message: Message):
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple[str]):
-    pass # TODO: Сделать код
+    def _log():
+        ...
+
+    async def _say():
+        title = f""
+        # TODO: Вывод в общий чат о наказании
+        await message.answer(title)
+
+    PeerID = Message.peer_id
+    UserID = message.reply_message.from_id
+    MutedByID = message.from_id
+
+    try:
+        MuteDeltaTime = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
+            else (int(args[0]) + 1 * TIME_COEFFICENT[args[1]])
+
+    except Exception:
+        return
+
+    if not database.get_kick(PeerID=PeerID, UserID=UserID):
+        UserInfo = await bot.api.users.get(UserID)
+        MutedByInfo = await bot.api.users.get(MutedByID)
+
+        UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
+        UserURL = f"https://vk.com/id{UserID}"
+
+        MutedByName = f"{MutedByInfo[0].first_name} {MutedByInfo[0].last_name}"
+        MutedByURL = f"https://vk.com/id{MutedByID}"
+
+        MuteTime = int(time.time())
+        UnmuteTime = MuteTime + MuteDeltaTime
+
+        await _say()
+        database.add_mute(PeerID, UserID, UserName, UserURL, MutedByID, MutedByName, MutedByURL, MuteTime, UnmuteTime)
 
 @bl.chat_message(
     HandleCommand(ALIASES['unmute'], ['!', '/'], 0),
@@ -263,6 +355,9 @@ async def mute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unmute(message: Message):
+    def _log():
+        ...
+
     pass # TODO: Сделать код
 
 
@@ -281,7 +376,38 @@ async def unmute(message: Message):
     OnlyEnrolled()
 )
 async def warn(message: Message):
-    pass # TODO: Сделать код
+    def _log():
+        ...
+
+    async def _say():
+        title = f""
+        # TODO: Вывод в общий чат о наказании
+        await message.answer(title)
+
+    PeerID = Message.peer_id
+    UserID = message.reply_message.from_id
+    WarnedByID = message.from_id
+
+    UserInfo = await bot.api.users.get(UserID)
+    WarnedByInfo = await bot.api.users.get(WarnedByID)
+
+    UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
+    UserURL = f"https://vk.com/id{UserID}"
+
+    WarnedByName = f"{WarnedByInfo[0].first_name} {WarnedByInfo[0].last_name}"
+    WarnedByURL = f"https://vk.com/id{WarnedByInfo}"
+
+    WarnTime = int(time.time())
+    UnwarnTime = WarnTime + TIME_COEFFICENT["d"]
+
+    WarnCount = database.get_warn(PeerID=PeerID, UserID=UserID) + 1
+
+    await _say()
+    database.add_warn(PeerID, UserID, UserName, UserURL,
+                      WarnedByID, WarnedByName, WarnedByURL,
+                      WarnTime, UnwarnTime, WarnCount)
+
+
 
 @bl.chat_message(
     HandleCommand(ALIASES['unwarn'], ['!', '/'],  0),
@@ -293,6 +419,9 @@ async def warn(message: Message):
     OnlyEnrolled()
 )
 async def unwarn(message: Message):
+    def _log():
+        ...
+
     pass # TODO: Сделать код
 
 """
@@ -308,6 +437,9 @@ async def unwarn(message: Message):
     OnlyEnrolled()
 )
 async def delete(message: Message):
+    def _log():
+        ...
+
     async def _collapse(m: Message):
         MessageID = m.conversation_message_id
         PeerID = message.peer_id
@@ -340,6 +472,9 @@ async def delete(message: Message):
     OnlyEnrolled()
 )
 async def copy(message: Message):
+    def _log():
+        ...
+
     title = message.reply_message.text
     await message.answer(title)
     # TODO: Вывод лога в лог-чат

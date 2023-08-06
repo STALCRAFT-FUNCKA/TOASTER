@@ -55,6 +55,21 @@ banned = """CREATE TABLE IF NOT EXISTS banned
                     CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE  
                 );"""
 
+muted = """CREATE TABLE IF NOT EXISTS muted
+               (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
+                    UserID INTEGER,
+                    UserName TEXT,
+                    UserURL TEXT,
+                    MutedByID INTEGER,
+                    MutedByName TEXT,
+                    MutedByURL TEXT,
+                    MuteTime INTEGER,
+                    UnmuteTime INTEGER ,
+                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE 
+               );"""
+
 warned = """CREATE TABLE IF NOT EXISTS warned
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,21 +86,6 @@ warned = """CREATE TABLE IF NOT EXISTS warned
                     CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT REPLACE 
                 );"""
 
-muted = """CREATE TABLE IF NOT EXISTS muted
-               (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    MutedByID INTEGER,
-                    MutedByName TEXT,
-                    MutedByURL TEXT,
-                    MuteTime INTEGER,
-                    UnmuteTime INTEGER ,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE 
-               );"""
-
 blacklist = """CREATE TABLE IF NOT EXISTS blacklist
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,7 +100,7 @@ whitelist = """CREATE TABLE IF NOT EXISTS whitelist
                     Domain TEXT
                 );"""
 
-cooldown = """CREATE TABLE IF NOT EXISTS cooldown
+queue = """CREATE TABLE IF NOT EXISTS queue
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
@@ -111,4 +111,4 @@ cooldown = """CREATE TABLE IF NOT EXISTS cooldown
                     NextSendTime INTEGER
                 );"""
 
-tables = [conversation, setting, permission, kicked, banned, warned, muted, blacklist, whitelist, cooldown]
+tables = [conversation, setting, permission, kicked, banned, warned, muted, blacklist, whitelist, queue]

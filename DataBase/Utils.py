@@ -1,4 +1,6 @@
 import sqlite3
+from typing import List
+
 from DataBase import tables
 
 class Connection:
@@ -69,10 +71,18 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_conversation(self, PeerID:int, Destination:str):
-        request = f"""SELECT PeerID FROM conversation WHERE PeerID = {PeerID} AND Destination = '{Destination}'"""
+    def get_conversation(self, PeerID:int, Destination:str) -> List[int]:
+        if PeerID == -1:
+            request = f"""SELECT PeerID conversation WHERE Destination = '{Destination}'"""
+        else:
+            request = f"""SELECT PeerID FROM conversation WHERE PeerID = {PeerID} AND Destination = '{Destination}'"""
+
         self.cursor.execute(request)
-        return self.cursor.fetchall()
+        record = self.cursor.fetchall()
+        if record:
+            return [x[0] for x in record]
+        else:
+            return []
 
     """
     --------------------------------------------------------------------------------------------------------------------
@@ -92,6 +102,14 @@ class Connection:
                         );"""
         self.cursor.execute(request)
         self.connection.commit()
+
+    def get_setting(self,SettingName:str, PeerID:int) -> bool:
+        request = f"""SELECT SettingStatus FROM setting WHERE SettingName = '{SettingName}' AND PeerID = {PeerID}"""
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        if record:
+            return record[0][0]
+
     """
      --------------------------------------------------------------------------------------------------------------------
     """
@@ -123,7 +141,7 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_permission(self, PeerID:int, UserID:int):
+    def get_permission(self, PeerID:int, UserID:int) -> int:
         request = f"""SELECT PermissionLvl FROM permission WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -163,11 +181,15 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_kick(self, PeerID:int, UserID:int):
-        request = f"""SELECT * FROM kicked WHERE PeerID = {PeerID} AND UserID = {UserID};"""
+    def get_kick(self, PeerID:int, UserID:int) -> List[int]:
+        request = f"""SELECT UserID FROM kicked WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
-        return self.cursor.fetchall()
+        record = self.cursor.fetchall()
+        if record:
+            return [x[0] for x in record]
 
+        else:
+            return []
     """
      --------------------------------------------------------------------------------------------------------------------
     """
@@ -204,6 +226,16 @@ class Connection:
         request = f"""DELETE FROM banned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         self.connection.commit()
+
+    def get_ban(self, PeerID: int, UserID: int) -> List[int]:
+        request = f"""SELECT UserID FROM banned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        if record:
+            return [x[0] for x in record]
+
+        else:
+            return []
 
     """
      --------------------------------------------------------------------------------------------------------------------
@@ -243,6 +275,15 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
+    def get_mute(self, PeerID: int, UserID: int) -> List[int]:
+        request = f"""SELECT UserID FROM muted WHERE PeerID = {PeerID} AND UserID = {UserID};"""
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        if record:
+            return [x[0] for x in record]
+
+        else:
+            return []
     """
      --------------------------------------------------------------------------------------------------------------------
     """
@@ -262,6 +303,16 @@ class Connection:
         self.connection.commit()
         # TODO: Сделать проверку на кол-во варнов
 
+    def get_warn(self, PeerID: int, UserID: int) -> int:
+        request = f"""SELECT WarnCount FROM warned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        if record:
+            return record[0][0]
+
+        else:
+            return 0
+
     """
      --------------------------------------------------------------------------------------------------------------------
     """
@@ -272,4 +323,4 @@ if __name__ == "__main__":
     database = Connection('database.db')
     print(database.version())
     database.debug()
-    print(database.get_permission(2000000002, 1))
+    print(database.get_setting(PeerID=2000000002, SettingName="Allow_Picture"))

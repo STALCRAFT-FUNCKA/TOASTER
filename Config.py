@@ -17,6 +17,12 @@ TIME_TYPE = {
     'm': 'month(s)',
 }
 
+TIME_COEFFICENT = {
+    'h': 1 * 60 * 60,
+    'd': 1 * 60 * 60 * 24,
+    'm': 1 * 60 * 60 * 24 * 31,
+}
+
 PERMISSION_LVL = {
     0: 'User',
     1: 'Moderator',
