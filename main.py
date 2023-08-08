@@ -1,7 +1,7 @@
 from vkbottle.bot import Bot
 from config import TOKEN
 
-from Handlers import handlers
+from handlers import handlers
 from labelers import labelers
 
 bot = Bot(token=TOKEN)

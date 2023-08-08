@@ -1,7 +1,7 @@
 import sqlite3
 from typing import List
 
-from DataBase import tables
+from database import tables
 
 
 class Connection:

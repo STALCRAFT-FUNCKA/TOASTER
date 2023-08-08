@@ -2,10 +2,10 @@ from typing import List, Optional, Union
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from config import GROUP_ID, TOKEN
-from DataBase.interface import Connection
+from database.interface import Connection
 
 bot = Bot(token=TOKEN)
-database = Connection('DataBase/database.db')
+database = Connection('database/database.db')
 
 DEFAULT_PREFIXES = ["!", "/"]
 DEFAULT_ALIASES = ["Command", "command"]

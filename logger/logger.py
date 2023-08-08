@@ -2,11 +2,11 @@ import json
 from typing import Optional
 
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
-from DataBase.interface import Connection
+from database.interface import Connection
 
 from vkbottle.bot import Bot
 
-database = Connection('DataBase/database.db')
+database = Connection('database/database.db')
 
 
 class Logger:

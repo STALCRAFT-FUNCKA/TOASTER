@@ -3,7 +3,7 @@ from typing import Tuple
 
 from vkbottle.bot import Bot, BotLabeler, Message
 
-from DataBase.interface import Connection
+from database.interface import Connection
 from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT, STUFF_ADMIN_ID
 from logger.logger import Logger
 from utils.information_getter import About
@@ -19,7 +19,7 @@ from rules.custom_rules import (
 )
 
 bot = Bot(token=TOKEN)
-database = Connection('DataBase/database.db')
+database = Connection('database/database.db')
 logger = Logger()
 bl = BotLabeler()
 
