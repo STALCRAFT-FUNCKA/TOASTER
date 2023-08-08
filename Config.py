@@ -29,6 +29,7 @@ PERMISSION_LVL = {
     2: 'Administrator',
 }
 
+# std settings
 SETTINGS = {
     'Allow_Picture': False,
     'Allow_Video': False,

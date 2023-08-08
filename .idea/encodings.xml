@@ -3,7 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Config.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/DataBase/Utils.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/DataBase/Interface.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Labelers/AccAgeChecker.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Labelers/Commands.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Labelers/ConversationRegistrator.py" charset="UTF-8" />

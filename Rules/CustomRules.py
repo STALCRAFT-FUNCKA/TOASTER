@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from Config import GROUP, TOKEN
-from DataBase.Utils import Connection
+from DataBase.Interface import Connection
 
 bot = Bot(token=TOKEN)
 database = Connection('DataBase/database.db')

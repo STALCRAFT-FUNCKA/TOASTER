@@ -3,10 +3,11 @@ from typing import List
 
 from DataBase import tables
 
+
 class Connection:
 
     def _fill_std_form(self):
-        for table in tables:
+        for table in tables.tables:
             self.cursor.execute(table)
 
     """
@@ -73,7 +74,7 @@ class Connection:
 
     def get_conversation(self, PeerID:int, Destination:str) -> List[int]:
         if PeerID == -1:
-            request = f"""SELECT PeerID conversation WHERE Destination = '{Destination}'"""
+            request = f"""SELECT PeerID FROM conversation WHERE Destination = '{Destination}'"""
         else:
             request = f"""SELECT PeerID FROM conversation WHERE PeerID = {PeerID} AND Destination = '{Destination}'"""
 

@@ -2,11 +2,22 @@ import time
 from typing import Tuple
 
 from vkbottle.bot import Bot, BotLabeler, Message
-from DataBase.Utils import Connection
+
+import Config
+from DataBase.Interface import Connection
 from Config import ALIASES, TOKEN, GROUP, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT
 from Logger.Logger import Logger
-from Rules.CustomRules import (HandleCommand, CollapseCommand, AnswerCommand, CheckPermission, HandleIn, OnlyEnrolled,
-                               IgnorePermission)
+from Utils.InformationGetter import About
+from Utils.TimeConverter import Converter
+from Rules.CustomRules import (
+    HandleCommand,
+    CollapseCommand,
+    AnswerCommand,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled,
+    IgnorePermission
+)
 
 
 bot = Bot(token=TOKEN)
@@ -14,6 +25,8 @@ database = Connection('DataBase/database.db')
 logger = Logger()
 bl = BotLabeler()
 
+About = About()
+Converter = Converter()
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -46,8 +59,17 @@ async def reference(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def enroll(message: Message):
-    def _log():
-        ...
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /enroll \n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {}
+
+        return {'text': text, 'forward': forward}
 
     PeerID = message.peer_id
     Destination = "CHAT"
@@ -63,6 +85,7 @@ async def enroll(message: Message):
 
     await message.answer(title)
 
+    await logger.send_log(await _log())
     database.add_conversation(PeerID=PeerID, PeerName=PeerName, Destination=Destination)
     for setting in SETTINGS:
         database.add_setting(PeerID=PeerID, SettingName=setting, SettingStatus=SETTINGS[setting])
@@ -76,8 +99,17 @@ async def enroll(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def drop(message: Message):
-    def _log():
-        ...
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /drop \n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {}
+
+        return {'text': text, 'forward': forward}
 
     PeerID = message.peer_id
     Destination = "CHAT"
@@ -85,6 +117,7 @@ async def drop(message: Message):
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
         title = f"Регистрация данной беседы упразднена."
 
+        await logger.send_log(await _log())
         database.remove_conversation(PeerID=PeerID)
 
     else:
@@ -107,8 +140,17 @@ async def drop(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def enroll_log(message: Message):
-    def _log():
-        ...
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /enroll_log \n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {}
+
+        return {'text': text, 'forward': forward}
 
     PeerID = message.peer_id
     Destination = "LOG"
@@ -124,6 +166,7 @@ async def enroll_log(message: Message):
 
     await message.answer(title)
 
+    await logger.send_log(await _log())
     database.add_conversation(PeerID=PeerID, PeerName=PeerName, Destination=Destination)
 
 
@@ -135,8 +178,17 @@ async def enroll_log(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def drop_log(message: Message):
-    def _log():
-        ...
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /drop_log \n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {}
+
+        return {'text': text, 'forward': forward}
 
     async def _say(title):
         await message.answer(title)
@@ -146,6 +198,8 @@ async def drop_log(message: Message):
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
         await _say("Данный лог-чат упразднён.")
+
+        await logger.send_log(await _log())
         database.remove_conversation(PeerID=PeerID)
 
     else:
@@ -167,8 +221,19 @@ async def drop_log(message: Message):
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
-    def _log():
-        ...
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /permission\n" \
+               f"Уровень прав: {int(args[0])} - {Config.PERMISSION_LVL[int(args[0])]}\n" \
+               f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {}
+
+        return {'text': text, 'forward': forward}
 
     PeerID = message.peer_id
     UserID = message.reply_message.from_id
@@ -180,6 +245,7 @@ async def permission(message: Message, args: Tuple[str]):
     PermissionLvl = int(args[0])
     PermissionName = PERMISSION_LVL[PermissionLvl]
 
+    await logger.send_log(await _log())
     database.set_permission(UserID, UserName, UserURL, PermissionLvl, PermissionName, PeerID)
 
 
@@ -198,8 +264,9 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message):
-    def _log():
+    async def _log():
         ...
+        # TODO: Логи
 
     async def _say():
         title = f""
@@ -223,7 +290,9 @@ async def kick(message: Message):
         KickTime = int(time.time())
 
         await _say()
+        await logger.send_log(await _log())
         database.add_kick(PeerID, UserID, UserName, UserURL, KickedByID, KickedByName, KickedByURL, KickTime)
+
         await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
 
 
@@ -244,6 +313,7 @@ async def kick(message: Message):
 async def ban(message: Message, args: Tuple[str]):
     def _log():
         ...
+        # TODO: Логи
 
     async def _say():
         title = f""
@@ -291,6 +361,7 @@ async def ban(message: Message, args: Tuple[str]):
 async def unban(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     pass # TODO: Сделать код
 
@@ -312,6 +383,7 @@ async def unban(message: Message):
 async def mute(message: Message, args: Tuple[str]):
     def _log():
         ...
+        # TODO: Логи
 
     async def _say():
         title = f""
@@ -357,6 +429,7 @@ async def mute(message: Message, args: Tuple[str]):
 async def unmute(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     pass # TODO: Сделать код
 
@@ -378,6 +451,7 @@ async def unmute(message: Message):
 async def warn(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     async def _say():
         title = f""
@@ -421,6 +495,7 @@ async def warn(message: Message):
 async def unwarn(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     pass # TODO: Сделать код
 
@@ -439,6 +514,7 @@ async def unwarn(message: Message):
 async def delete(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     async def _collapse(m: Message):
         MessageID = m.conversation_message_id
@@ -474,7 +550,7 @@ async def delete(message: Message):
 async def copy(message: Message):
     def _log():
         ...
+        # TODO: Логи
 
     title = message.reply_message.text
     await message.answer(title)
-    # TODO: Вывод лога в лог-чат

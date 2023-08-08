@@ -1,16 +1,24 @@
 from vkbottle.bot import Bot
 from Config import TOKEN
+
+from Handlers import handlers
 from Labelers import labelers
 
 bot = Bot(token=TOKEN)
 
+
+def _load(modules):
+    for module in modules:
+        bot.labeler.load(module)
+
+
+@bot.loop_wrapper.interval(seconds=1)
+async def check_punish_state():
+    for handler in handlers:
+        handler.check()
+
+
 if __name__ == "__main__":
-    @bot.loop_wrapper.interval(seconds=1)
-    async def check_punish_state():
-        Ellipsis # TODO: Сделать проверку наказаний каждую секунду
-
-
-    for custom_labeler in labelers:
-        bot.labeler.load(custom_labeler)
+    _load(labelers)
 
     bot.run_forever()
