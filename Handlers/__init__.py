@@ -1,7 +1,7 @@
 from . import (
-    BanHandler,
-    MuteHandler,
-    WarnHandler
+    ban_handler,
+    mute_handler,
+    warn_handler
 )
 
-handlers = [BanHandler.Handler, MuteHandler.Handler, WarnHandler.Handler]
+handlers = [ban_handler.Handler, mute_handler.Handler, warn_handler.Handler]

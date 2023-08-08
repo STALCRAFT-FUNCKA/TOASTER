@@ -1,114 +1,114 @@
-conversation = """CREATE TABLE IF NOT EXISTS conversation
+conversations = """CREATE TABLE IF NOT EXISTS conversations
                (
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   PeerID INTEGER UNIQUE ON CONFLICT REPLACE,
-                   PeerName TEXT,
-                   Destination TEXT
+                   peer_id INTEGER UNIQUE ON CONFLICT REPLACE,
+                   peer_name TEXT,
+                   destination TEXT
                );"""
 
-permission = """CREATE TABLE IF NOT EXISTS permission
+permissions = """CREATE TABLE IF NOT EXISTS permissions
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    UserID INTEGER, 
-                    UserName TEXT,
-                    UserURL TEXT,
-                    PermissionLvl INTEGER,
-                    PermissionName TEXT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT REPLACE
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER, 
+                    user_name TEXT,
+                    user_url TEXT,
+                    permission_lvl INTEGER,
+                    permission_name TEXT,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT REPLACE
                 );"""
 
-setting = """CREATE TABLE IF NOT EXISTS setting
+settings = """CREATE TABLE IF NOT EXISTS settings
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    SettingName TEXT UNIQUE ON CONFLICT IGNORE,
-                    SettingStatus INTEGER,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    setting_name TEXT UNIQUE ON CONFLICT IGNORE,
+                    setting_status INTEGER
                 );"""
 
 kicked = """CREATE TABLE IF NOT EXISTS kicked
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    KickedByID INTEGER,
-                    KickedByName TEXT,
-                    KickedByURL TEXT,
-                    KickTime INTEGER,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER,
+                    user_name TEXT,
+                    user_url TEXT,
+                    kicked_by_id INTEGER,
+                    kicked_by_name TEXT,
+                    kicked_by_url TEXT,
+                    kick_time INTEGER,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT IGNORE
                 );"""
 
 banned = """CREATE TABLE IF NOT EXISTS banned
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    BannedByID INTEGER,
-                    BannedByName TEXT,
-                    BannedByURL TEXT,
-                    BanTime INTEGER,
-                    UnbanTime INTEGER,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE  
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER,
+                    user_name TEXT,
+                    user_url TEXT,
+                    banned_by_id INTEGER,
+                    banned_by_name TEXT,
+                    banned_by_url TEXT,
+                    ban_time INTEGER,
+                    unban_time INTEGER,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT IGNORE  
                 );"""
 
 muted = """CREATE TABLE IF NOT EXISTS muted
                (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    MutedByID INTEGER,
-                    MutedByName TEXT,
-                    MutedByURL TEXT,
-                    MuteTime INTEGER,
-                    UnmuteTime INTEGER ,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT IGNORE 
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER,
+                    user_name TEXT,
+                    user_url TEXT,
+                    muted_by_id INTEGER,
+                    muted_by_name TEXT,
+                    muted_by_url TEXT,
+                    mute_time INTEGER,
+                    unmute_time INTEGER ,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT IGNORE 
                );"""
 
 warned = """CREATE TABLE IF NOT EXISTS warned
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    WarnedByID INTEGER,
-                    WarnedByName TEXT,
-                    WarnedByURL TEXT,
-                    WarnTime INTEGER,
-                    UnwarnTime INTEGER,
-                    WarnCount INTEGER,
-                    CONSTRAINT someone UNIQUE (UserID, PeerID) ON CONFLICT REPLACE 
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER,
+                    user_name TEXT,
+                    user_url TEXT,
+                    warned_by_id INTEGER,
+                    warned_by_name TEXT,
+                    warned_by_url TEXT,
+                    warn_time INTEGER,
+                    unwarn_time INTEGER,
+                    warn_count INTEGER,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT REPLACE 
                 );"""
 
 blacklist = """CREATE TABLE IF NOT EXISTS blacklist
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    URL TEXT
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    url TEXT
                 );"""
 
 whitelist = """CREATE TABLE IF NOT EXISTS whitelist
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    Domain TEXT
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    domain TEXT
                 );"""
 
 queue = """CREATE TABLE IF NOT EXISTS queue
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    PeerID INTEGER REFERENCES conversation (PeerID) ON DELETE CASCADE,
-                    UserID INTEGER,
-                    UserName TEXT,
-                    UserURL TEXT,
-                    SendTime INTEGER,
-                    NextSendTime INTEGER
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    user_id INTEGER,
+                    user_name TEXT,
+                    user_url TEXT,
+                    send_time INTEGER,
+                    next_send_time INTEGER
                 );"""
 
-tables = [conversation, setting, permission, kicked, banned, warned, muted, blacklist, whitelist, queue]
+tables = [conversations, settings, permissions, kicked, banned, warned, muted, blacklist, whitelist, queue]
