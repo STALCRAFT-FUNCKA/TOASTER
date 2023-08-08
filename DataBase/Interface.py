@@ -13,7 +13,7 @@ class Connection:
     """
     --------------------------------------------------------------------------------------------------------------------
     """
-    def __init__(self, filename: str, allow_debug_text: bool = False):
+    def __init__(self, filename, allow_debug_text = False):
         try:
             self.connection = sqlite3.connect(filename)
             self.cursor = self.connection.cursor()
@@ -51,7 +51,7 @@ class Connection:
     """
     --------------------------------------------------------------------------------------------------------------------
     """
-    def add_conversation(self, PeerID:int, PeerName:str, Destination:str):
+    def add_conversation(self, PeerID, PeerName, Destination):
         request = f"""INSERT INTO conversation 
                         (
                             PeerID, 
@@ -67,12 +67,12 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def remove_conversation(self, PeerID:int):
+    def remove_conversation(self, PeerID):
         request = f"""DELETE FROM conversation WHERE PeerID = {PeerID};"""
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_conversation(self, PeerID:int, Destination:str) -> List[int]:
+    def get_conversation(self, PeerID, Destination) -> List[int]:
         if PeerID == -1:
             request = f"""SELECT PeerID FROM conversation WHERE Destination = '{Destination}'"""
         else:
@@ -88,7 +88,7 @@ class Connection:
     """
     --------------------------------------------------------------------------------------------------------------------
     """
-    def add_setting(self,SettingName:str, SettingStatus:bool, PeerID:int):
+    def add_setting(self,SettingName, SettingStatus, PeerID):
         request = f"""INSERT INTO setting 
                         (
                             SettingName, 
@@ -104,7 +104,7 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_setting(self,SettingName:str, PeerID:int) -> bool:
+    def get_setting(self,SettingName, PeerID) -> bool:
         request = f"""SELECT SettingStatus FROM setting WHERE SettingName = '{SettingName}' AND PeerID = {PeerID}"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -114,7 +114,7 @@ class Connection:
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-    def set_permission(self, UserID:int, UserName:str, UserURL:str, PermissionLvl:int, PermissionName:str, PeerID:int):
+    def set_permission(self, UserID, UserName, UserURL, PermissionLvl, PermissionName, PeerID):
         request = ""
         if PermissionLvl < 1:
             request = f"""DELETE FROM permission WHERE UserID = {UserID} AND PeerID = {PeerID};"""
@@ -142,7 +142,7 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_permission(self, PeerID:int, UserID:int) -> int:
+    def get_permission(self, PeerID, UserID) -> int:
         request = f"""SELECT PermissionLvl FROM permission WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -155,8 +155,8 @@ class Connection:
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-    def add_kick(self, PeerID:int, UserID:int, UserName:str, UserURL:str,
-                 KickedByID:int, KickedByName:str, KickedByURL:str, KickTime:int):
+    def add_kick(self, PeerID, UserID, UserName, UserURL,
+                 KickedByID, KickedByName, KickedByURL, KickTime):
         request = f"""INSERT INTO kicked 
                         (
                             PeerID,
@@ -182,7 +182,7 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_kick(self, PeerID:int, UserID:int) -> List[int]:
+    def get_kick(self, PeerID, UserID) -> List[int]:
         request = f"""SELECT UserID FROM kicked WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -194,8 +194,7 @@ class Connection:
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-    def add_ban(self, PeerID:int, UserID:int, UserName:str, UserURL:str,
-                 BannedByID:int, BannedByName:str, BannedByURL:str, BanTime:int, UnbanTime:int):
+    def add_ban(self, PeerID, UserID, UserName, UserURL, BannedByID, BannedByName, BannedByURL, BanTime, UnbanTime):
         request = f"""INSERT INTO banned 
                         (
                             PeerID, 
@@ -223,12 +222,12 @@ class Connection:
         self.cursor.execute(request)
         self.connection.commit()
 
-    def remove_ban(self, PeerID:int, UserID:int):
+    def remove_ban(self, PeerID, UserID):
         request = f"""DELETE FROM banned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_ban(self, PeerID: int, UserID: int) -> List[int]:
+    def get_ban(self, PeerID, UserID) -> List[int]:
         request = f"""SELECT UserID FROM banned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -241,19 +240,18 @@ class Connection:
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-    def add_mute(self, PeerID:int, UserID:int, UserName:str, UserURL:str,
-                 MutedByID:int, MutedByName:str, MutedByURL:str, MuteTime:int, UnmuteTime:int):
+    def add_mute(self, PeerID, UserID, UserName, UserURL, MutedByID, MutedByName, MutedByURL, MuteTime, UnmuteTime):
         request = f"""INSERT INTO muted 
                         (
                             PeerID, 
                             UserID, 
                             UserName, 
                             UserURL, 
-                            BannedByID, 
-                            BannedByName, 
-                            BannedByURL, 
-                            BanTime, 
-                            UnbanTime
+                            MutedByID, 
+                            MutedByName, 
+                            MutedByURL, 
+                            MuteTime, 
+                            UnmuteTime
                         ) 
                         VALUES 
                         (
@@ -271,12 +269,12 @@ class Connection:
         self.connection.commit()
 
 
-    def remove_mute(self, PeerID:int, UserID:int):
+    def remove_mute(self, PeerID, UserID):
         request = f"""DELETE FROM muted WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_mute(self, PeerID: int, UserID: int) -> List[int]:
+    def get_mute(self, PeerID, UserID) -> List[int]:
         request = f"""SELECT UserID FROM muted WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -288,23 +286,44 @@ class Connection:
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-    def add_warn(self, PeerID:int, UserID:int, UserName:str, UserURL:str,
-                 WarnedByID:int,  WarnedByName:str,  WarnedByURL:str,  WarnTime:int, UnwarnTime:int, WarnCount:int):
-        request = f"""INSERT INTO muted (PeerID, UserID, UserName, UserURL, 
-                                                    BannedByID, BannedByName, BannedByURL, BanTime, UnbanTime) 
-                                    VALUES ({PeerID}, {UserID}, '{UserName}', '{UserURL}', 
-                                            {WarnedByID}, '{WarnedByName}', '{WarnedByURL}', {WarnTime}, {UnwarnTime});"""
+    def add_warn(self, PeerID, UserID, UserName, UserURL, WarnedByID,  WarnedByName, WarnedByURL, WarnTime, UnwarnTime, WarnCount):
+        request = f"""INSERT INTO warned 
+                        (
+                            PeerID, 
+                            UserID, 
+                            UserName, 
+                            UserURL, 
+                            WarnedByID, 
+                            WarnedByName, 
+                            WarnedByURL, 
+                            WarnTime, 
+                            UnwarnTime,
+                            WarnCount
+                        ) 
+                        VALUES 
+                        (
+                            {PeerID}, 
+                            {UserID}, 
+                            '{UserName}', 
+                            '{UserURL}', 
+                            {WarnedByID}, 
+                            '{WarnedByName}', 
+                            '{WarnedByURL}', 
+                            {WarnTime}, 
+                            {UnwarnTime},
+                            {WarnCount}
+                        );"""
         self.cursor.execute(request)
         self.connection.commit()
         # TODO: Сдилать првоерку на кол-во варнов
 
-    def remove_warn(self, PeerID:int, UserID:int):
+    def remove_warn(self, PeerID, UserID):
         request = f"""DELETE FROM warned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         self.connection.commit()
         # TODO: Сделать проверку на кол-во варнов
 
-    def get_warn(self, PeerID: int, UserID: int) -> int:
+    def get_warn(self, PeerID, UserID) -> int:
         request = f"""SELECT WarnCount FROM warned WHERE PeerID = {PeerID} AND UserID = {UserID};"""
         self.cursor.execute(request)
         record = self.cursor.fetchall()

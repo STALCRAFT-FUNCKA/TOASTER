@@ -3,9 +3,8 @@ from typing import Tuple
 
 from vkbottle.bot import Bot, BotLabeler, Message
 
-import Config
 from DataBase.Interface import Connection
-from Config import ALIASES, TOKEN, GROUP, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT
+from Config import ALIASES, TOKEN, GROUP, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT, STUFF_ADMIN_ID
 from Logger.Logger import Logger
 from Utils.InformationGetter import About
 from Utils.TimeConverter import Converter
@@ -40,10 +39,11 @@ Converter = Converter()
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def reference(message: Message):
-    url = 'https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md'
+    async def _say(title):
+        await message.answer(title)
 
-    title = f'Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}'
-    await message.answer(title)
+    url = "https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md"
+    await _say(f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}")
 
 
 """
@@ -62,7 +62,7 @@ async def enroll(message: Message):
     async def _log():
         pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
         text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
-               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
                f"Источник: {await About.PeerName(message)}\n" \
                f"Команда: /enroll \n" \
                f"Время (МСК): {Converter.convert(time.time())}"
@@ -71,19 +71,19 @@ async def enroll(message: Message):
 
         return {'text': text, 'forward': forward}
 
-    PeerID = message.peer_id
+    async def _say(title):
+        await message.answer(title)
+
+    PeerID = About.PeerID(message)
     Destination = "CHAT"
 
-    Peer_info = await bot.api.messages.get_conversations_by_id(group_id=GROUP, peer_ids=PeerID)
-    PeerName = Peer_info.items[0].chat_settings.title
+    PeerName = About.PeerName(message)
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
-        title = f"Данные беседы обновлены."
+        await _say("Данные беседы обновлены.")
 
     else:
-        title = f"Беседа зарегистрирована."
-
-    await message.answer(title)
+        await _say(f"Беседа зарегистрирована.")
 
     await logger.send_log(await _log())
     database.add_conversation(PeerID=PeerID, PeerName=PeerName, Destination=Destination)
@@ -102,7 +102,7 @@ async def drop(message: Message):
     async def _log():
         pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
         text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
-               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
                f"Источник: {await About.PeerName(message)}\n" \
                f"Команда: /drop \n" \
                f"Время (МСК): {Converter.convert(time.time())}"
@@ -111,19 +111,20 @@ async def drop(message: Message):
 
         return {'text': text, 'forward': forward}
 
-    PeerID = message.peer_id
+    async def _say(title):
+        await message.answer(title)
+
+    PeerID = About.PeerID(message)
     Destination = "CHAT"
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
-        title = f"Регистрация данной беседы упразднена."
+        await _say("Регистрация данной беседы упразднена.")
 
         await logger.send_log(await _log())
         database.remove_conversation(PeerID=PeerID)
 
     else:
-        title = f"Данная беседа не зарегистрирована."
-
-    await message.answer(title)
+        await _say("Данная беседа не зарегистрирована.")
 
 
 """
@@ -143,7 +144,7 @@ async def enroll_log(message: Message):
     async def _log():
         pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
         text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
-               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
                f"Источник: {await About.PeerName(message)}\n" \
                f"Команда: /enroll_log \n" \
                f"Время (МСК): {Converter.convert(time.time())}"
@@ -152,19 +153,19 @@ async def enroll_log(message: Message):
 
         return {'text': text, 'forward': forward}
 
-    PeerID = message.peer_id
+    async def _say(title):
+        await message.answer(title)
+
+    PeerID = About.PeerID(message)
     Destination = "LOG"
 
-    Peer_info = await bot.api.messages.get_conversations_by_id(group_id=GROUP, peer_ids=message.peer_id)
-    PeerName = Peer_info.items[0].chat_settings.title
+    PeerName = About.PeerName(message)
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
-        title = f"Данные беседы обновлены."
+        await _say("Данные беседы обновлены.")
 
     else:
-        title = f"Беседа назначена в качестве лог-чата."
-
-    await message.answer(title)
+        await _say("Беседа назначена в качестве лог-чата.")
 
     await logger.send_log(await _log())
     database.add_conversation(PeerID=PeerID, PeerName=PeerName, Destination=Destination)
@@ -181,7 +182,7 @@ async def drop_log(message: Message):
     async def _log():
         pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
         text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
-               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
                f"Источник: {await About.PeerName(message)}\n" \
                f"Команда: /drop_log \n" \
                f"Время (МСК): {Converter.convert(time.time())}"
@@ -193,7 +194,7 @@ async def drop_log(message: Message):
     async def _say(title):
         await message.answer(title)
 
-    PeerID = message.peer_id
+    PeerID = About.PeerID(message)
     Destination = "LOG"
 
     if database.get_conversation(PeerID=PeerID, Destination=Destination):
@@ -204,8 +205,6 @@ async def drop_log(message: Message):
 
     else:
         await _say("Беседа не является лог-чатом.")
-
-
 
 
 """
@@ -224,10 +223,10 @@ async def permission(message: Message, args: Tuple[str]):
     async def _log():
         pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
         text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
-               f"Роль: {pl} - {Config.PERMISSION_LVL[pl]}\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
                f"Источник: {await About.PeerName(message)}\n" \
                f"Команда: /permission\n" \
-               f"Уровень прав: {int(args[0])} - {Config.PERMISSION_LVL[int(args[0])]}\n" \
+               f"Уровень прав: {int(args[0])} - {PERMISSION_LVL[int(args[0])]}\n" \
                f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
                f"Время (МСК): {Converter.convert(time.time())}"
 
@@ -235,18 +234,21 @@ async def permission(message: Message, args: Tuple[str]):
 
         return {'text': text, 'forward': forward}
 
-    PeerID = message.peer_id
-    UserID = message.reply_message.from_id
+    PeerID = About.PeerID(message)
+    UserID = About.UserID(message.reply_message)
 
-    UserInfo = await bot.api.users.get(UserID)
-    UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
-    UserURL = f"https://vk.com/id{UserID}"
+    UserName = About.UserFullName(message.reply_message)
+    UserURL = About.UserURL(message.reply_message)
 
-    PermissionLvl = int(args[0])
-    PermissionName = PERMISSION_LVL[PermissionLvl]
+    try:
+        PermissionLvl = int(args[0])
+        PermissionName = PERMISSION_LVL[PermissionLvl]
 
-    await logger.send_log(await _log())
-    database.set_permission(UserID, UserName, UserURL, PermissionLvl, PermissionName, PeerID)
+        await logger.send_log(await _log())
+        database.set_permission(UserID, UserName, UserURL, PermissionLvl, PermissionName, PeerID)
+
+    except Exception:
+        ...
 
 
 """
@@ -258,34 +260,43 @@ async def permission(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['kick'], ['!', '/'], 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1), # Moderator
+    CheckPermission(access_to=0), # Moderator
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def kick(message: Message):
     async def _log():
-        ...
-        # TODO: Логи
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /kick \n" \
+               f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {
+            'peer_id': About.PeerID(message),
+            'conversation_message_ids': [About.CvsMessageID(message.reply_message)]
+        }
+
+        return {'text': text, 'forward': forward}
 
     async def _say():
-        title = f""
-        # TODO: Вывод в общий чат о наказании
+        title = f"@id{About.UserID(message.reply_message)} (Пользователь) исключен из беседы навсегда.\n" \
+                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = Message.peer_id
-    UserID = message.reply_message.from_id
-    KickedByID = message.from_id
+    PeerID = About.PeerID(message)
+    UserID = About.UserID(message.reply_message)
+    KickedByID = About.UserID(message)
 
     if not database.get_kick(PeerID=PeerID, UserID=UserID):
-        UserInfo = await bot.api.users.get(UserID)
-        KickedByInfo = await bot.api.users.get(KickedByID)
+        UserName = About.UserFullName(message.reply_message)
+        UserURL = About.UserURL(message.reply_message)
 
-        UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
-        UserURL = f"https://vk.com/id{UserID}"
-
-        KickedByName = f"{KickedByInfo[0].first_name} {KickedByInfo[0].last_name}"
-        KickedByURL = f"https://vk.com/id{KickedByID}"
+        KickedByName = About.UserFullName(message)
+        KickedByURL = About.UserURL(message)
 
         KickTime = int(time.time())
 
@@ -305,24 +316,38 @@ async def kick(message: Message):
     HandleCommand(ALIASES['ban'], ['!', '/'], 2),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1), # Moderator
+    CheckPermission(access_to=0), # Moderator
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    def _log():
-        ...
-        # TODO: Логи
+    async def _log(UnTime):
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /ban \n" \
+               f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
+               f"Время (МСК): {Converter.convert(time.time())}\n" \
+               f"Время снятия (МСК): {Converter.convert(UnTime)}\n"
 
-    async def _say():
-        title = f""
-        # TODO: Вывод в общий чат о наказании
+        forward = {
+            'peer_id': About.PeerID(message),
+            'conversation_message_ids': [About.CvsMessageID(message.reply_message)]
+        }
+
+        return {'text': text, 'forward': forward}
+
+    async def _say(UnTime):
+        title = f"@id{About.UserID(message.reply_message)} (Пользователь) временно заблокирован.\n" \
+                f"Время снятия блокировки: {Converter.convert(UnTime)}\n" \
+                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = Message.peer_id
-    UserID = message.reply_message.from_id
-    BannedByID = message.from_id
+    PeerID = About.PeerID(message)
+    UserID = About.UserID(message.reply_message)
+    BannedByID = About.UserID(message)
 
     try:
         BanDeltaTime = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
@@ -332,20 +357,19 @@ async def ban(message: Message, args: Tuple[str]):
         return
 
     if not database.get_kick(PeerID=PeerID, UserID=UserID):
-        UserInfo = await bot.api.users.get(UserID)
-        BannedByInfo = await bot.api.users.get(BannedByID)
+        UserName = About.UserFullName(message.reply_message)
+        UserURL = About.UserURL(message.reply_message)
 
-        UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
-        UserURL = f"https://vk.com/id{UserID}"
-
-        BannedByName = f"{BannedByInfo[0].first_name} {BannedByInfo[0].last_name}"
-        BannedByURL = f"https://vk.com/id{BannedByInfo}"
+        BannedByName = About.UserFullName(message)
+        BannedByURL = About.UserURL(message)
 
         BanTime = int(time.time())
         UnbanTime = BanTime + BanDeltaTime
 
-        await _say()
+        await _say(UnbanTime)
+        await logger.send_log(await _log(UnbanTime))
         database.add_ban(PeerID, UserID, UserName, UserURL, BannedByID, BannedByName, BannedByURL, BanTime, UnbanTime)
+
         await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
 
 
@@ -381,18 +405,33 @@ async def unban(message: Message):
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple[str]):
-    def _log():
-        ...
-        # TODO: Логи
+    async def _log(UnTime):
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /mute \n" \
+               f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
+               f"Время (МСК): {Converter.convert(time.time())}\n" \
+               f"Время снятия (МСК): {Converter.convert(UnTime)}\n"
 
-    async def _say():
-        title = f""
-        # TODO: Вывод в общий чат о наказании
+        forward = {
+            'peer_id': About.PeerID(message),
+            'conversation_message_ids': [About.CvsMessageID(message.reply_message)]
+        }
+
+        return {'text': text, 'forward': forward}
+
+    async def _say(UnTime):
+        title = f"@id{About.UserID(message.reply_message)} (Пользователь) временно заглушен.\n" \
+                f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
+                f"Время снятия заглушения: {Converter.convert(UnTime)}\n" \
+                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = Message.peer_id
-    UserID = message.reply_message.from_id
-    MutedByID = message.from_id
+    PeerID = About.PeerID(message)
+    UserID = About.UserID(message.reply_message)
+    MutedByID = About.UserID(message)
 
     try:
         MuteDeltaTime = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
@@ -402,19 +441,17 @@ async def mute(message: Message, args: Tuple[str]):
         return
 
     if not database.get_kick(PeerID=PeerID, UserID=UserID):
-        UserInfo = await bot.api.users.get(UserID)
-        MutedByInfo = await bot.api.users.get(MutedByID)
+        UserName = About.UserFullName(message.reply_message)
+        UserURL = About.UserURL(message.reply_message)
 
-        UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
-        UserURL = f"https://vk.com/id{UserID}"
-
-        MutedByName = f"{MutedByInfo[0].first_name} {MutedByInfo[0].last_name}"
-        MutedByURL = f"https://vk.com/id{MutedByID}"
+        MutedByName = About.UserFullName(message)
+        MutedByURL = About.UserURL(message)
 
         MuteTime = int(time.time())
         UnmuteTime = MuteTime + MuteDeltaTime
 
-        await _say()
+        await _say(UnmuteTime)
+        await logger.send_log(await _log(UnmuteTime))
         database.add_mute(PeerID, UserID, UserName, UserURL, MutedByID, MutedByName, MutedByURL, MuteTime, UnmuteTime)
 
 @bl.chat_message(
@@ -449,34 +486,48 @@ async def unmute(message: Message):
     OnlyEnrolled()
 )
 async def warn(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def _log(UnTime, WnCount):
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /warn \n" \
+               f"Цель: @id{About.UserID(message.reply_message)} ({await About.UserFullName(message.reply_message)})\n" \
+               f"Количество предупреждений: {WnCount}/3" \
+               f"Время (МСК): {Converter.convert(time.time())}\n" \
+               f"Время снятия (МСК): {Converter.convert(UnTime)}\n"
 
-    async def _say():
-        title = f""
-        # TODO: Вывод в общий чат о наказании
+        forward = {
+            'peer_id': About.PeerID(message),
+            'conversation_message_ids': [About.CvsMessageID(message.reply_message)]
+        }
+
+        return {'text': text, 'forward': forward}
+
+    async def _say(UnTime, WnCount):
+        title = f"@id{About.UserID(message.reply_message)} (Пользователь) получил предупреждение.\n" \
+                f"Текущее количество предупреждений: {WnCount}/3.\n" \
+                f"Время снятия предупреждений: {Converter.convert(UnTime)}\n" \
+                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = Message.peer_id
-    UserID = message.reply_message.from_id
-    WarnedByID = message.from_id
+    PeerID = About.PeerID(message)
+    UserID = About.UserID(message.reply_message)
+    WarnedByID = About.UserID(message)
 
-    UserInfo = await bot.api.users.get(UserID)
-    WarnedByInfo = await bot.api.users.get(WarnedByID)
+    UserName = About.UserFullName(message.reply_message)
+    UserURL = About.UserURL(message.reply_message)
 
-    UserName = f"{UserInfo[0].first_name} {UserInfo[0].last_name}"
-    UserURL = f"https://vk.com/id{UserID}"
-
-    WarnedByName = f"{WarnedByInfo[0].first_name} {WarnedByInfo[0].last_name}"
-    WarnedByURL = f"https://vk.com/id{WarnedByInfo}"
+    WarnedByName = About.UserFullName(message)
+    WarnedByURL = About.UserURL(message)
 
     WarnTime = int(time.time())
     UnwarnTime = WarnTime + TIME_COEFFICENT["d"]
 
     WarnCount = database.get_warn(PeerID=PeerID, UserID=UserID) + 1
 
-    await _say()
+    await _say(UnwarnTime, WarnCount)
+    await logger.send_log(await _log(UnwarnTime, WarnCount))
     database.add_warn(PeerID, UserID, UserName, UserURL,
                       WarnedByID, WarnedByName, WarnedByURL,
                       WarnTime, UnwarnTime, WarnCount)
@@ -507,14 +558,26 @@ async def unwarn(message: Message):
     HandleCommand(ALIASES['delete'], ['!', '/'], 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=True),
-    CheckPermission(access_to=1), # Moderator
+    CheckPermission(access_to=0), # Moderator
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def delete(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /delete \n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
+
+        forward = {'peer_id': About.PeerID(message)}
+        if message.fwd_messages:
+            forward['conversation_message_ids'] = [About.CvsMessageID(m) for m in message.fwd_messages]
+        else:
+            forward['conversation_message_ids'] = [About.CvsMessageID(message.reply_message)]
+
+        return {'text': text, 'forward': forward}
 
     async def _collapse(m: Message):
         MessageID = m.conversation_message_id
@@ -525,13 +588,13 @@ async def delete(message: Message):
         except Exception:
             ...
 
+    await logger.send_log(await _log())
+
     if message.fwd_messages:
-        # TODO: Вывод лога при удалении в лог-чат
         for msg in message.fwd_messages:
             await _collapse(msg)
 
     else:
-        # TODO: Вывод лога при удалении в лог-чат
         await _collapse(message.reply_message)
 
 
@@ -543,14 +606,25 @@ async def delete(message: Message):
     HandleCommand(ALIASES['copy'], ['!', '/'], 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1), # Moderator
+    CheckPermission(access_to=0), # Moderator
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def copy(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def _log():
+        pl = database.get_permission(UserID=About.UserID(message), PeerID=About.PeerID(message))
+        text = f"Инициатор: @id{About.UserID(message)} ({await About.UserFullName(message)})\n" \
+               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
+               f"Источник: {await About.PeerName(message)}\n" \
+               f"Команда: /copy\n" \
+               f"Время (МСК): {Converter.convert(time.time())}"
 
-    title = message.reply_message.text
-    await message.answer(title)
+        forward = {
+            'peer_id': About.PeerID(message),
+            'conversation_message_ids': [About.CvsMessageID(message.reply_message)]
+        }
+
+        return {'text': text, 'forward': forward}
+
+    await logger.send_log(await _log())
+    await message.answer(message.reply_message.text)

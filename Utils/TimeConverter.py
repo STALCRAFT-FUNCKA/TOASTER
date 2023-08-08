@@ -8,5 +8,6 @@ class Converter:
         tz = datetime.timezone(offset, name='MSK')
 
         MSK_time = str(datetime.datetime.fromtimestamp(epoch, tz=tz)).split('+')[0]
-        MSK_time = MSK_time[0:MSK_time.find('.')]
+        if MSK_time.find('.') != -1:
+            MSK_time = MSK_time[0:MSK_time.find('.')]
         return MSK_time

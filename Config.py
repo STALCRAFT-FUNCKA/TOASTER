@@ -71,4 +71,4 @@ ALIASES = {
 
 }
 
-STUFF_ADMIN = 0
+STUFF_ADMIN_ID = 0

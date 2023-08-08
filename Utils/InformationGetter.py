@@ -15,6 +15,13 @@ class About:
     def PeerID(message: Message):
         return message.peer_id
 
+    @staticmethod
+    def CvsMessageID(message: Message):
+        return message.conversation_message_id
+
+    async def UserURL(self, message: Message):
+        return f"https://vk.com/id{self.UserID(message)}"
+
     async def UserFirstName(self, message: Message):
         author_info = await self.bot.api.users.get(self.UserID(message))
         return  author_info[0].first_name
