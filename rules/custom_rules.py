@@ -1,8 +1,8 @@
 from typing import List, Optional, Union
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
-from Config import GROUP, TOKEN
-from DataBase.Interface import Connection
+from config import GROUP_ID, TOKEN
+from DataBase.interface import Connection
 
 bot = Bot(token=TOKEN)
 database = Connection('DataBase/database.db')
@@ -73,7 +73,7 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         try:
             await bot.api.messages.delete(
-                group_id=GROUP,
+                group_id=GROUP_ID,
                 peer_id=message.peer_id,
                 cmids=message.conversation_message_id,
                 delete_for_all=True
@@ -94,7 +94,7 @@ class CheckPermission(ABCRule[BaseMessageMin]):
         UserID = message.from_id
 
         # TODO: VK admin
-        if database.get_permission(PeerID=PeerID, UserID=UserID) >= self.access_to:
+        if database.get_permission(peer_id=PeerID, user_id=UserID) >= self.access_to:
             return True
 
         return False
@@ -112,19 +112,19 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
             if message.reply_message:
                 UserID = message.reply_message.from_id
                 # TODO: VK admin
-                if database.get_permission(PeerID=PeerID, UserID=UserID) < self.ignore_from:
+                if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
                     return True
 
             elif message.fwd_messages:
                 for msg in message.fwd_messages:
                     UserID = msg.from_id
                     # TODO: VK admin
-                    if database.get_permission(PeerID=PeerID, UserID=UserID) < self.ignore_from:
+                    if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
                         return True
 
         elif self.mode == "SELF":
             UserID = message.from_id
-            if database.get_permission(PeerID=PeerID, UserID=UserID) < self.ignore_from:
+            if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
                 return True
 
         return False
@@ -136,10 +136,10 @@ class HandleIn(ABCRule[BaseMessageMin]):
         self.handle_chat = handle_chat
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        PeerID = message.peer_id
+        peer_id = message.peer_id
+        destination = "LOG"
 
-        Destination = "LOG"
-        if database.get_conversation(PeerID=PeerID, Destination=Destination):
+        if database.get_conversation(peer_id=peer_id, destination=destination):
             if self.handle_log:
                 return True
 
@@ -148,8 +148,8 @@ class HandleIn(ABCRule[BaseMessageMin]):
                 await message.answer(title)
                 return False
 
-        Destination = "CHAT"
-        if database.get_conversation(PeerID=PeerID, Destination=Destination):
+        destination = "CHAT"
+        if database.get_conversation(peer_id=peer_id, destination=destination):
             if self.handle_chat:
                 return True
 
@@ -163,12 +163,12 @@ class HandleIn(ABCRule[BaseMessageMin]):
 class OnlyEnrolled(ABCRule[BaseMessageMin]):
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        PeerID = message.peer_id
+        peer_id = message.peer_id
 
-        if database.get_conversation(PeerID=PeerID, Destination="LOG"):
+        if database.get_conversation(peer_id=peer_id, destination="LOG"):
                 return True
 
-        elif database.get_conversation(PeerID=PeerID, Destination="CHAT"):
+        elif database.get_conversation(peer_id=peer_id, destination="CHAT"):
                 return True
 
         else:
