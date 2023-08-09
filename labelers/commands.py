@@ -1,10 +1,9 @@
-import time
 from typing import Tuple
 
 from vkbottle.bot import Bot, BotLabeler, Message
 
 from database.interface import Connection
-from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, PERMISSION_LVL, TIME_COEFFICENT, STUFF_ADMIN_ID
+from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, TIME_COEFFICENT, STUFF_ADMIN_ID
 from logger.logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
@@ -62,42 +61,46 @@ async def reference(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def enroll(message: Message):
-    async def _say(title):
+    async def say_respond(title):
         await message.answer(title)
 
     # получаем все необходимые данные
-    user_id = message.from_id
-    peer_id = message.peer_id
+    all_data = await about.get_all_info(message, command=enroll)
     destination = "CHAT"
-    initiator_name = await about.user_full_name(user_id, tag=True)
-    initiator_role = database.get_permission(peer_id, user_id)
-    source_peer_name = await about.peer_name(peer_id)
-    now_time = converter.convert(int(time.time()))
-    command_name = f"{enroll.__name__}"
 
     # формируем лог
     logger.compose_log_data(
-        initiator_name=initiator_name,
-        initiator_role=initiator_role,
-        source_peer_name=source_peer_name,
-        command_name=command_name,
-        now_time=now_time
+        initiator_name=all_data.get("initiator_name_tagged"),
+        initiator_role=all_data.get("initiator_role"),
+        peer_name=all_data.get("_get_peer_name"),
+        command_name=all_data.get("command_name"),
+        now_time=all_data.get("now_time")
     )
 
     # отправляем лог
     await logger.send()
 
     # отправляем уведомления в чат
-    if database.get_conversation(peer_id=peer_id, destination=destination):
-        await _say("Данные беседы обновлены.")
+    if database.get_conversation(peer_id=all_data.get("peer_id"),
+                                 destination=destination):
+        await say_respond("Данные беседы обновлены.")
     else:
-        await _say(f"Беседа зарегистрирована.")
+        await say_respond(f"Беседа зарегистрирована.")
 
     # регистрируем беседу в БД
-    database.add_conversation(peer_id=peer_id, peer_name=source_peer_name, destination=destination)
+    database.add_conversation(
+        peer_id=all_data.get("peer_id"),
+        peer_name=all_data.get("_get_peer_name"),
+        destination=destination
+    )
+
     # добавляем стандартный набор настроек
     for setting in SETTINGS:
-        database.add_setting(peer_id=peer_id, setting_name=setting, setting_status=SETTINGS[setting])
+        database.add_setting(
+            peer_id=all_data.get("peer_id"),
+            setting_name=setting,
+            setting_status=SETTINGS[setting]
+        )
 
 
 @bl.chat_message(
@@ -108,41 +111,35 @@ async def enroll(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def drop(message: Message):
-    async def _say(title):
+    async def say_respond(title):
         await message.answer(title)
 
     # получаем предварительные данные
-    peer_id = message.peer_id
+    all_data = await about.get_all_info(message, command=drop)
     destination = "CHAT"
 
-    if database.get_conversation(peer_id=peer_id, destination=destination):
-        # получаем все необходимые данные
-        user_id = message.from_id
-        initiator_name = await about.user_full_name(user_id, tag=True)
-        initiator_role = database.get_permission(peer_id, user_id)
-        source_peer_name = await about.peer_name(peer_id)
-        now_time = converter.convert(int(time.time()))
-        command_name = f"{drop.__name__}"
-
+    if database.get_conversation(peer_id=all_data.get("peer_id"), destination=destination):
         # формируем лог
         logger.compose_log_data(
-            initiator_name=initiator_name,
-            initiator_role=initiator_role,
-            source_peer_name=source_peer_name,
-            command_name=command_name,
-            now_time=now_time
+            initiator_name=all_data.get("initiator_name_tagged"),
+            initiator_role=all_data.get("initiator_role"),
+            peer_name=all_data.get("_get_peer_name"),
+            command_name=all_data.get("command_name"),
+            now_time=all_data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
+
         # отправляем уведомление в чат
-        await _say("Регистрация данной беседы упразднена.")
+        await say_respond("Регистрация данной беседы упразднена.")
+
         # удаляем регистрацию беседы из БД
-        database.remove_conversation(peer_id=peer_id)
+        database.remove_conversation(peer_id=all_data.get("peer_id"))
 
     else:
         # отправляем уведомление в чат
-        await _say("Данная беседа не зарегистрирована.")
+        await say_respond("Данная беседа не зарегистрирована.")
 
 
 """
@@ -161,39 +158,40 @@ async def drop(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def enroll_log(message: Message):
-    async def _say(title):
+    async def say_respond(title):
         await message.answer(title)
 
     # получаем все необходимые данные
-    user_id = message.from_id
-    peer_id = message.peer_id
+    all_data = await about.get_all_info(message, command=enroll_log)
     destination = "LOG"
-    initiator_name = await about.user_full_name(user_id, tag=True)
-    initiator_role = database.get_permission(peer_id, user_id)
-    source_peer_name = await about.peer_name(peer_id)
-    now_time = converter.convert(int(time.time()))
-    command_name = f"{enroll_log.__name__}"
 
     # формируем лог
     logger.compose_log_data(
-        initiator_name=initiator_name,
-        initiator_role=initiator_role,
-        source_peer_name=source_peer_name,
-        command_name=command_name,
-        now_time=now_time
+        initiator_name=all_data.get("initiator_name_tagged"),
+        initiator_role=all_data.get("initiator_role"),
+        peer_name=all_data.get("_get_peer_name"),
+        command_name=all_data.get("command_name"),
+        now_time=all_data.get("now_time")
     )
 
     # отправляем лог
     await logger.send()
 
     # отправляем уведомления в чат
-    if database.get_conversation(peer_id=peer_id, destination=destination):
-        await _say("Данные беседы обновлены.")
+    if database.get_conversation(
+            peer_id=all_data.get("peer_id"),
+            destination=destination
+    ):
+        await say_respond("Данные беседы обновлены.")
     else:
-        await _say(f"Беседа назначена в качестве лог-чата.")
+        await say_respond(f"Беседа назначена в качестве лог-чата.")
 
     # регистрируем лог-чат в БД
-    database.add_conversation(peer_id=peer_id, peer_name=source_peer_name, destination=destination)
+    database.add_conversation(
+        peer_id=all_data.get("peer_id"),
+        peer_name=all_data.get("peer_name"),
+        destination=destination
+    )
 
 
 @bl.chat_message(
@@ -204,42 +202,36 @@ async def enroll_log(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def drop_log(message: Message):
-    async def _say(title):
+    async def say_respond(title):
         await message.answer(title)
 
-    # получаем предварительные данные
-    peer_id = message.peer_id
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=drop_log)
     destination = "LOG"
 
     # проверяем наличие регистрации беседы в БД
-    if database.get_conversation(peer_id=peer_id, destination=destination):
-        # получаем все необходимые данные
-        user_id = message.from_id
-        initiator_name = await about.user_full_name(user_id, tag=True)
-        initiator_role = database.get_permission(peer_id, user_id)
-        source_peer_name = await about.peer_name(peer_id)
-        now_time = converter.convert(int(time.time()))
-        command_name = f"{drop_log.__name__}"
-
+    if database.get_conversation(peer_id=all_data.get("peer_id"), destination=destination):
         # формируем лог
         logger.compose_log_data(
-            initiator_name=initiator_name,
-            initiator_role=initiator_role,
-            source_peer_name=source_peer_name,
-            command_name=command_name,
-            now_time=now_time
+            initiator_name=all_data.get("initiator_name_tagged"),
+            initiator_role=all_data.get("initiator_role"),
+            peer_name=all_data.get("_get_peer_name"),
+            command_name=all_data.get("command_name"),
+            now_time=all_data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
+
         # отправляем уведомление
-        await _say("Данный лог-чат упразднён.")
+        await say_respond("Данный лог-чат упразднён.")
+
         # удаляем регистрацию лог-чата
-        database.remove_conversation(peer_id=peer_id)
+        database.remove_conversation(peer_id=all_data.get("peer_id"))
 
     else:
         # отправляем уведомление
-        await _say("Беседа не является лог-чатом.")
+        await say_respond("Беседа не является лог-чатом.")
 
 
 """
@@ -258,40 +250,34 @@ async def drop_log(message: Message):
 )
 async def permission(message: Message, args: Tuple[str]):
     try:
-        # выводим число уровня роли
-        set_role = int(args[0])
-        set_role_name = PERMISSION_LVL[set_role]
-
         # получаем все необходимые данные
-        user_id = message.from_id
-        target_user_id = message.reply_message.from_id
-        peer_id = message.peer_id
-        initiator_name = await about.user_full_name(user_id, tag=True)
-        initiator_role = database.get_permission(peer_id, user_id)
-        target_name = await about.user_full_name(target_user_id, tag=True)
-        target_url = about.user_url(target_user_id)
-        source_peer_name = await about.peer_name(peer_id)
-        now_time_epoch = int(time.time())
-        now_time = converter.convert(now_time_epoch)
-        command_name = f"{permission.__name__}"
+        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]))
 
         # формируем лог
         logger.compose_log_data(
-            initiator_name=initiator_name,
-            initiator_role=initiator_role,
-            source_peer_name=source_peer_name,
-            command_name=command_name,
-            set_role=set_role,
-            now_time=now_time,
+            initiator_name=all_data.get("initiator_name_tagged"),
+            initiator_role=all_data.get("initiator_role"),
+            peer_name=all_data.get("_get_peer_name"),
+            command_name=all_data.get("command_name"),
+            set_role=all_data("target_set_role"),
+            now_time=all_data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
-        # добавляем пользователю группу прав
-        database.set_permission(peer_id, user_id, target_name, target_url, set_role, set_role_name)
 
-    except Exception:
-        ...
+        # добавляем пользователю группу прав
+        database.set_permission(
+            all_data.get("peer_id"),
+            all_data.get("target_id"),
+            all_data.get("target_name"),
+            all_data.get("target_url"),
+            all_data.get("target_set_role"),
+            all_data.get("target_set_role_name")
+        )
+
+    except Exception as error:
+        print("Command aborted: ", error)
 
 
 """
@@ -311,45 +297,49 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message):
-    async def _log():
-        pl = database.get_permission(user_id=about.UserID(message), peer_id=about.PeerID(message))
-        text = f"Инициатор: @id{about.UserID(message)} ({await about.user_full_name(message)})\n" \
-               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
-               f"Источник: {await about.peer_name(message)}\n" \
-               f"Команда: /kick \n" \
-               f"Цель: @id{about.UserID(message.reply_message)} ({await about.user_full_name(message.reply_message)})\n" \
-               f"Время (МСК): {converter.convert(time.time())}"
-
-        forward = {
-            'peer_id': about.PeerID(message),
-            'conversation_message_ids': [about.CvsMessageID(message.reply_message)]
-        }
-
-        return {'text': text, 'forward': forward}
-
-    async def _say():
-        title = f"@id{about.UserID(message.reply_message)} (Пользователь) исключен из беседы навсегда.\n" \
+    async def say_respond():
+        title = f"@id{message.reply_message.from_id} (Пользователь) исключен из беседы навсегда.\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = about.PeerID(message)
-    UserID = about.UserID(message.reply_message)
-    KickedByID = about.UserID(message)
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=kick)
 
-    if not database.get_kick(peer_id=PeerID, user_id=UserID):
-        UserName = about.user_full_name(message.reply_message)
-        UserURL = about.user_url(message.reply_message)
+    # проверяем наличие пользователя в бд
+    if not database.get_kick(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=all_data.get("initiator_name_tagged"),
+            initiator_role=all_data.get("initiator_role"),
+            peer_name=all_data.get("_get_peer_name"),
+            command_name=all_data.get("command_name"),
+            now_time=all_data.get("now_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=all_data.get("peer_id"),
+            cmids=all_data.get("cmids")
+        )
 
-        KickedByName = about.user_full_name(message)
-        KickedByURL = about.user_url(message)
+        # отправляем лог
+        await logger.send()
 
-        KickTime = int(time.time())
+        # отправляем уведомление в чат
+        await say_respond()
 
-        await _say()
-        await logger.send_log(await _log())
-        database.add_kick(PeerID, UserID, UserName, UserURL, KickedByID, KickedByName, KickedByURL, KickTime)
+        # Выдаем кик
+        database.add_kick(
+            all_data.get("peer_id"),
+            all_data.get("target_id"),
+            all_data.get("target_name"),
+            all_data.get("target_url"),
+            all_data.get("initiator_id"),
+            all_data.get("initiator_name"),
+            all_data.get("initiator_url"),
+            all_data.get("now_time_epoch")
+        )
 
-        await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
+        # Исключаем из беседы
+        await bot.api.messages.remove_chat_user(message.chat_id, all_data.get("target_id"))
 
 
 """
@@ -369,55 +359,62 @@ async def kick(message: Message):
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    async def _log(UnTime):
-        pl = database.get_permission(user_id=about.UserID(message), peer_id=about.PeerID(message))
-        text = f"Инициатор: @id{about.UserID(message)} ({await about.user_full_name(message)})\n" \
-               f"Роль: {pl} - {PERMISSION_LVL[pl]}\n" \
-               f"Источник: {await about.peer_name(message)}\n" \
-               f"Команда: /ban \n" \
-               f"Цель: @id{about.UserID(message.reply_message)} ({await about.user_full_name(message.reply_message)})\n" \
-               f"Время (МСК): {converter.convert(time.time())}\n" \
-               f"Время снятия (МСК): {converter.convert(UnTime)}\n"
-
-        forward = {
-            'peer_id': about.PeerID(message),
-            'conversation_message_ids': [about.CvsMessageID(message.reply_message)]
-        }
-
-        return {'text': text, 'forward': forward}
-
-    async def _say(UnTime):
-        title = f"@id{about.UserID(message.reply_message)} (Пользователь) временно заблокирован.\n" \
-                f"Время снятия блокировки: {converter.convert(UnTime)}\n" \
+    async def say_respond(tt):
+        title = f"@id{message.reply_message.from_id} (Пользователь) временно заблокирован.\n" \
+                f"Время снятия блокировки: {converter.convert(tt)}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    PeerID = about.PeerID(message)
-    UserID = about.UserID(message.reply_message)
-    BannedByID = about.UserID(message)
-
+    # выводим дельту времени
     try:
-        BanDeltaTime = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
-            else (int(args[0]) + 1 * TIME_COEFFICENT[args[1]])
+        if int(args[0]) > 0:
+            delta = (int(args[0]) * TIME_COEFFICENT[args[1]])
+        else:
+            delta = TIME_COEFFICENT[args[1]]
 
-    except Exception:
-        return
+        # получаем все необходимые данные
+        all_data = await about.get_all_info(message, command=ban, time_delta=delta)
 
-    if not database.get_kick(peer_id=PeerID, user_id=UserID):
-        UserName = about.user_full_name(message.reply_message)
-        UserURL = about.user_url(message.reply_message)
+        if not database.get_ban(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
+            # формируем лог
+            logger.compose_log_data(
+                initiator_name=all_data.get("initiator_name_tagged"),
+                initiator_role=all_data.get("initiator_role"),
+                peer_name=all_data.get("source_peer_name"),
+                command_name=all_data.get("command_name"),
+                target_warns=all_data.get("warn_count"),
+                now_time=all_data.get("now_time"),
+                target_time=all_data.get("target_time")
+            )
+            logger.compose_log_attachments(
+                peer_id=all_data.get("peer_id"),
+                cmids=all_data.get("cmids")
+            )
 
-        BannedByName = about.user_full_name(message)
-        BannedByURL = about.user_url(message)
+            # отправляем лог
+            await logger.send()
 
-        BanTime = int(time.time())
-        UnbanTime = BanTime + BanDeltaTime
+            # отправляем уведомление в чат
+            await say_respond(all_data.get("target_time"))
 
-        await _say(UnbanTime)
-        await logger.send_log(await _log(UnbanTime))
-        database.add_ban(PeerID, UserID, UserName, UserURL, BannedByID, BannedByName, BannedByURL, BanTime, UnbanTime)
+            # выдаем блокировку
+            database.add_ban(
+                all_data.get("peer_id"),
+                all_data.get("target_id"),
+                all_data.get("target_name"),
+                all_data.get("target_url"),
+                all_data.get("initiator_id"),
+                all_data.get("initiator_name"),
+                all_data.get("initiator_url"),
+                all_data.get("now_time_epoch"),
+                all_data.get("target_time_epoch")
+            )
 
-        await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
+            # исключаем из беседы
+            await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
+
+    except Exception as error:
+        print("Command aborted: ", error)
 
 
 @bl.chat_message(
@@ -461,62 +458,54 @@ async def mute(message: Message, args: Tuple[str]):
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    # предварительные данные
-    user_id = message.from_id
-    peer_id = message.peer_id
-    target_user_id = message.reply_message.from_id
-
     # выводим дельту времени
     try:
-        delta_time = (int(args[0]) * TIME_COEFFICENT[args[1]]) if args[0] != 0 \
-            else (int(args[0]) + 1 * TIME_COEFFICENT[args[1]])
-    except Exception:
-        return
+        if int(args[0]) > 0:
+            delta = (int(args[0]) * TIME_COEFFICENT[args[1]])
+        else:
+            delta = TIME_COEFFICENT[args[1]]
 
-    # проверяем наличие пользователя в базе данных
-    if not database.get_kick(peer_id, target_user_id):
         # получаем все необходимые данные
-        initiator_name = await about.user_full_name(user_id, tag=True)
-        initiator_role = database.get_permission(peer_id, user_id)
-        initiator_url = about.user_url(user_id)
-        target_name = await about.user_full_name(target_user_id, tag=True)
-        target_url = about.user_url(target_user_id)
-        warn_count = database.get_warn(peer_id, target_user_id)
-        source_peer_name = await about.peer_name(peer_id)
-        now_time_epoch = int(time.time())
-        now_time = converter.convert(now_time_epoch)
-        target_time_epoch = now_time_epoch + delta_time
-        target_time = converter.convert(target_time_epoch)
-        command_name = f"{mute.__name__}"
+        all_data = await about.get_all_info(message, command=mute, time_delta=delta)
 
-        cvs_msg_ids = [about.get_cmids(message.reply_message)] \
-                      or [about.get_cmids(msg) for msg in message.fwd_messages]
+        # проверяем наличие пользователя в базе данных
+        if not database.get_mute(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
+            # формируем лог
+            logger.compose_log_data(
+                initiator_name=all_data.get("initiator_name_tagged"),
+                initiator_role=all_data.get("initiator_role"),
+                peer_name=all_data.get("source_peer_name"),
+                command_name=all_data.get("command_name"),
+                target_warns=all_data.get("warn_count"),
+                now_time=all_data.get("now_time"),
+                target_time=all_data.get("target_time")
+            )
+            logger.compose_log_attachments(
+                peer_id=all_data.get("peer_id"),
+                cmids=all_data.get("cmids")
+            )
 
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=initiator_name,
-            initiator_role=initiator_role,
-            source_peer_name=source_peer_name,
-            command_name=command_name,
-            target_warns=warn_count,
-            now_time=now_time,
-            target_time=target_time
-        )
-        logger.compose_log_attachments(
-            peer_id=peer_id,
-            cvs_msg_ids=cvs_msg_ids
-        )
+            # отправляем лог
+            await logger.send()
 
-        # отправляем лог
-        await logger.send()
+            # отправляем уведомление в чат
+            await say_respond(all_data.get("target_time"))
 
-        # отправляем уведомление в чат
-        await say_respond(target_time)
+            # выдаем блокировку
+            database.add_mute(
+                all_data.get("peer_id"),
+                all_data.get("target_id"),
+                all_data.get("target_name"),
+                all_data.get("target_url"),
+                all_data.get("initiator_id"),
+                all_data.get("initiator_name"),
+                all_data.get("initiator_url"),
+                all_data.get("now_time_epoch"),
+                all_data.get("target_time_epoch")
+            )
 
-        # выдаем заглушение
-        database.add_mute(peer_id, target_user_id, target_name, target_url,
-                          user_id, initiator_name, initiator_url,
-                          now_time_epoch, target_time_epoch)
+    except Exception as error:
+        print("Command aborted: ", error)
 
 
 @bl.chat_message(
@@ -561,51 +550,45 @@ async def warn(message: Message):
         await message.answer(title)
 
     # получаем все необходимые данные
-    user_id = message.from_id
-    target_user_id = message.reply_message.from_id
-    peer_id = message.peer_id
-    initiator_name = await about.user_full_name(user_id, tag=True)
-    initiator_role = database.get_permission(peer_id, user_id)
-    initiator_url = about.user_url(user_id)
-    target_name = await about.user_full_name(target_user_id, tag=True)
-    target_url = about.user_url(target_user_id)
-    warn_count = database.get_warn(peer_id, target_user_id) + 1
-    source_peer_name = await about.peer_name(peer_id)
-    now_time_epoch = int(time.time())
-    now_time = converter.convert(now_time_epoch)
-    target_time_epoch = now_time_epoch + TIME_COEFFICENT["d"]
-    target_time = converter.convert(target_time_epoch)
-    command_name = f"{warn.__name__}"
-
-    cvs_msg_ids = [about.get_cmids(message.reply_message)] \
-                  or [about.get_cmids(msg) for msg in message.fwd_messages]
+    all_data = await about.get_all_info(message, command=warn)
 
     # формируем лог
     logger.compose_log_data(
-        initiator_name=initiator_name,
-        initiator_role=initiator_role,
-        source_peer_name=source_peer_name,
-        command_name=command_name,
-        target_warns=warn_count,
-        now_time=now_time,
-        target_time=target_time
+        initiator_name=all_data.get("initiator_name_tagged"),
+        initiator_role=all_data.get("initiator_role"),
+        peer_name=all_data.get("_get_peer_name"),
+        command_name=all_data.get("command_name"),
+        target_warns=all_data.get("target_warns"),
+        now_time=all_data.get("now_time"),
+        target_time=all_data.get("target_time")
     )
     logger.compose_log_attachments(
-        peer_id=peer_id,
-        cvs_msg_ids=cvs_msg_ids
+        peer_id=all_data.get("peer_id"),
+        cmids=all_data.get("cmids")
     )
 
     # отправляем лог
     await logger.send()
 
     # отправляем уведомление
-    await say_respond(target_time, warn_count)
+    await say_respond(
+        all_data.get("target_time"),
+        all_data.get("target_warns")
+    )
 
     # выдаем предупреждение
-    database.add_warn(peer_id, target_user_id, target_name, target_url,
-                      user_id, initiator_name, initiator_url,
-                      now_time_epoch, target_time_epoch, warn_count)
-    # TODO: Коротин в бд, разобраться
+    database.add_warn(
+        all_data.get("peer_id"),
+        all_data.get("target_id"),
+        all_data.get("target_name"),
+        all_data.get("target_url"),
+        all_data.get("initiator_id"),
+        all_data.get("initiator_name"),
+        all_data.get("initiator_url"),
+        all_data.get("now_time_epoch"),
+        all_data.get("target_time_epoch"),
+        all_data.get("target_warns")
+    )
 
 @bl.chat_message(
     HandleCommand(ALIASES['unwarn'], ['!', '/'], 0),
@@ -640,48 +623,42 @@ async def unwarn(message: Message):
 )
 async def delete(message: Message):
     async def _collapse(m: Message):
-        cmids = m.conversation_message_id
-        peer_id = message.peer_id
-        try:
-            await bot.api.messages.delete(group_id=GROUP_ID, peer_id=peer_id, cmids=cmids, delete_for_all=True)
-
-        except Exception:
-            ...
+        await bot.api.messages.delete(
+            group_id=GROUP_ID,
+            peer_id=message.peer_id,
+            cmids=m.conversation_message_id,
+            delete_for_all=True
+        )
 
     # получаем все необходимые данные
-    user_id = message.from_id
-    peer_id = message.peer_id
-    initiator_name = await about.user_full_name(user_id, tag=True)
-    initiator_role = database.get_permission(peer_id, user_id)
-    source_peer_name = await about.peer_name(peer_id)
-    now_time = converter.convert(int(time.time()))
-    command_name = f"{delete.__name__}"
-
-    cvs_msg_ids = [about.get_cmids(message.reply_message)] \
-                  or [about.get_cmids(msg) for msg in message.fwd_messages]
-    # TODO: Подшаманить с нонтайпом
-
+    all_data = await about.get_all_info(message, command=delete)
 
     # формируем лог
     logger.compose_log_data(
-        initiator_name=initiator_name,
-        initiator_role=initiator_role,
-        source_peer_name=source_peer_name,
-        command_name=command_name,
-        now_time=now_time
+        initiator_name=all_data.get("initiator_name_tagged"),
+        initiator_role=all_data.get("initiator_role"),
+        peer_name=all_data.get("_get_peer_name"),
+        command_name=all_data.get("command_name"),
+        now_time=all_data.get("now_time"),
     )
     logger.compose_log_attachments(
-        peer_id=peer_id,
-        cvs_msg_ids=cvs_msg_ids
+        peer_id=all_data.get("peer_id"),
+        cmids=all_data.get("cmids")
     )
 
-    # отправляем лог
-    await logger.send()
+    try:
+        # отправляем лог
+        await logger.send()
 
-    # удаляем сообщения
-    await _collapse(message.reply_message)
-    for msg in message.fwd_messages:
-        await _collapse(msg)
+        # удаляем сообщения
+        if message.reply_message:
+            await _collapse(message.reply_message)
+        else:
+            for msg in message.fwd_messages:
+                await _collapse(msg)
+
+    except Exception as error:
+        print("Command aborted:", error)
 
 
 """
@@ -700,28 +677,19 @@ async def delete(message: Message):
 )
 async def copy(message: Message):
     # получаем все необходимые данные
-    user_id = message.from_id
-    peer_id = message.peer_id
-    initiator_name = await about.user_full_name(user_id, tag=True)
-    initiator_role = database.get_permission(peer_id, user_id)
-    source_peer_name = await about.peer_name(peer_id)
-    now_time = converter.convert(int(time.time()))
-    command_name = f"{copy.__name__}"
-
-    cvs_msg_ids = [about.get_cmids(message.reply_message)] \
-                  or [about.get_cmids(msg) for msg in message.fwd_messages]
+    all_data = await about.get_all_info(message, command=copy)
 
     # формируем лог
     logger.compose_log_data(
-        initiator_name=initiator_name,
-        initiator_role=initiator_role,
-        source_peer_name=source_peer_name,
-        command_name=command_name,
-        now_time=now_time
+        initiator_name=all_data.get("initiator_name_tagged"),
+        initiator_role=all_data.get("initiator_role"),
+        peer_name=all_data.get("_get_peer_name"),
+        command_name=all_data.get("command_name"),
+        now_time=all_data.get("now_time"),
     )
     logger.compose_log_attachments(
-        peer_id=peer_id,
-        cvs_msg_ids=cvs_msg_ids
+        peer_id=all_data.get("peer_id"),
+        cmids=all_data.get("cmids")
     )
 
     # отправляем лог

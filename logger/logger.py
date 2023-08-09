@@ -29,12 +29,12 @@ class Logger:
     def compose_log_attachments(
             self,
             peer_id=None,
-            cvs_msg_ids: Optional[list] = None
+            cmids: Optional[list] = None
     ):
 
         forward = {
             'peer_id': peer_id,
-            'conversation_message_ids': cvs_msg_ids
+            'conversation_message_ids': cmids
         }
 
         self.log_data['forward'] = forward
@@ -43,7 +43,7 @@ class Logger:
             self,
             initiator_name=None,
             initiator_role=None,
-            source_peer_name=None,
+            peer_name=None,
             command_name=None,
             set_role=None,
             target_name=None,
@@ -60,8 +60,8 @@ class Logger:
         if initiator_role is not None:
             role_name = PERMISSION_LVL.get(initiator_role, "Неизвестная роль")
             log_lines.append(f"Роль: {initiator_role} - {role_name}")
-        if source_peer_name is not None:
-            log_lines.append(f"Источник: {source_peer_name}")
+        if peer_name is not None:
+            log_lines.append(f"Источник: {peer_name}")
         if command_name is not None:
             log_lines.append(f"Команда: /{command_name}")
         if set_role is not None:

@@ -42,7 +42,7 @@ class Connection:
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         record = self.cursor.fetchall()
         print('Таблицы:', record)
-        self.cursor.execute("SELECT peer_id, peer_name FROM conversations;")
+        self.cursor.execute("SELECT peer_id, _get_peer_name FROM conversations;")
         record = self.cursor.fetchall()
         print('Беседы:', record)
 
@@ -129,7 +129,7 @@ class Connection:
                             peer_id,
                             user_id,
                             user_name,
-                            user_url,
+                            _get_user_url,
                             permission_lvl,
                             permission_name
                         )
@@ -167,7 +167,7 @@ class Connection:
                             peer_id,
                             user_id, 
                             user_name, 
-                            user_url, 
+                            _get_user_url, 
                             kicked_by_id, 
                             kicked_by_name, 
                             kicked_by_url, 
@@ -208,7 +208,7 @@ class Connection:
                             peer_id, 
                             user_id, 
                             user_name, 
-                            user_url, 
+                            _get_user_url, 
                             banned_by_id, 
                             banned_by_name, 
                             banned_by_url, 
@@ -256,7 +256,7 @@ class Connection:
                             peer_id, 
                             user_id, 
                             user_name, 
-                            user_url, 
+                            _get_user_url, 
                             muted_by_id, 
                             muted_by_name, 
                             muted_by_url, 
@@ -304,7 +304,7 @@ class Connection:
                             peer_id, 
                             user_id, 
                             user_name, 
-                            user_url, 
+                            _get_user_url, 
                             warned_by_id, 
                             warned_by_name, 
                             warned_by_url, 
