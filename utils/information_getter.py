@@ -42,10 +42,13 @@ class About:
             message: Message,
             set_role = 0,
             command = None,
-            time_delta = 0
+            time_delta = 0,
+            destination = None
     ):
         peer_id = message.peer_id
         peer_name = await self._get_peer_name(peer_id)
+        peer_destination = destination
+        chat_id = message.chat_id
         # -----
         initiator_id = message.from_id
         initiator_name = await self._get_user_full_name(initiator_id)
@@ -75,9 +78,12 @@ class About:
         else:
             cmids = []
 
+
         all_data = {
             "peer_id": peer_id,
-            "_get_peer_name": peer_name,
+            "peer_name": peer_name,
+            "peer_destination": peer_destination,
+            "chat_id": chat_id,
             # -----
             "initiator_id": initiator_id,
             "initiator_name": initiator_name,
