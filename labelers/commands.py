@@ -3,7 +3,7 @@ from typing import Tuple
 from vkbottle.bot import Bot, BotLabeler, Message
 
 from database.interface import Connection
-from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, TIME_COEFFICENT, STUFF_ADMIN_ID
+from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID
 from logger.logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
@@ -39,11 +39,11 @@ converter = Converter()
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def reference(message: Message):
-    async def _say(title):
+    async def send_respond(title):
         await message.answer(title)
 
     url = "https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md"
-    await _say(f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}")
+    await send_respond(f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}")
 
 
 """
@@ -61,46 +61,40 @@ async def reference(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def enroll(message: Message):
-    async def say_respond(title):
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(title):
         await message.answer(title)
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=enroll)
-    destination = "CHAT"
+    all_data = await about.get_all_info(message, command=enroll, destination="CHAT")
 
-    # формируем лог
-    logger.compose_log_data(
-        initiator_name=all_data.get("initiator_name_tagged"),
-        initiator_role=all_data.get("initiator_role"),
-        peer_name=all_data.get("_get_peer_name"),
-        command_name=all_data.get("command_name"),
-        now_time=all_data.get("now_time")
-    )
-
-    # отправляем лог
-    await logger.send()
+    # вызываем отправку лога
+    await send_log(all_data)
 
     # отправляем уведомления в чат
-    if database.get_conversation(peer_id=all_data.get("peer_id"),
-                                 destination=destination):
-        await say_respond("Данные беседы обновлены.")
+    if database.get_conversation(all_data.get("peer_id"), destination="CHAT"):
+        await send_respond("Данные беседы обновлены.")
     else:
-        await say_respond(f"Беседа зарегистрирована.")
+        await send_respond(f"Беседа зарегистрирована.")
 
     # регистрируем беседу в БД
-    database.add_conversation(
-        peer_id=all_data.get("peer_id"),
-        peer_name=all_data.get("_get_peer_name"),
-        destination=destination
-    )
+    database.add_conversation(all_data)
 
     # добавляем стандартный набор настроек
     for setting in SETTINGS:
-        database.add_setting(
-            peer_id=all_data.get("peer_id"),
-            setting_name=setting,
-            setting_status=SETTINGS[setting]
-        )
+        database.add_setting(data=all_data, setting_name=setting,setting_status=SETTINGS[setting])
 
 
 @bl.chat_message(
@@ -111,35 +105,38 @@ async def enroll(message: Message):
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def drop(message: Message):
-    async def say_respond(title):
-        await message.answer(title)
-
-    # получаем предварительные данные
-    all_data = await about.get_all_info(message, command=drop)
-    destination = "CHAT"
-
-    if database.get_conversation(peer_id=all_data.get("peer_id"), destination=destination):
+    async def send_log(data):
         # формируем лог
         logger.compose_log_data(
-            initiator_name=all_data.get("initiator_name_tagged"),
-            initiator_role=all_data.get("initiator_role"),
-            peer_name=all_data.get("_get_peer_name"),
-            command_name=all_data.get("command_name"),
-            now_time=all_data.get("now_time")
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
 
+    async def send_respond(title):
+        await message.answer(title)
+
+    # получаем предварительные данные
+    all_data = await about.get_all_info(message, command=drop, destination="CHAT")
+
+    if database.get_conversation(all_data.get("peer_id"), destination="CHAT"):
+        # вызываем отправку лога
+        await send_log(all_data)
+
         # отправляем уведомление в чат
-        await say_respond("Регистрация данной беседы упразднена.")
+        await send_respond("Регистрация данной беседы упразднена.")
 
         # удаляем регистрацию беседы из БД
-        database.remove_conversation(peer_id=all_data.get("peer_id"))
+        database.remove_conversation(all_data)
 
     else:
         # отправляем уведомление в чат
-        await say_respond("Данная беседа не зарегистрирована.")
+        await send_respond("Данная беседа не зарегистрирована.")
 
 
 """
@@ -158,40 +155,36 @@ async def drop(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def enroll_log(message: Message):
-    async def say_respond(title):
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(title):
         await message.answer(title)
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=enroll_log)
-    destination = "LOG"
+    all_data = await about.get_all_info(message, command=enroll_log, destination="LOG")
 
-    # формируем лог
-    logger.compose_log_data(
-        initiator_name=all_data.get("initiator_name_tagged"),
-        initiator_role=all_data.get("initiator_role"),
-        peer_name=all_data.get("_get_peer_name"),
-        command_name=all_data.get("command_name"),
-        now_time=all_data.get("now_time")
-    )
-
-    # отправляем лог
-    await logger.send()
+    # вызываем отправку лога
+    await send_log(all_data)
 
     # отправляем уведомления в чат
-    if database.get_conversation(
-            peer_id=all_data.get("peer_id"),
-            destination=destination
-    ):
-        await say_respond("Данные беседы обновлены.")
+    if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
+        await send_respond("Данные беседы обновлены.")
     else:
-        await say_respond(f"Беседа назначена в качестве лог-чата.")
+        await send_respond(f"Беседа назначена в качестве лог-чата.")
 
     # регистрируем лог-чат в БД
-    database.add_conversation(
-        peer_id=all_data.get("peer_id"),
-        peer_name=all_data.get("peer_name"),
-        destination=destination
-    )
+    database.add_conversation(all_data)
 
 
 @bl.chat_message(
@@ -202,36 +195,39 @@ async def enroll_log(message: Message):
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def drop_log(message: Message):
-    async def say_respond(title):
-        await message.answer(title)
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=drop_log)
-    destination = "LOG"
-
-    # проверяем наличие регистрации беседы в БД
-    if database.get_conversation(peer_id=all_data.get("peer_id"), destination=destination):
+    async def send_log(data):
         # формируем лог
         logger.compose_log_data(
-            initiator_name=all_data.get("initiator_name_tagged"),
-            initiator_role=all_data.get("initiator_role"),
-            peer_name=all_data.get("_get_peer_name"),
-            command_name=all_data.get("command_name"),
-            now_time=all_data.get("now_time")
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
 
+    async def send_respond(title):
+        await message.answer(title)
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=drop_log, destination="LOG")
+
+    # проверяем наличие регистрации беседы в БД
+    if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
+        # вызываем отправку лога
+        await send_log(all_data)
+
         # отправляем уведомление
-        await say_respond("Данный лог-чат упразднён.")
+        await send_respond("Данный лог-чат упразднён.")
 
         # удаляем регистрацию лог-чата
-        database.remove_conversation(peer_id=all_data.get("peer_id"))
+        database.remove_conversation(all_data)
 
     else:
         # отправляем уведомление
-        await say_respond("Беседа не является лог-чатом.")
+        await send_respond("Беседа не является лог-чатом.")
 
 
 """
@@ -249,32 +245,29 @@ async def drop_log(message: Message):
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
-    try:
-        # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]))
-
+    async def send_log(data):
         # формируем лог
         logger.compose_log_data(
-            initiator_name=all_data.get("initiator_name_tagged"),
-            initiator_role=all_data.get("initiator_role"),
-            peer_name=all_data.get("_get_peer_name"),
-            command_name=all_data.get("command_name"),
-            set_role=all_data("target_set_role"),
-            now_time=all_data.get("now_time")
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            set_role=data("target_set_role"),
+            now_time=data.get("now_time")
         )
 
         # отправляем лог
         await logger.send()
 
+    try:
+        # получаем все необходимые данные
+        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]))
+
+        # вызываем отправку лога
+        await send_log(all_data)
+
         # добавляем пользователю группу прав
-        database.set_permission(
-            all_data.get("peer_id"),
-            all_data.get("target_id"),
-            all_data.get("target_name"),
-            all_data.get("target_url"),
-            all_data.get("target_set_role"),
-            all_data.get("target_set_role_name")
-        )
+        database.set_permission(all_data)
 
     except Exception as error:
         print("Command aborted: ", error)
@@ -297,8 +290,25 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message):
-    async def say_respond():
-        title = f"@id{message.reply_message.from_id} (Пользователь) исключен из беседы навсегда.\n" \
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) исключен из беседы навсегда.\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
@@ -306,40 +316,18 @@ async def kick(message: Message):
     all_data = await about.get_all_info(message, command=kick)
 
     # проверяем наличие пользователя в бд
-    if not database.get_kick(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
+    if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
         # формируем лог
-        logger.compose_log_data(
-            initiator_name=all_data.get("initiator_name_tagged"),
-            initiator_role=all_data.get("initiator_role"),
-            peer_name=all_data.get("_get_peer_name"),
-            command_name=all_data.get("command_name"),
-            now_time=all_data.get("now_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=all_data.get("peer_id"),
-            cmids=all_data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.send()
+        await send_log(all_data)
 
         # отправляем уведомление в чат
-        await say_respond()
+        await send_respond(all_data)
 
         # Выдаем кик
-        database.add_kick(
-            all_data.get("peer_id"),
-            all_data.get("target_id"),
-            all_data.get("target_name"),
-            all_data.get("target_url"),
-            all_data.get("initiator_id"),
-            all_data.get("initiator_name"),
-            all_data.get("initiator_url"),
-            all_data.get("now_time_epoch")
-        )
+        database.add_kick(all_data)
 
         # Исключаем из беседы
-        await bot.api.messages.remove_chat_user(message.chat_id, all_data.get("target_id"))
+        await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
 
 
 """
@@ -359,62 +347,49 @@ async def kick(message: Message):
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    async def say_respond(tt):
-        title = f"@id{message.reply_message.from_id} (Пользователь) временно заблокирован.\n" \
-                f"Время снятия блокировки: {converter.convert(tt)}\n" \
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_warns=data.get("warn_count"),
+            now_time=data.get("now_time"),
+            target_time=data.get("target_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) временно заблокирован.\n" \
+                f"Время снятия блокировки: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
     # выводим дельту времени
-    try:
-        if int(args[0]) > 0:
-            delta = (int(args[0]) * TIME_COEFFICENT[args[1]])
-        else:
-            delta = TIME_COEFFICENT[args[1]]
+    delta = converter.delta(args[0], args[1])
 
-        # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=ban, time_delta=delta)
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=ban, time_delta=delta)
 
-        if not database.get_ban(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
-            # формируем лог
-            logger.compose_log_data(
-                initiator_name=all_data.get("initiator_name_tagged"),
-                initiator_role=all_data.get("initiator_role"),
-                peer_name=all_data.get("source_peer_name"),
-                command_name=all_data.get("command_name"),
-                target_warns=all_data.get("warn_count"),
-                now_time=all_data.get("now_time"),
-                target_time=all_data.get("target_time")
-            )
-            logger.compose_log_attachments(
-                peer_id=all_data.get("peer_id"),
-                cmids=all_data.get("cmids")
-            )
+    if not database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
+        # вызываем отправку лога
+        await send_log(all_data)
 
-            # отправляем лог
-            await logger.send()
+        # отправляем уведомление в чат
+        await send_respond(all_data)
 
-            # отправляем уведомление в чат
-            await say_respond(all_data.get("target_time"))
+        # выдаем блокировку
+        database.add_ban(all_data)
 
-            # выдаем блокировку
-            database.add_ban(
-                all_data.get("peer_id"),
-                all_data.get("target_id"),
-                all_data.get("target_name"),
-                all_data.get("target_url"),
-                all_data.get("initiator_id"),
-                all_data.get("initiator_name"),
-                all_data.get("initiator_url"),
-                all_data.get("now_time_epoch"),
-                all_data.get("target_time_epoch")
-            )
-
-            # исключаем из беседы
-            await bot.api.messages.remove_chat_user(message.chat_id, message.reply_message.from_id)
-
-    except Exception as error:
-        print("Command aborted: ", error)
+        # исключаем из беседы
+        await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
 
 
 @bl.chat_message(
@@ -451,61 +426,48 @@ async def unban(message: Message):
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple[str]):
-    async def say_respond(tt):
-        title = f"@id{message.reply_message.from_id} (Пользователь) временно заглушен.\n" \
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_warns=data.get("warn_count"),
+            now_time=data.get("now_time"),
+            target_time=data.get("target_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) временно заглушен.\n" \
                 f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
-                f"Время снятия заглушения: {tt}\n" \
+                f"Время снятия заглушения: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
     # выводим дельту времени
-    try:
-        if int(args[0]) > 0:
-            delta = (int(args[0]) * TIME_COEFFICENT[args[1]])
-        else:
-            delta = TIME_COEFFICENT[args[1]]
+    delta = converter.delta(args[0], args[1])
 
-        # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=mute, time_delta=delta)
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=mute, time_delta=delta)
 
-        # проверяем наличие пользователя в базе данных
-        if not database.get_mute(peer_id=all_data.get("peer_id"), user_id=all_data.get("target_id")):
-            # формируем лог
-            logger.compose_log_data(
-                initiator_name=all_data.get("initiator_name_tagged"),
-                initiator_role=all_data.get("initiator_role"),
-                peer_name=all_data.get("source_peer_name"),
-                command_name=all_data.get("command_name"),
-                target_warns=all_data.get("warn_count"),
-                now_time=all_data.get("now_time"),
-                target_time=all_data.get("target_time")
-            )
-            logger.compose_log_attachments(
-                peer_id=all_data.get("peer_id"),
-                cmids=all_data.get("cmids")
-            )
+    # проверяем наличие пользователя в базе данных
+    if not database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
+        # вызываем отправку лога
+        await send_log(all_data)
 
-            # отправляем лог
-            await logger.send()
+        # отправляем уведомление в чат
+        await send_respond(all_data)
 
-            # отправляем уведомление в чат
-            await say_respond(all_data.get("target_time"))
-
-            # выдаем блокировку
-            database.add_mute(
-                all_data.get("peer_id"),
-                all_data.get("target_id"),
-                all_data.get("target_name"),
-                all_data.get("target_url"),
-                all_data.get("initiator_id"),
-                all_data.get("initiator_name"),
-                all_data.get("initiator_url"),
-                all_data.get("now_time_epoch"),
-                all_data.get("target_time_epoch")
-            )
-
-    except Exception as error:
-        print("Command aborted: ", error)
+        # выдаем блокировку
+        database.add_mute(all_data)
 
 
 @bl.chat_message(
@@ -542,53 +504,43 @@ async def unmute(message: Message):
     OnlyEnrolled()
 )
 async def warn(message: Message):
-    async def say_respond(tt, wc):
-        title = f"@id{message.reply_message.from_id} (Пользователь) получил предупреждение.\n" \
-                f"Текущее количество предупреждений: {wc}/3.\n" \
-                f"Время снятия предупреждений: {tt}\n" \
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_warns=data.get("target_warns"),
+            now_time=data.get("now_time"),
+            target_time=data.get("target_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def send_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) получил предупреждение.\n" \
+                f"Текущее количество предупреждений: {data.get('target_warns') + 1}/3.\n" \
+                f"Время снятия предупреждений: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=warn)
 
-    # формируем лог
-    logger.compose_log_data(
-        initiator_name=all_data.get("initiator_name_tagged"),
-        initiator_role=all_data.get("initiator_role"),
-        peer_name=all_data.get("_get_peer_name"),
-        command_name=all_data.get("command_name"),
-        target_warns=all_data.get("target_warns"),
-        now_time=all_data.get("now_time"),
-        target_time=all_data.get("target_time")
-    )
-    logger.compose_log_attachments(
-        peer_id=all_data.get("peer_id"),
-        cmids=all_data.get("cmids")
-    )
-
-    # отправляем лог
-    await logger.send()
+    # вызываем отправку лога
+    await send_log(all_data)
 
     # отправляем уведомление
-    await say_respond(
-        all_data.get("target_time"),
-        all_data.get("target_warns")
-    )
+    await send_respond(all_data)
 
     # выдаем предупреждение
-    database.add_warn(
-        all_data.get("peer_id"),
-        all_data.get("target_id"),
-        all_data.get("target_name"),
-        all_data.get("target_url"),
-        all_data.get("initiator_id"),
-        all_data.get("initiator_name"),
-        all_data.get("initiator_url"),
-        all_data.get("now_time_epoch"),
-        all_data.get("target_time_epoch"),
-        all_data.get("target_warns")
-    )
+    database.add_warn(all_data)
 
 @bl.chat_message(
     HandleCommand(ALIASES['unwarn'], ['!', '/'], 0),
@@ -622,7 +574,24 @@ async def unwarn(message: Message):
     OnlyEnrolled()
 )
 async def delete(message: Message):
-    async def _collapse(m: Message):
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time"),
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
+    async def collapse(m: Message):
         await bot.api.messages.delete(
             group_id=GROUP_ID,
             peer_id=message.peer_id,
@@ -633,29 +602,16 @@ async def delete(message: Message):
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=delete)
 
-    # формируем лог
-    logger.compose_log_data(
-        initiator_name=all_data.get("initiator_name_tagged"),
-        initiator_role=all_data.get("initiator_role"),
-        peer_name=all_data.get("_get_peer_name"),
-        command_name=all_data.get("command_name"),
-        now_time=all_data.get("now_time"),
-    )
-    logger.compose_log_attachments(
-        peer_id=all_data.get("peer_id"),
-        cmids=all_data.get("cmids")
-    )
-
     try:
-        # отправляем лог
-        await logger.send()
+        # вызываем отправку лога
+        await send_log(all_data)
 
         # удаляем сообщения
         if message.reply_message:
-            await _collapse(message.reply_message)
+            await collapse(message.reply_message)
         else:
             for msg in message.fwd_messages:
-                await _collapse(msg)
+                await collapse(msg)
 
     except Exception as error:
         print("Command aborted:", error)
@@ -676,24 +632,28 @@ async def delete(message: Message):
     OnlyEnrolled()
 )
 async def copy(message: Message):
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time"),
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.send()
+
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=copy)
 
-    # формируем лог
-    logger.compose_log_data(
-        initiator_name=all_data.get("initiator_name_tagged"),
-        initiator_role=all_data.get("initiator_role"),
-        peer_name=all_data.get("_get_peer_name"),
-        command_name=all_data.get("command_name"),
-        now_time=all_data.get("now_time"),
-    )
-    logger.compose_log_attachments(
-        peer_id=all_data.get("peer_id"),
-        cmids=all_data.get("cmids")
-    )
-
-    # отправляем лог
-    await logger.send()
+    # вызываем отправку лога
+    await send_log(all_data)
 
     # отправляем скопированное сообщение в чат
     await message.answer(message.reply_message.text)
