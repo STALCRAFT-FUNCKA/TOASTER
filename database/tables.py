@@ -2,7 +2,7 @@ conversations = """CREATE TABLE IF NOT EXISTS conversations
                (
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    peer_id INTEGER UNIQUE ON CONFLICT REPLACE,
-                   _get_peer_name TEXT,
+                   peer_name TEXT,
                    destination TEXT
                );"""
 
@@ -12,7 +12,7 @@ permissions = """CREATE TABLE IF NOT EXISTS permissions
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER, 
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     permission_lvl INTEGER,
                     permission_name TEXT,
                     CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT REPLACE
@@ -32,7 +32,7 @@ kicked = """CREATE TABLE IF NOT EXISTS kicked
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER,
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     kicked_by_id INTEGER,
                     kicked_by_name TEXT,
                     kicked_by_url TEXT,
@@ -46,7 +46,7 @@ banned = """CREATE TABLE IF NOT EXISTS banned
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER,
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     banned_by_id INTEGER,
                     banned_by_name TEXT,
                     banned_by_url TEXT,
@@ -61,7 +61,7 @@ muted = """CREATE TABLE IF NOT EXISTS muted
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER,
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     muted_by_id INTEGER,
                     muted_by_name TEXT,
                     muted_by_url TEXT,
@@ -76,7 +76,7 @@ warned = """CREATE TABLE IF NOT EXISTS warned
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER,
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     warned_by_id INTEGER,
                     warned_by_name TEXT,
                     warned_by_url TEXT,
@@ -106,7 +106,7 @@ queue = """CREATE TABLE IF NOT EXISTS queue
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     user_id INTEGER,
                     user_name TEXT,
-                    _get_user_url TEXT,
+                    user_url TEXT,
                     send_time INTEGER,
                     next_send_time INTEGER
                 );"""
