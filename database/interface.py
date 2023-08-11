@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List
+from typing import List, Dict
 
 from database import tables
 
@@ -50,32 +50,56 @@ class Connection:
     --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_conversation(self, peer_id, peer_name, destination):
-        request = f"""INSERT INTO conversations 
-                        (
-                            peer_id, 
-                            peer_name,
-                            destination
-                        ) 
-                        VALUES 
-                        (
-                            {peer_id}, 
-                            '{peer_name}',
-                            '{destination}'
-                        );"""
+    def add_conversation(self, data: Dict):
+        request = f"""
+            INSERT INTO 
+                conversations 
+                (
+                    peer_id, 
+                    peer_name,
+                    destination
+                ) 
+            VALUES 
+                (
+                    {data.get("peer_id")}, 
+                    '{data.get("peer_name")}',
+                    '{data.get("destination")}'
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def remove_conversation(self, peer_id):
-        request = f"""DELETE FROM conversations WHERE peer_id = {peer_id};"""
+        request = f"""
+            DELETE FROM 
+                conversations 
+            WHERE 
+                peer_id = {peer_id};
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_conversation(self, peer_id, destination) -> List[int]:
         if peer_id == -1:
-            request = f"""SELECT peer_id FROM conversations WHERE destination = '{destination}'"""
+            request = f"""
+                SELECT 
+                    peer_id 
+                FROM 
+                    conversations 
+                WHERE 
+                destination = '{destination}';
+        """
         else:
-            request = f"""SELECT peer_id FROM conversations WHERE peer_id = {peer_id} AND destination = '{destination}'"""
+            request = f"""
+                SELECT 
+                    peer_id 
+                FROM 
+                    conversations 
+                WHERE 
+                    peer_id = {peer_id} 
+                AND 
+                    destination = '{destination}';
+            """
 
         self.cursor.execute(request)
         record = self.cursor.fetchall()
@@ -88,24 +112,36 @@ class Connection:
     --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_setting(self, peer_id, setting_name, setting_status):
-        request = f"""INSERT INTO settings 
-                        (
-                            peer_id,
-                            setting_name, 
-                            setting_status
-                        ) 
-                        VALUES 
-                        (   
-                            {peer_id}, 
-                            '{setting_name}', 
-                            '{setting_status}' 
-                        );"""
+    def add_setting(self, data: Dict, setting_name, setting_status):
+        request = f"""
+            INSERT INTO 
+                settings 
+                (
+                    peer_id,
+                    setting_name, 
+                    setting_status
+                ) 
+            VALUES 
+                (   
+                    {data.get("peer_id")}, 
+                    '{setting_name}', 
+                    '{setting_status}' 
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_setting(self, peer_id, setting_name) -> bool:
-        request = f"""SELECT setting_status FROM settings WHERE setting_name = %s AND peer_id = %s"""
+        request = f"""
+            SELECT 
+                setting_status 
+            FROM 
+                settings 
+            WHERE 
+                setting_name = %s 
+            AND 
+                peer_id = %s
+        """
         self.cursor.execute(request, (setting_name, peer_id))
         record = self.cursor.fetchone()
 
@@ -118,36 +154,55 @@ class Connection:
      --------------------------------------------------------------------------------------------------------------------
     """
 
-    def set_permission(self, peer_id, user_id, user_name, user_url, permission_lvl, permission_name):
+    def set_permission(self, data: Dict):
         request = ""
-        if permission_lvl < 1:
-            request = f"""DELETE FROM permissions WHERE user_id = {user_id} AND peer_id = {peer_id};"""
+        if data.get("target_set_role") < 1:
+            request = f"""
+                DELETE FROM 
+                    permissions 
+                WHERE 
+                    user_id = {data.get("target_id")} 
+                AND 
+                    peer_id = {data.get("peer_id")};
+            """
 
-        elif permission_lvl < 3:
-            request = f"""INSERT INTO permissions
-                        (
-                            peer_id,
-                            user_id,
-                            user_name,
-                            _get_user_url,
-                            permission_lvl,
-                            permission_name
-                        )
-                        VALUES 
-                        (
-                            {peer_id},
-                            {user_id},
-                            '{user_name}',
-                            '{user_url}',
-                            {permission_lvl},
-                            '{permission_name}'
-                        );"""
+        elif data.get("target_set_role") < 3:
+            request = f"""
+                INSERT INTO 
+                    permissions
+                    (
+                        peer_id,
+                        user_id,
+                        user_name,
+                        user_url,
+                        permission_lvl,
+                        permission_name
+                    )
+                VALUES 
+                    (
+                        {data.get("peer_id")},
+                        {data.get("target_id")},
+                        '{data.get("target_name")}',
+                        '{data.get("target_url")}',
+                        {data.get("target_set_role")},
+                        '{data.get("target_set_role_name")}'
+                    );
+            """
 
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_permission(self, peer_id, user_id) -> int:
-        request = f"""SELECT permission_lvl FROM permissions WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            SELECT 
+                permission_lvl 
+            FROM 
+                permissions 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         record = self.cursor.fetchall()
         if record:
@@ -160,35 +215,46 @@ class Connection:
      --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_kick(self, peer_id, user_id, user_name, user_url,
-                 kicked_by_id, kicked_by_name, kicked_by_url, kick_time):
-        request = f"""INSERT INTO kicked 
-                        (
-                            peer_id,
-                            user_id, 
-                            user_name, 
-                            _get_user_url, 
-                            kicked_by_id, 
-                            kicked_by_name, 
-                            kicked_by_url, 
-                            kick_time
-                        ) 
-                        VALUES 
-                        (
-                            {peer_id}, 
-                            {user_id}, 
-                            '{user_name}', 
-                            '{user_url}', 
-                            {kicked_by_id}, 
-                            '{kicked_by_name}', 
-                            '{kicked_by_url}', 
-                            {kick_time}
-                        );"""
+    def add_kick(self, data: Dict):
+        request = f"""
+            INSERT INTO 
+                kicked 
+                (
+                    peer_id,
+                    user_id, 
+                    user_name, 
+                    user_url, 
+                    kicked_by_id, 
+                    kicked_by_name, 
+                    kicked_by_url, 
+                    kick_time
+                ) 
+            VALUES 
+                (
+                    {data.get("peer_id")}, 
+                    {data.get("target_id")}, 
+                    '{data.get("target_name")}', 
+                    '{data.get("target_url")}', 
+                    {data.get("initiator_id")}, 
+                    '{data.get("initiator_name")}', 
+                    '{data.get("initiator_url")}', 
+                    {data.get("now_time_epoch")}
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_kick(self, peer_id, user_id) -> List[int]:
-        request = f"""SELECT user_id FROM kicked WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            SELECT 
+                user_id 
+            FROM 
+                kicked 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         record = self.cursor.fetchall()
         if record:
@@ -201,42 +267,60 @@ class Connection:
      --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_ban(self, peer_id, user_id, user_name, user_url, banned_by_id, banned_by_name, banned_by_url, ban_time,
-                unban_time):
-        request = f"""INSERT INTO banned 
-                        (
-                            peer_id, 
-                            user_id, 
-                            user_name, 
-                            _get_user_url, 
-                            banned_by_id, 
-                            banned_by_name, 
-                            banned_by_url, 
-                            ban_time, 
-                            unban_time
-                        ) 
-                        VALUES 
-                        (
-                            {peer_id}, 
-                            {user_id}, 
-                            '{user_name}', 
-                            '{user_url}', 
-                            {banned_by_id}, 
-                            '{banned_by_name}', 
-                            '{banned_by_url}', 
-                            {ban_time},
-                            {unban_time}
-                        );"""
+    def add_ban(self, data: Dict):
+        request = f"""
+            INSERT INTO 
+                banned 
+                (
+                    peer_id, 
+                    user_id, 
+                    user_name, 
+                    user_url, 
+                    banned_by_id, 
+                    banned_by_name, 
+                    banned_by_url, 
+                    ban_time, 
+                    unban_time
+                ) 
+                VALUES 
+                (
+                    {data.get("peer_id")}, 
+                    {data.get("target_id")}, 
+                    '{data.get("target_name")}', 
+                    '{data.get("target_url")}', 
+                    {data.get("initiator_id")}, 
+                    '{data.get("initiator_name")}', 
+                    '{data.get("initiator_url")}', 
+                    {data.get("now_time_epoch")},
+                    {data.get("target_time_epoch")}
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def remove_ban(self, peer_id, user_id):
-        request = f"""DELETE FROM banned WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            DELETE FROM 
+                banned 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_ban(self, peer_id, user_id) -> List[int]:
-        request = f"""SELECT user_id FROM banned WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            SELECT 
+                user_id 
+            FROM 
+                banned 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         record = self.cursor.fetchall()
         if record:
@@ -249,32 +333,34 @@ class Connection:
      --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_mute(self, peer_id, user_id, user_name, user_url, muted_by_id, muted_by_name, muted_by_url, mute_time,
-                 unmute_time):
-        request = f"""INSERT INTO muted 
-                        (
-                            peer_id, 
-                            user_id, 
-                            user_name, 
-                            _get_user_url, 
-                            muted_by_id, 
-                            muted_by_name, 
-                            muted_by_url, 
-                            mute_time, 
-                            unmute_time
-                        ) 
-                        VALUES 
-                        (
-                            {peer_id}, 
-                            {user_id}, 
-                            '{user_name}', 
-                            '{user_url}', 
-                            {muted_by_id}, 
-                            '{muted_by_name}', 
-                            '{muted_by_url}', 
-                            {mute_time}, 
-                            {unmute_time}
-                        );"""
+    def add_mute(self, data: Dict):
+        request = f"""
+            INSERT INTO 
+                muted 
+                (
+                    peer_id, 
+                    user_id, 
+                    user_name, 
+                    user_url, 
+                    muted_by_id, 
+                    muted_by_name, 
+                    muted_by_url, 
+                    mute_time, 
+                    unmute_time
+                ) 
+            VALUES 
+                (
+                    {data.get("peer_id")}, 
+                    {data.get("target_id")}, 
+                    '{data.get("target_name")}', 
+                    '{data.get("target_url")}', 
+                    {data.get("initiator_id")}, 
+                    '{data.get("initiator_name")}', 
+                    '{data.get("initiator_url")}', 
+                    {data.get("now_time_epoch")},
+                    {data.get("target_time_epoch")}
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
@@ -297,46 +383,64 @@ class Connection:
      --------------------------------------------------------------------------------------------------------------------
     """
 
-    def add_warn(self, peer_id, user_id, user_name, user_url,
-                 warned_by_id, warned_by_name, warned_by_url, warn_time, unwarn_time, warn_count):
-        request = f"""INSERT INTO warned 
-                        (
-                            peer_id, 
-                            user_id, 
-                            user_name, 
-                            _get_user_url, 
-                            warned_by_id, 
-                            warned_by_name, 
-                            warned_by_url, 
-                            warn_time, 
-                            unwarn_time,
-                            warn_count
-                        ) 
-                        VALUES 
-                        (
-                            {peer_id}, 
-                            {user_id}, 
-                            '{user_name}', 
-                            '{user_url}', 
-                            {warned_by_id}, 
-                            '{warned_by_name}', 
-                            '{warned_by_url}', 
-                            {warn_time}, 
-                            {unwarn_time},
-                            {warn_count}
-                        );"""
+    def add_warn(self, data: Dict):
+        request = f"""
+            INSERT INTO 
+                warned 
+                (
+                    peer_id, 
+                    user_id, 
+                    user_name, 
+                    user_url, 
+                    warned_by_id, 
+                    warned_by_name, 
+                    warned_by_url, 
+                    warn_time, 
+                    unwarn_time,
+                    warn_count
+                ) 
+                VALUES 
+                (
+                    {data.get("peer_id")}, 
+                    {data.get("target_id")}, 
+                    '{data.get("target_name")}', 
+                    '{data.get("target_url")}', 
+                    {data.get("initiator_id")}, 
+                    '{data.get("initiator_name")}', 
+                    '{data.get("initiator_url")}', 
+                    {data.get("now_time_epoch")},
+                    {data.get("target_time_epoch")},
+                    {data.get("target_warns")},
+                );
+        """
         self.cursor.execute(request)
         self.connection.commit()
         # TODO: Сдилать првоерку на кол-во варнов
 
     def remove_warn(self, peer_id, user_id):
-        request = f"""DELETE FROM warned WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            DELETE FROM 
+                warned 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         self.connection.commit()
         # TODO: Сделать проверку на кол-во варнов
 
     def get_warn(self, peer_id, user_id) -> int:
-        request = f"""SELECT warn_count FROM warned WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            SELECT 
+                warn_count 
+            FROM 
+                warned 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         record = self.cursor.fetchone()
 
