@@ -6,6 +6,7 @@ conversations = """CREATE TABLE IF NOT EXISTS conversations
                    destination TEXT
                );"""
 
+# TODO: Сделать унифицированные названия столбцов
 permissions = """CREATE TABLE IF NOT EXISTS permissions
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
