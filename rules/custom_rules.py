@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
-from config import GROUP_ID, TOKEN
+from config import GROUP_ID, TOKEN, STUFF_ADMIN_ID
 from database.interface import Connection
 
 bot = Bot(token=TOKEN)
@@ -80,7 +80,8 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
             )
             message.deleted = True
             return  True
-        except Exception:
+        except Exception as error:
+            print("Rule aborted command completion:", error)
             message.deleted = False
             return False
 
@@ -90,11 +91,13 @@ class CheckPermission(ABCRule[BaseMessageMin]):
         self.access_to = access_to
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        PeerID = message.peer_id
-        UserID = message.from_id
+        peer_id = message.peer_id
+        initiator_id = message.from_id
 
-        # TODO: VK admin
-        if database.get_permission(peer_id=PeerID, user_id=UserID) >= self.access_to:
+        if initiator_id == STUFF_ADMIN_ID:
+            return True
+
+        if database.get_permission(peer_id=peer_id, user_id=initiator_id) >= self.access_to:
             return True
 
         return False
@@ -106,25 +109,35 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
         self.mode = mode
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        PeerID = message.peer_id
+        peer_id = message.peer_id
 
         if self.mode == "TARGET":
             if message.reply_message:
-                UserID = message.reply_message.from_id
-                # TODO: VK admin
-                if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
+                target_id = message.reply_message.from_id
+
+                if target_id == STUFF_ADMIN_ID:
+                    return True
+
+                if database.get_permission(peer_id=peer_id, user_id=target_id) < self.ignore_from:
                     return True
 
             elif message.fwd_messages:
                 for msg in message.fwd_messages:
-                    UserID = msg.from_id
-                    # TODO: VK admin
-                    if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
+                    target_id = msg.from_id
+
+                    if target_id == STUFF_ADMIN_ID:
+                        return True
+
+                    if database.get_permission(peer_id=peer_id, user_id=target_id) < self.ignore_from:
                         return True
 
         elif self.mode == "SELF":
-            UserID = message.from_id
-            if database.get_permission(peer_id=PeerID, user_id=UserID) < self.ignore_from:
+            initiator_id = message.from_id
+
+            if initiator_id == STUFF_ADMIN_ID:
+                return True
+
+            if database.get_permission(peer_id=peer_id, user_id=initiator_id) < self.ignore_from:
                 return True
 
         return False
