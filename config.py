@@ -1,20 +1,30 @@
 """
-Bot main token
+Главный файл настроек
 """
+
+"""
+Токен бота.
+"""
+# TODO: Вписать его способ получения в доку
 TOKEN = 'vk1.a.zgY9PVhHltfqgBW-DGSbvizCe-pj3yqZyrSq3PDD-hRuRbIGALz2UN19tWaQRU8ANzSP12DPook-E9RrytgIG7k2wEIkUUDGOsCkFPq-PR_RmHyBCVthqdIg6I09K2WvRNTsQpifVF8-9-FKGWbrU87UFAEXp2aqh6LmOe5EqwMxbtOygx4yxC0I3k5sheMaOoM7r9hgOEdTAq8L3eeXAw'
 
 """
-Master group id
+ID группы, на которой инициализирован бот.
 """
+# TODO: Вписать его способ получения в доку
 GROUP_ID = 218730916
 
 """
-Master group id
+ID главного админа.
 """
+# TODO: Вписать его назначение
 STUFF_ADMIN_ID = 0
 
 """
-Moderation content
+------------------------------------------------------------------------------------------------------------------------
+"""
+"""
+Время
 """
 TIME_TYPE = {
     'h': 'hour(s)',
