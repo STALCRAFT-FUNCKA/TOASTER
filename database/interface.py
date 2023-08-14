@@ -415,20 +415,33 @@ class Connection:
         """
         self.cursor.execute(request)
         self.connection.commit()
-        # TODO: Сдилать првоерку на кол-во варнов
 
     def remove_warn(self, peer_id, user_id):
-        request = f"""
-            DELETE FROM 
-                warned 
-            WHERE 
-                peer_id = {peer_id} 
-            AND 
-                user_id = {user_id};
-        """
+        target_warns = self.get_warn(peer_id, user_id)
+
+        if target_warns == 1:
+            request = f"""
+                DELETE FROM 
+                    warned 
+                WHERE 
+                    peer_id = {peer_id} 
+                AND 
+                    user_id = {user_id};
+            """
+
+        else:
+            request = f"""
+                UPDATE
+                    warned
+                SET
+                    warn_count = {target_warns - 1}
+                WHERE 
+                    peer_id = {peer_id} 
+                AND 
+                    user_id = {user_id};
+            """
         self.cursor.execute(request)
         self.connection.commit()
-        # TODO: Сделать проверку на кол-во варнов
 
     def get_warn(self, peer_id, user_id) -> int:
         request = f"""
