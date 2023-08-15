@@ -4,6 +4,7 @@
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/config.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/database/interface.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/handlers/abc_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/labelers/AccAgeChecker.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/labelers/ConversationRegistrator.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/labelers/ForbiddenFilter.py" charset="UTF-8" />

@@ -72,7 +72,7 @@ async def enroll(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(title):
         await message.answer(title)
@@ -116,7 +116,7 @@ async def drop(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(title):
         await message.answer(title)
@@ -166,7 +166,7 @@ async def enroll_log(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(title):
         await message.answer(title)
@@ -206,7 +206,7 @@ async def drop_log(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(title):
         await message.answer(title)
@@ -257,7 +257,7 @@ async def permission(message: Message, args: Tuple[str]):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     try:
         # получаем все необходимые данные
@@ -305,7 +305,7 @@ async def kick(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(data):
         title = f"@id{data.get('target_id')} (Пользователь) исключен из беседы навсегда.\n" \
@@ -364,7 +364,7 @@ async def ban(message: Message, args: Tuple[str]):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(data):
         title = f"@id{data.get('target_id')} (Пользователь) временно заблокирован.\n" \
@@ -443,7 +443,7 @@ async def mute(message: Message, args: Tuple[str]):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(data):
         title = f"@id{data.get('target_id')} (Пользователь) временно заглушен.\n" \
@@ -521,17 +521,23 @@ async def warn(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def send_respond(data):
         title = f"@id{data.get('target_id')} (Пользователь) получил предупреждение.\n" \
-                f"Текущее количество предупреждений: {data.get('target_warns') + 1}/3.\n" \
+                f"Текущее количество предупреждений: {data.get('target_warns')}/3.\n" \
                 f"Время снятия предупреждений: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
+    # выводим дельту времени
+    delta = converter.delta(0, "d")
+
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=warn)
+    all_data = await about.get_all_info(message, command=warn, time_delta=delta)
+
+    # инкриминируем предупреждение
+    all_data["target_warns"] += 1
 
     # вызываем отправку лога
     await send_log(all_data)
@@ -589,7 +595,7 @@ async def delete(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     async def collapse(m: Message):
         await bot.api.messages.delete(
@@ -647,7 +653,7 @@ async def copy(message: Message):
         )
 
         # отправляем лог
-        await logger.send()
+        await logger.log()
 
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=copy)
