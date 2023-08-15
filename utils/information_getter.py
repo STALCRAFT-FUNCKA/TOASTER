@@ -14,15 +14,15 @@ class About:
         self.converter = Converter()
 
     @staticmethod
-    def _get_cmids(message: Message):
+    def get_cmids(message: Message):
         return message.conversation_message_id
 
     @staticmethod
-    def _get_user_url(user_id):
+    def get_user_url(user_id):
         url = f"https://vk.com/id{user_id}"
         return url
 
-    async def _get_user_full_name(self, user_id, tag=False):
+    async def get_user_full_name(self, user_id, tag=False):
         author_info = await self.bot.api.users.get(user_id)
         full_name = f"{author_info[0].first_name} {author_info[0].last_name}"
         if tag:
@@ -30,7 +30,7 @@ class About:
 
         return full_name
 
-    async def _get_peer_name(self, peer_id):
+    async def get_peer_name(self, peer_id):
         conversations_info = await self.bot.api.messages.get_conversations_by_id(
             group_id=GROUP_ID,
             peer_ids=peer_id
@@ -46,20 +46,20 @@ class About:
             destination = None
     ):
         peer_id = message.peer_id
-        peer_name = await self._get_peer_name(peer_id)
+        peer_name = await self.get_peer_name(peer_id)
         peer_destination = destination
         chat_id = message.chat_id
         # -----
         initiator_id = message.from_id
-        initiator_name = await self._get_user_full_name(initiator_id)
-        initiator_name_tagged = await self._get_user_full_name(initiator_id, tag=True)
+        initiator_name = await self.get_user_full_name(initiator_id)
+        initiator_name_tagged = await self.get_user_full_name(initiator_id, tag=True)
         initiator_role = self.database.get_permission(peer_id, initiator_id)
-        initiator_url = self._get_user_url(initiator_id)
+        initiator_url = self.get_user_url(initiator_id)
         # -----
         target_id = message.reply_message.from_id if message.reply_message else None
-        target_name = await self._get_user_full_name(target_id) if message.reply_message else None
-        target_name_tagged = await self._get_user_full_name(target_id) if message.reply_message else None
-        target_url = self._get_user_url(target_id) if message.reply_message else None
+        target_name = await self.get_user_full_name(target_id) if message.reply_message else None
+        target_name_tagged = await self.get_user_full_name(target_id) if message.reply_message else None
+        target_url = self.get_user_url(target_id) if message.reply_message else None
         target_set_role = set_role if message.reply_message else None
         target_set_role_name = PERMISSION_LVL.get(set_role) if message.reply_message else None
         target_warns = self.database.get_warn(peer_id, target_id) if message.reply_message else None
@@ -72,9 +72,9 @@ class About:
         target_time = self.converter.convert(target_time_epoch)
         # -----
         if message.fwd_messages:
-            cmids = [self._get_cmids(msg) for msg in message.fwd_messages]
+            cmids = [self.get_cmids(msg) for msg in message.fwd_messages]
         elif message.reply_message:
-            cmids = [self._get_cmids(message.reply_message)]
+            cmids = [self.get_cmids(message.reply_message)]
         else:
             cmids = []
 
