@@ -58,7 +58,7 @@ class About:
         # -----
         target_id = message.reply_message.from_id if message.reply_message else None
         target_name = await self.get_user_full_name(target_id) if message.reply_message else None
-        target_name_tagged = await self.get_user_full_name(target_id) if message.reply_message else None
+        target_name_tagged = await self.get_user_full_name(target_id, tag=True) if message.reply_message else None
         target_url = self.get_user_url(target_id) if message.reply_message else None
         target_set_role = set_role if message.reply_message else None
         target_set_role_name = PERMISSION_LVL.get(set_role) if message.reply_message else None

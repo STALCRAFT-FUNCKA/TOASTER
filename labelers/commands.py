@@ -1,7 +1,5 @@
 from typing import Tuple
-
 from vkbottle.bot import Bot, BotLabeler, Message
-
 from database.interface import Connection
 from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID
 from logger.logger import Logger
@@ -252,6 +250,7 @@ async def permission(message: Message, args: Tuple[str]):
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged)"),
             set_role=data("target_set_role"),
             now_time=data.get("now_time")
         )
@@ -296,6 +295,7 @@ async def kick(message: Message):
             initiator_name=data.get("initiator_name_tagged"),
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
+            target_name=data.get("target_name_tagged"),
             command_name=data.get("command_name"),
             now_time=data.get("now_time")
         )
@@ -354,6 +354,7 @@ async def ban(message: Message, args: Tuple[str]):
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged"),
             target_warns=data.get("warn_count"),
             now_time=data.get("now_time"),
             target_time=data.get("target_time")
@@ -433,7 +434,7 @@ async def mute(message: Message, args: Tuple[str]):
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
-            target_warns=data.get("warn_count"),
+            target_name=data.get("target_name_tagged"),
             now_time=data.get("now_time"),
             target_time=data.get("target_time")
         )
@@ -511,6 +512,7 @@ async def warn(message: Message):
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged"),
             target_warns=data.get("target_warns"),
             now_time=data.get("now_time"),
             target_time=data.get("target_time")
@@ -552,8 +554,7 @@ async def warn(message: Message):
     HandleCommand(ALIASES['unwarn'], ['!', '/'], 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1),  # Moderator
-    IgnorePermission(ignore_from=1, mode="TARGET"),
+    CheckPermission(access_to=0),  # Moderator
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
