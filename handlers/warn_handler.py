@@ -1,18 +1,11 @@
-from vkbottle import Bot
+import time
+from .abc_handler import ABCHandler
 
 
-from config import TOKEN
-from database.interface import Connection
-from logger.logger import Logger
-
-bot = Bot(token=TOKEN)
-database = Connection('database/database.db')
-logger = Logger()
-
-class Handler:
-    @staticmethod
-    def check():
-        ...
-
-    # TODO: Сделать проверку на кол-во варнов. Если 3 варна - выдать мут.
-    # TODO: Сделать проверку на время варна. Если время варна истекло - полностью снять все варны.
+class Handler(ABCHandler):
+    async def check(self):
+        expired = self.database.get_expired_warn(time.time())
+        if expired:
+            for warn in expired:
+                self.database.remove_warn(peer_id=warn[0], user_id=warn[1], force=True)
+                await self._send_log(peer_id=warn[0], user_id=warn[1], command="unwarn")
