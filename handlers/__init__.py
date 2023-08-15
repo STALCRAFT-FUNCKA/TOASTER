@@ -4,4 +4,4 @@ from . import (
     warn_handler
 )
 
-handlers = [ban_handler.Handler, mute_handler.Handler, warn_handler.Handler]
+handlers = [ban_handler.Handler(), mute_handler.Handler(), warn_handler.Handler()]
