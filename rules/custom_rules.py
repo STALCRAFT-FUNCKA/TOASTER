@@ -80,6 +80,24 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
             )
             message.deleted = True
             return  True
+
+        except Exception as error:
+            print("Rule aborted command completion:", error)
+            message.deleted = False
+            return False
+
+class CollapseTarget(ABCRule[BaseMessageMin]):
+    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
+        try:
+            await bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=message.reply_message.peer_id,
+                cmids=message.reply_message.conversation_message_id,
+                delete_for_all=True
+            )
+            message.deleted = True
+            return  True
+
         except Exception as error:
             print("Rule aborted command completion:", error)
             message.deleted = False
