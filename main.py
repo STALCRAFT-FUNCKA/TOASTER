@@ -15,7 +15,7 @@ def _load(modules):
 @bot.loop_wrapper.interval(seconds=1)
 async def check_punish_state():
     for handler in handlers:
-        handler.check()
+        await handler.check()
 
 
 if __name__ == "__main__":
