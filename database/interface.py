@@ -63,7 +63,7 @@ class Connection:
                 (
                     {data.get("peer_id")}, 
                     '{data.get("peer_name")}',
-                    '{data.get("destination")}'
+                    '{data.get("peer_destination")}'
                 );
         """
         self.cursor.execute(request)
@@ -87,7 +87,7 @@ class Connection:
                 FROM 
                     conversations 
                 WHERE 
-                destination = '{destination}';
+                    destination = '{destination}';
         """
         else:
             request = f"""
@@ -329,6 +329,20 @@ class Connection:
         else:
             return []
 
+    def get_expired_ban(self, now_time):
+        request = f"""
+            SELECT 
+                peer_id,
+                user_id 
+            FROM 
+                banned
+            WHERE 
+                unban_time < {now_time} 
+        """
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        return record
+
     """
      --------------------------------------------------------------------------------------------------------------------
     """
@@ -365,12 +379,28 @@ class Connection:
         self.connection.commit()
 
     def remove_mute(self, peer_id, user_id):
-        request = f"""DELETE FROM muted WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            DELETE FROM 
+                muted 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         self.connection.commit()
 
     def get_mute(self, peer_id, user_id) -> List[int]:
-        request = f"""SELECT user_id FROM muted WHERE peer_id = {peer_id} AND user_id = {user_id};"""
+        request = f"""
+            SELECT 
+                user_id 
+            FROM 
+                muted 
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
         self.cursor.execute(request)
         record = self.cursor.fetchall()
         if record:
@@ -379,81 +409,96 @@ class Connection:
         else:
             return []
 
+    def get_expired_mute(self, now_time):
+        request = f"""
+            SELECT 
+                peer_id,
+                user_id 
+            FROM 
+                muted 
+            WHERE 
+                unmute_time < {now_time} 
+        """
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        return record
+
     """
      --------------------------------------------------------------------------------------------------------------------
     """
-
     def add_warn(self, data: Dict):
         request = f"""
-            INSERT INTO 
-                warned 
-                (
-                    peer_id, 
-                    user_id, 
-                    user_name, 
-                    user_url, 
-                    warned_by_id, 
-                    warned_by_name, 
-                    warned_by_url, 
-                    warn_time, 
-                    unwarn_time,
-                    warn_count
-                ) 
-                VALUES 
-                (
-                    {data.get("peer_id")}, 
-                    {data.get("target_id")}, 
-                    '{data.get("target_name")}', 
-                    '{data.get("target_url")}', 
-                    {data.get("initiator_id")}, 
-                    '{data.get("initiator_name")}', 
-                    '{data.get("initiator_url")}', 
-                    {data.get("now_time_epoch")},
-                    {data.get("target_time_epoch")},
-                    {data.get("target_warns")},
-                );
-        """
+                INSERT INTO 
+                    warned 
+                    (
+                        peer_id, 
+                        user_id, 
+                        user_name, 
+                        user_url, 
+                        warned_by_id, 
+                        warned_by_name, 
+                        warned_by_url, 
+                        warn_time, 
+                        unwarn_time,
+                        warn_count
+                    ) 
+                    VALUES 
+                    (
+                        {data.get("peer_id")}, 
+                        {data.get("target_id")}, 
+                        '{data.get("target_name")}', 
+                        '{data.get("target_url")}', 
+                        {data.get("initiator_id")}, 
+                        '{data.get("initiator_name")}', 
+                        '{data.get("initiator_url")}', 
+                        {data.get("now_time_epoch")},
+                        {data.get("target_time_epoch")},
+                        {data.get("target_warns")}
+                    );
+            """
         self.cursor.execute(request)
         self.connection.commit()
 
-    def remove_warn(self, peer_id, user_id):
+
+    def remove_warn(self, peer_id, user_id, force=False):
         target_warns = self.get_warn(peer_id, user_id)
 
-        if target_warns == 1:
+        if target_warns == 1 or force:
             request = f"""
-                DELETE FROM 
+                    DELETE FROM 
+                        warned 
+                    WHERE 
+                        peer_id = {peer_id} 
+                    AND 
+                        user_id = {user_id};
+                """
+
+        else:
+            request = f"""
+                    UPDATE
+                        warned
+                    SET
+                        warn_count = {target_warns - 1}
+                    WHERE 
+                        peer_id = {peer_id} 
+                    AND 
+                        user_id = {user_id};
+                """
+        self.cursor.execute(request)
+        self.connection.commit()
+
+
+    def get_warn(self, peer_id, user_id) -> int:
+        request = f"""
+                SELECT 
+                    warn_count 
+                FROM 
                     warned 
                 WHERE 
                     peer_id = {peer_id} 
                 AND 
                     user_id = {user_id};
             """
-
-        else:
-            request = f"""
-                UPDATE
-                    warned
-                SET
-                    warn_count = {target_warns - 1}
-                WHERE 
-                    peer_id = {peer_id} 
-                AND 
-                    user_id = {user_id};
-            """
-        self.cursor.execute(request)
-        self.connection.commit()
-
-    def get_warn(self, peer_id, user_id) -> int:
-        request = f"""
-            SELECT 
-                warn_count 
-            FROM 
-                warned 
-            WHERE 
-                peer_id = {peer_id} 
-            AND 
-                user_id = {user_id};
-        """
         self.cursor.execute(request)
         record = self.cursor.fetchone()
 
@@ -462,10 +507,37 @@ class Connection:
 
         return 0
 
-    """
-     --------------------------------------------------------------------------------------------------------------------
-    """
+    def get_expired_warn(self, now_time):
+        request = f"""
+            SELECT 
+                peer_id,
+                user_id 
+            FROM 
+                warned
+            WHERE 
+                unwarn_time < {now_time} 
+        """
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        return record
 
+    def get_overflow_warn(self):
+        request = f"""
+            SELECT 
+                peer_id,
+                user_id 
+            FROM 
+                warned
+            WHERE 
+                warn_count > 2
+        """
+        self.cursor.execute(request)
+        record = self.cursor.fetchall()
+        return record
+
+    """
+    --------------------------------------------------------------------------------------------------------------------
+    """
 
 if __name__ == "__main__":
     database = Connection('database.db')
