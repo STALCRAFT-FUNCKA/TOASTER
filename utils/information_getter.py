@@ -22,9 +22,16 @@ class About:
         url = f"https://vk.com/id{user_id}"
         return url
 
+    async def get_user_id(self, screen_name):
+        info = await self.bot.api.users.get(screen_name)
+        if info:
+            return info[0].id
+        else:
+            return None
+
     async def get_user_full_name(self, user_id, tag=False):
-        author_info = await self.bot.api.users.get(user_id)
-        full_name = f"{author_info[0].first_name} {author_info[0].last_name}"
+        info = await self.bot.api.users.get(user_id)
+        full_name = f"{info[0].first_name} {info[0].last_name}"
         if tag:
             full_name = f"@id{user_id} ({full_name})"
 
@@ -43,7 +50,8 @@ class About:
             set_role = 0,
             command = None,
             time_delta = 0,
-            destination = None
+            destination = None,
+            cuid = None,
     ):
         peer_id = message.peer_id
         peer_name = await self.get_peer_name(peer_id)
@@ -56,13 +64,18 @@ class About:
         initiator_role = self.database.get_permission(peer_id, initiator_id)
         initiator_url = self.get_user_url(initiator_id)
         # -----
-        target_id = message.reply_message.from_id if message.reply_message else None
-        target_name = await self.get_user_full_name(target_id) if message.reply_message else None
-        target_name_tagged = await self.get_user_full_name(target_id, tag=True) if message.reply_message else None
-        target_url = self.get_user_url(target_id) if message.reply_message else None
-        target_set_role = set_role if message.reply_message else None
-        target_set_role_name = PERMISSION_LVL.get(set_role) if message.reply_message else None
-        target_warns = self.database.get_warn(peer_id, target_id) if message.reply_message else None
+        if message.reply_message and cuid is None:
+            target_id = message.reply_message.from_id
+        elif cuid is not None:
+            target_id = cuid
+        else:
+            target_id = None
+        target_name = await self.get_user_full_name(target_id) if target_id else None
+        target_name_tagged = await self.get_user_full_name(target_id, tag=True) if target_id else None
+        target_url = self.get_user_url(target_id) if target_id else None
+        target_set_role = set_role if target_id else None
+        target_set_role_name = PERMISSION_LVL.get(set_role) if target_id else None
+        target_warns = self.database.get_warn(peer_id, target_id) if target_id else None
         # -----
         command_name = f"{command.__name__}"
         # -----
