@@ -22,3 +22,6 @@ if __name__ == "__main__":
     _load(labelers)
 
     bot.run_forever()
+
+# TODO: Сделать наказание после 3х варнов
+#TODO: Разобраться с правилом игнора.
