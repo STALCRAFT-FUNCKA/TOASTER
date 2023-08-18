@@ -1,6 +1,7 @@
 from . import (
-    commands
+    commands,
+    commands_url
 )
 
 
-labelers = [commands.bl]
+labelers = [commands.bl, commands_url.bl]
