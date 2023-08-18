@@ -1,7 +1,7 @@
 from typing import Tuple
 from vkbottle.bot import Bot, BotLabeler, Message
 from database.interface import Connection
-from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID
+from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID, PREFIXES
 from logger.logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
@@ -30,7 +30,7 @@ converter = Converter()
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['reference'], ['!', '/'], 0),
+    HandleCommand(ALIASES['reference'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=1),  # Moderator
@@ -52,7 +52,7 @@ async def reference(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['enroll'], ['!', '/'], 0),
+    HandleCommand(ALIASES['enroll'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=0),  # Admin
@@ -96,7 +96,7 @@ async def enroll(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['drop'], ['!', '/'], 0),
+    HandleCommand(ALIASES['drop'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=0),  # Admin
@@ -146,7 +146,7 @@ async def drop(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['enroll_log'], ['!', '/'], 0),
+    HandleCommand(ALIASES['enroll_log'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=0),  # Admin
@@ -186,7 +186,7 @@ async def enroll_log(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['drop_log'], ['!', '/'], 0),
+    HandleCommand(ALIASES['drop_log'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=0),  # Admin
@@ -235,7 +235,7 @@ async def drop_log(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['permission'], ['!', '/'], 1),
+    HandleCommand(ALIASES['permission'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Admin
@@ -251,7 +251,7 @@ async def permission(message: Message, args: Tuple[str]):
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
             target_name=data.get("target_name_tagged)"),
-            set_role=data("target_set_role"),
+            set_role=data.get("target_set_role"),
             now_time=data.get("now_time")
         )
 
@@ -274,13 +274,77 @@ async def permission(message: Message, args: Tuple[str]):
 
 """
 ------------------------------------------------------------------------------------------------------------------------
+Команда кика пользователя со ВСЕХ бесед. 
+Бессрочно исключает пользователя из  ВСЕХ бесед.
+"""
+@bl.chat_message(
+    HandleCommand(ALIASES['terminate'], PREFIXES, 0),
+    CollapseCommand(),
+    AnswerCommand(use_reply=True, use_fwd=False),
+    CheckPermission(access_to=0),  # Administrator
+    IgnorePermission(ignore_from=1, mode="TARGET"),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def terminate(message: Message):
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            target_name=data.get("target_name_tagged"),
+            command_name=data.get("command_name"),
+            now_time=data.get("now_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
+
+        # отправляем лог
+        await logger.log()
+
+    async def send_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
+                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+        await bot.api.messages.send(
+            chat_id=all_data.get("chat_id"),
+            message=title,
+            random_id=0
+        )
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=terminate)
+
+    for peer_id in database.get_conversation(peer_id=-1, destination="CHAT"):
+        all_data["peer_id"] = peer_id
+        all_data["chat_id"] = peer_id - 2000000000
+
+        # проверяем наличие пользователя в бд
+        if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
+            if all_data["peer_name"] != "Все беседы":
+                all_data["peer_name"] = "Все беседы"
+                # формируем лог
+                await send_log(all_data)
+
+            # отправляем уведомление в чат
+            await send_respond(all_data)
+
+            # Выдаем кик
+            database.add_kick(all_data)
+
+            # Исключаем из беседы
+            await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
 Команда кика пользователя с беседы. 
 Бессрочно исключает пользователя из беседы.
 """
-
-
 @bl.chat_message(
-    HandleCommand(ALIASES['kick'], ['!', '/'], 0),
+    HandleCommand(ALIASES['kick'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
@@ -338,7 +402,7 @@ async def kick(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['ban'], ['!', '/'], 2),
+    HandleCommand(ALIASES['ban'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
@@ -355,7 +419,6 @@ async def ban(message: Message, args: Tuple[str]):
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
             target_name=data.get("target_name_tagged"),
-            target_warns=data.get("warn_count"),
             now_time=data.get("now_time"),
             target_time=data.get("target_time")
         )
@@ -394,20 +457,37 @@ async def ban(message: Message, args: Tuple[str]):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unban'], ['!', '/'], 0),
+    HandleCommand(ALIASES['unban'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1),  # Moderator
-    IgnorePermission(ignore_from=1, mode="TARGET"),
+    CheckPermission(access_to=0),  # Moderator
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def unban(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged"),
+            now_time=data.get("now_time"),
+        )
 
-    pass  # TODO: Сделать код
+        # отправляем лог
+        await logger.log()
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=unban)
+
+    if database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
+        # вызываем отправку лога
+        await send_log(all_data)
+
+        # снимаем блокировку
+        database.remove_ban(all_data.get("peer_id"), all_data.get("target_id"))
 
 
 """
@@ -418,7 +498,7 @@ async def unban(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['mute'], ['!', '/'], 2),
+    HandleCommand(ALIASES['mute'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
@@ -472,7 +552,7 @@ async def mute(message: Message, args: Tuple[str]):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unmute'], ['!', '/'], 0),
+    HandleCommand(ALIASES['unmute'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=1),  # Moderator
@@ -481,11 +561,35 @@ async def mute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unmute(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged"),
+            now_time=data.get("now_time"),
+            target_time=data.get("target_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
 
-    pass  # TODO: Сделать код
+        # отправляем лог
+        await logger.log()
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=unmute)
+
+    # проверяем наличие пользователя в базе данных
+    if database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
+        # вызываем отправку лога
+        await send_log(all_data)
+
+        # выдаем блокировку
+        database.remove_mute(all_data.get("peer_id"), all_data.get("target_id"))
 
 
 """
@@ -496,7 +600,7 @@ async def unmute(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['warn'], ['!', '/'], 0),
+    HandleCommand(ALIASES['warn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
@@ -551,7 +655,7 @@ async def warn(message: Message):
     database.add_warn(all_data)
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unwarn'], ['!', '/'], 0),
+    HandleCommand(ALIASES['unwarn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
@@ -559,11 +663,37 @@ async def warn(message: Message):
     OnlyEnrolled()
 )
 async def unwarn(message: Message):
-    def _log():
-        ...
-        # TODO: Логи
+    async def send_log(data):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            target_name=data.get("target_name_tagged"),
+            target_warns=data.get("target_warns"),
+            now_time=data.get("now_time")
+        )
+        logger.compose_log_attachments(
+            peer_id=data.get("peer_id"),
+            cmids=data.get("cmids")
+        )
 
-    pass  # TODO: Сделать код
+        # отправляем лог
+        await logger.log()
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=unwarn)
+
+    # инкриминируем предупреждение
+    if all_data.get("target_warns") != 0:
+        all_data["target_warns"] -= 1
+
+        # вызываем отправку лога
+        await send_log(all_data)
+
+        # выдаем предупреждение
+        database.remove_warn(all_data.get("peer_id"), all_data.get("target_id"))
 
 
 """
@@ -573,7 +703,7 @@ async def unwarn(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['delete'], ['!', '/'], 0),
+    HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=True),
     CheckPermission(access_to=0),  # Moderator
@@ -631,7 +761,7 @@ async def delete(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['copy'], ['!', '/'], 0),
+    HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=0),  # Moderator
