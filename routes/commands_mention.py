@@ -16,10 +16,9 @@ from rules.custom_rules import (
 )
 
 bot = Bot(token=TOKEN)
+bl = BotLabeler()
 database = Connection('database/database.db')
 logger = Logger()
-bl = BotLabeler()
-
 about = About()
 converter = Converter()
 
