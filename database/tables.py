@@ -6,7 +6,7 @@ conversations = """CREATE TABLE IF NOT EXISTS conversations
                    destination TEXT
                );"""
 
-# TODO: Сделать унифицированные названия столбцов
+# TODO: РЎРґРµР»Р°С‚СЊ СѓРЅРёС„РёС†РёСЂРѕРІР°РЅРЅС‹Рµ РЅР°Р·РІР°РЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ
 permissions = """CREATE TABLE IF NOT EXISTS permissions
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,7 +109,8 @@ queue = """CREATE TABLE IF NOT EXISTS queue
                     user_name TEXT,
                     user_url TEXT,
                     send_time INTEGER,
-                    next_send_time INTEGER
+                    next_send_time INTEGER,
+                    CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT IGNORE
                 );"""
 
 tables = [conversations, settings, permissions, kicked, banned, warned, muted, blacklist, whitelist, queue]
