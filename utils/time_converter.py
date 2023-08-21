@@ -1,9 +1,10 @@
 import datetime
-
+from utils.singleton import MetaSingleton
 from config import TIME_COEFFICENT
 
 
-class Converter:
+class Converter(metaclass=MetaSingleton):
+
     @staticmethod
     def convert(epoch) -> str:
         offset = datetime.timedelta(hours=3)
