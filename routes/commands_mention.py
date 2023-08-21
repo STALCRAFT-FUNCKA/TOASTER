@@ -78,7 +78,7 @@ async def terminate(message: Message, args: Tuple[str]):
         return
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=terminate, cuid=cuid)
+    all_data = await about.get_all_info(message, command=terminate, ctid=cuid)
 
     for peer_id in database.get_conversation(peer_id=-1, destination="CHAT"):
         all_data["peer_id"] = peer_id
@@ -143,7 +143,7 @@ async def permission(message: Message, args: Tuple[str]):
 
     try:
         # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]), cuid=cuid)
+        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]), ctid=cuid)
 
         # вызываем отправку лога
         await send_log(all_data)
@@ -207,7 +207,7 @@ async def kick(message: Message, args: Tuple[str]):
         return
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=kick, cuid=cuid)
+    all_data = await about.get_all_info(message, command=kick, ctid=cuid)
 
     # проверяем наличие пользователя в бд
     if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
@@ -284,7 +284,7 @@ async def ban(message: Message, args: Tuple[str]):
     delta = converter.delta(args[0], args[1])
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=ban, time_delta=delta, cuid=cuid)
+    all_data = await about.get_all_info(message, command=ban, time_delta=delta, ctid=cuid)
 
     if not database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
         # вызываем отправку лога
@@ -337,7 +337,7 @@ async def unban(message: Message, args: Tuple[str]):
         return
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unban, cuid=cuid)
+    all_data = await about.get_all_info(message, command=unban, ctid=cuid)
 
     if database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
         # вызываем отправку лога
@@ -404,7 +404,7 @@ async def mute(message: Message, args: Tuple[str]):
     delta = converter.delta(args[0], args[1])
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=mute, time_delta=delta, cuid=cuid)
+    all_data = await about.get_all_info(message, command=mute, time_delta=delta, ctid=cuid)
 
     # проверяем наличие пользователя в базе данных
     if not database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
@@ -422,7 +422,7 @@ async def mute(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unmute'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=1),  # Moderator
+    CheckPermission(access_to=0),  # Moderator
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -460,7 +460,7 @@ async def unmute(message: Message, args: Tuple[str]):
         return
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unmute, cuid=cuid)
+    all_data = await about.get_all_info(message, command=unmute, ctid=cuid)
 
     # проверяем наличие пользователя в базе данных
     if database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
@@ -529,7 +529,7 @@ async def warn(message: Message, args: Tuple[str]):
     delta = converter.delta(0, "d")
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=warn, time_delta=delta, cuid=cuid)
+    all_data = await about.get_all_info(message, command=warn, time_delta=delta, ctid=cuid)
 
     # инкриминируем предупреждение
     all_data["target_warns"] += 1
@@ -586,7 +586,7 @@ async def unwarn(message: Message, args: Tuple[str]):
         return
 
     # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unwarn, cuid=cuid)
+    all_data = await about.get_all_info(message, command=unwarn, ctid=cuid)
 
     # инкриминируем предупреждение
     if all_data.get("target_warns") != 0:
