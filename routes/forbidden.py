@@ -17,7 +17,7 @@ converter = Converter()
 
 @bl.chat_message(
     IgnorePermission(ignore_from=1, mode="SELF"),
-    HandleIn(handle_log=False, handle_chat=True),
+    HandleIn(handle_log=False, handle_chat=True, send_respond=False),
     blocking=False
 )
 async def forbidden(message: Message):
@@ -64,6 +64,7 @@ async def forbidden(message: Message):
 
         if reason is not None:
             print(reason)
-            # Код
+            ...
+            # warn
 
             await collapse(message)
