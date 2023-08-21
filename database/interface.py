@@ -1,10 +1,10 @@
 import sqlite3
 from typing import List, Dict
-
 from database import tables
+from utils.singleton import MetaSingleton
 
 
-class Connection:
+class Connection(metaclass=MetaSingleton):
     def _fill_std_form(self):
         for table in tables.tables:
             self.cursor.execute(table)
@@ -13,7 +13,7 @@ class Connection:
     --------------------------------------------------------------------------------------------------------------------
     """
 
-    def __init__(self, filename, allow_debug_text=False):
+    def __init__(self, filename, allow_debug_text=True):
         try:
             self.connection = sqlite3.connect(filename)
             self.cursor = self.connection.cursor()
@@ -24,6 +24,7 @@ class Connection:
 
             self.cursor.execute('''PRAGMA foreign_keys=ON''')
             self.connection.commit()
+
 
         except sqlite3.Error as error:
             if allow_debug_text:
@@ -138,15 +139,15 @@ class Connection:
             FROM 
                 settings 
             WHERE 
-                setting_name = %s 
+                setting_name = '{setting_name}' 
             AND 
-                peer_id = %s
+                peer_id = {peer_id};
         """
-        self.cursor.execute(request, (setting_name, peer_id))
+        self.cursor.execute(request)
         record = self.cursor.fetchone()
 
         if record:
-            return record[0]
+            return True if record[0] == "True" else False
 
         return False
 
@@ -534,6 +535,86 @@ class Connection:
         self.cursor.execute(request)
         record = self.cursor.fetchall()
         return record
+
+    """
+    --------------------------------------------------------------------------------------------------------------------
+    """
+    def add_queue(self, data: Dict):
+        request = f"""
+                INSERT INTO 
+                    warned
+                    (
+                        peer_id,
+                        user_id,
+                        user_name,
+                        user_url,
+                        send_time,
+                        next_send_time
+                    ) 
+                VALUES
+                    (
+                        {data.get("peer_id")}, 
+                        {data.get("initiator_id")}, 
+                        '{data.get("initiator_name")}', 
+                        '{data.get("initiator_url")}', 
+                        {data.get("now_time_epoch")},
+                        {data.get("target_time_epoch")},
+                    );
+            """
+
+        self.cursor.execute(request)
+        self.connection.commit()
+
+    def remove_queue(self, peer_id, user_id):
+        request = f"""
+            DELETE FROM 
+                queue
+            WHERE 
+                peer_id = {peer_id} 
+            AND 
+                user_id = {user_id};
+        """
+        self.cursor.execute(request)
+        self.connection.commit()
+
+    def get_queue(self, peer_id, user_id):
+        request = f"""
+                SELECT 
+                    peer_id,
+                    user_id
+                FROM 
+                    queue
+                WHERE 
+                    peer_id = {peer_id}
+                AND 
+                    user_id = {user_id};
+            """
+        self.cursor.execute(request)
+        record = self.cursor.fetchone()
+
+        if record:
+            return record[0]
+
+        return ()
+
+    def get_expired_queue(self, now_time):
+        request = f"""
+                SELECT 
+                    peer_id,
+                    user_id
+                FROM 
+                    queue
+                WHERE 
+                    next_send_time < {now_time};
+            """
+        self.cursor.execute(request)
+        record = self.cursor.fetchone()
+
+        if record:
+            return record[0]
+
+        return ()
+
 
     """
     --------------------------------------------------------------------------------------------------------------------
