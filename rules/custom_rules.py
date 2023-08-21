@@ -169,9 +169,10 @@ class IgnoreMention(ABCRule[BaseMessageMin]):
 
 class HandleIn(ABCRule[BaseMessageMin]):
 
-    def __init__(self, handle_log: bool = False, handle_chat: bool = False):
+    def __init__(self, handle_log: bool = False, handle_chat: bool = False, send_respond=True):
         self.handle_log = handle_log
         self.handle_chat = handle_chat
+        self.send_respond = send_respond
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
@@ -182,8 +183,9 @@ class HandleIn(ABCRule[BaseMessageMin]):
                 return True
 
             else:
-                title = f"Отказ в исполнении команды. Команда не может быть использована в лог-чате."
-                await message.answer(title)
+                if self.send_respond:
+                    title = f"Отказ в исполнении команды. Команда не может быть использована в лог-чате."
+                    await message.answer(title)
                 return False
 
         destination = "CHAT"
@@ -192,8 +194,9 @@ class HandleIn(ABCRule[BaseMessageMin]):
                 return True
 
             else:
-                title = f"Отказ в исполнении команды. Команда не может быть использована в беседе."
-                await message.answer(title)
+                if self.send_respond:
+                    title = f"Отказ в исполнении команды. Команда не может быть использована в беседе."
+                    await message.answer(title)
                 return False
 
         return True
