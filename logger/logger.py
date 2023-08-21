@@ -1,13 +1,12 @@
 import json
 from typing import Optional
-
 from config import GROUP_ID, TOKEN, PERMISSION_LVL, STUFF_ADMIN_ID
 from database.interface import Connection
-
 from vkbottle.bot import Bot
+from utils.singleton import MetaSingleton
 
 
-class Logger:
+class Logger(metaclass=MetaSingleton):
     def _get_log_peers(self):
         return self.database.get_conversation(peer_id=-1, destination="LOG")
 
@@ -25,12 +24,7 @@ class Logger:
 
         self._std_log_data()
 
-    def compose_log_attachments(
-            self,
-            peer_id=None,
-            cmids: Optional[list] = None
-    ):
-
+    def compose_log_attachments(self, peer_id=None, cmids: Optional[list] = None):
         forward = {
             'peer_id': peer_id,
             'conversation_message_ids': cmids
@@ -66,6 +60,8 @@ class Logger:
             log_lines.append(f"Источник: {peer_name}")
         if command_name is not None:
             log_lines.append(f"Команда: /{command_name}")
+        if reason is not None:
+            log_lines.append(f"Причина: {reason}")
         if set_role is not None:
             role_name = PERMISSION_LVL.get(set_role, "Неизвестная роль")
             log_lines.append(f"Установленная роль: {set_role} - {role_name}")
