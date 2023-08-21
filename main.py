@@ -2,7 +2,7 @@ from vkbottle.bot import Bot
 from config import TOKEN
 
 from handlers import handlers
-from labelers import labelers
+from routes import labelers
 
 bot = Bot(token=TOKEN)
 
@@ -22,6 +22,3 @@ if __name__ == "__main__":
     _load(labelers)
 
     bot.run_forever()
-
-# TODO: Сделать наказание после 3х варнов
-#TODO: Разобраться с правилом игнора.
