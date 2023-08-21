@@ -10,7 +10,7 @@ class Handler(ABCHandler):
                 f"Причина: {data.get('reason')}\n" \
                 f"Время снятия заглушения: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await self.bot.api.messages.send(chat_id=data.get('peer_id') - 2000000000, message=title, random_id=0)
+        await self.bot.api.messages.send(chat_id=data.get('chat_id'), message=title, random_id=0)
 
     async def check(self):
         overflow = self.database.get_overflow_warn()
@@ -27,6 +27,7 @@ class Handler(ABCHandler):
                 all_data["initiator_id"] = 0
                 all_data["initiator_name"] = "Система"
                 all_data["initiator_url"] = GROUP_URL
+                all_data["chat_id"] = warn[0] - 2000000000
 
                 self.database.add_mute(all_data)
 
