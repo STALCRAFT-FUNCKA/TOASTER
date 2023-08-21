@@ -7,7 +7,7 @@ from .abc_handler import ABCHandler
 class Handler(ABCHandler):
     async def __send_respond(self, data):
         title = f"@id{data.get('target_id')} (Пользователь) был заглушен.\n" \
-                f"Причина: {data.get('reason')}" \
+                f"Причина: {data.get('reason')}\n" \
                 f"Время снятия заглушения: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await self.bot.api.messages.send(chat_id=data.get('peer_id') - 2000000000, message=title, random_id=0)
@@ -21,7 +21,7 @@ class Handler(ABCHandler):
                 all_data = await self.about.get_all_info(
                     cpid=warn[0],
                     ctid=warn[1],
-                    delta=delta,
+                    time_delta=delta,
                     rsn="Получено три предупреждения"
                 )
                 all_data["initiator_id"] = 0
