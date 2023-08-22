@@ -1,5 +1,5 @@
 import datetime
-from utils.singleton import MetaSingleton
+from additionals.METASingleton import MetaSingleton
 from config import TIME_COEFFICENT
 
 

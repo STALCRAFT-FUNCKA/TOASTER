@@ -1,5 +1,5 @@
 import time
-from .abc_handler import ABCHandler
+from additionals.ABCHandler import ABCHandler
 
 
 class Handler(ABCHandler):
@@ -7,5 +7,5 @@ class Handler(ABCHandler):
         expired = self.database.get_expired_mute(time.time())
         if expired:
             for mute in expired:
-                self.database.remove_ban(peer_id=mute[0], user_id=mute[1])
+                self.database.remove_mute(peer_id=mute[0], user_id=mute[1])
                 await self._send_log(peer_id=mute[0], user_id=mute[1], command="unmute")

@@ -89,6 +89,7 @@ SETTINGS = {
     'Allow_Sticker': False,
     'Allow_Reply': False,
     'Slow_Mode': False,
+    'Filter_Url': False,
 }
 
 """
@@ -123,5 +124,7 @@ ALIASES = {
     # ----------------------------------
     'warn': ('warn', 'пред'),
     'unwarn': ('unwarn', 'разпред'),
+    # ----------------------------------
+    'setting': ('setting', 'настройка'),
 
 }

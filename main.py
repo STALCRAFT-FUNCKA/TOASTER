@@ -22,3 +22,5 @@ if __name__ == "__main__":
     _load(labelers)
 
     bot.run_forever()
+
+# TODO: Добавить настройку CheckPunished

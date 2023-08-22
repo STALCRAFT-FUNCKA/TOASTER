@@ -1,8 +1,8 @@
 from typing import Tuple
 from vkbottle.bot import Bot, BotLabeler, Message
-from database.interface import Connection
+from database.sql_interface import Connection
 from config import ALIASES, TOKEN, STUFF_ADMIN_ID, PREFIXES
-from logger.logger import Logger
+from utils.chat_logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
 from rules.custom_rules import (

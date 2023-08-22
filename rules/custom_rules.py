@@ -2,7 +2,7 @@ from typing import Optional, Union, Tuple
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
-from database.interface import Connection
+from database.sql_interface import Connection
 
 bot = Bot(token=TOKEN)
 database = Connection('database/database.db')

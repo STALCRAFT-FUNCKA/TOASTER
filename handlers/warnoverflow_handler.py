@@ -1,7 +1,5 @@
-import time
-
 from config import TIME_COEFFICENT, GROUP_URL, STUFF_ADMIN_ID
-from .abc_handler import ABCHandler
+from additionals.ABCHandler import ABCHandler
 
 
 class Handler(ABCHandler):
@@ -17,7 +15,7 @@ class Handler(ABCHandler):
         if overflow:
             for warn in overflow:
                 self.database.remove_warn(peer_id=warn[0], user_id=warn[1], force=True)
-                delta = TIME_COEFFICENT["h"]
+                delta = TIME_COEFFICENT["d"]
                 all_data = await self.about.get_all_info(
                     cpid=warn[0],
                     ctid=warn[1],

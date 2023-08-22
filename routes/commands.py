@@ -1,8 +1,8 @@
 from typing import Tuple
 from vkbottle.bot import Bot, BotLabeler, Message
-from database.interface import Connection
+from database.sql_interface import Connection
 from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID, PREFIXES
-from logger.logger import Logger
+from utils.chat_logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
 from rules.custom_rules import (
@@ -26,8 +26,6 @@ converter = Converter()
 ------------------------------------------------------------------------------------------------------------------------
 Команда вывода справки\справочной информации.
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['reference'], PREFIXES, 0),
     CollapseCommand(),
@@ -48,8 +46,6 @@ async def reference(message: Message):
 Команда регистрации беседы. 
 Бот не будет производить никаких действий в беседе, пока она не будет зарегистрирована.
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['enroll'], PREFIXES, 0),
     CollapseCommand(),
@@ -77,21 +73,25 @@ async def enroll(message: Message):
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=enroll, destination="CHAT")
 
-    # вызываем отправку лога
-    await send_log(all_data)
-
     # отправляем уведомления в чат
     if database.get_conversation(all_data.get("peer_id"), destination="CHAT"):
+        k = False
         await send_respond("Данные беседы обновлены.")
     else:
+        k = True
         await send_respond(f"Беседа зарегистрирована.")
 
     # регистрируем беседу в БД
     database.add_conversation(all_data)
 
-    # добавляем стандартный набор настроек
-    for setting in SETTINGS:
-        database.add_setting(data=all_data, setting_name=setting,setting_status=SETTINGS[setting])
+    if k:
+        for setting in SETTINGS:
+            database.add_setting(data=all_data, setting_name=setting, setting_status=SETTINGS[setting])
+
+    # вызываем отправку лога
+    await send_log(all_data)
+
+
 
 
 @bl.chat_message(
@@ -129,7 +129,7 @@ async def drop(message: Message):
         await send_respond("Регистрация данной беседы упразднена.")
 
         # удаляем регистрацию беседы из БД
-        database.remove_conversation(all_data)
+        database.remove_conversation(all_data.get("peer_id"))
 
     else:
         # отправляем уведомление в чат
@@ -142,8 +142,6 @@ async def drop(message: Message):
 Таких лог-чатов может быть несколько.
 Бот отправляет логи своих действий в каждый из помеченных этой командой чатов.
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['enroll_log'], PREFIXES, 0),
     CollapseCommand(),
@@ -171,8 +169,8 @@ async def enroll_log(message: Message):
     # получаем все необходимые данные
     all_data = await about.get_all_info(message, command=enroll_log, destination="LOG")
 
-    # вызываем отправку лога
-    await send_log(all_data)
+    # регистрируем лог-чат в БД
+    database.add_conversation(all_data)
 
     # отправляем уведомления в чат
     if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
@@ -180,8 +178,8 @@ async def enroll_log(message: Message):
     else:
         await send_respond(f"Беседа назначена в качестве лог-чата.")
 
-    # регистрируем лог-чат в БД
-    database.add_conversation(all_data)
+    # вызываем отправку лога
+    await send_log(all_data)
 
 
 @bl.chat_message(
@@ -213,14 +211,14 @@ async def drop_log(message: Message):
 
     # проверяем наличие регистрации беседы в БД
     if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
-        # вызываем отправку лога
-        await send_log(all_data)
-
         # отправляем уведомление
         await send_respond("Данный лог-чат упразднён.")
 
         # удаляем регистрацию лог-чата
         database.remove_conversation(all_data)
+
+        # вызываем отправку лога
+        await send_log(all_data)
 
     else:
         # отправляем уведомление
@@ -231,8 +229,6 @@ async def drop_log(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда, устанавливающая группу прав пользователю в беседе. 
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['permission'], PREFIXES, 1),
     CollapseCommand(),
@@ -380,17 +376,17 @@ async def kick(message: Message):
 
     # проверяем наличие пользователя в бд
     if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
-        # формируем лог
-        await send_log(all_data)
+        # Выдаем кик
+        database.add_kick(all_data)
 
         # отправляем уведомление в чат
         await send_respond(all_data)
 
-        # Выдаем кик
-        database.add_kick(all_data)
-
         # Исключаем из беседы
         await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+
+        # формируем лог
+        await send_log(all_data)
 
 
 """
@@ -398,8 +394,6 @@ async def kick(message: Message):
 Команда блокировки пользователя в беседе. 
 Временно исключает пользователя из беседы.
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['ban'], PREFIXES, 2),
     CollapseCommand(),
@@ -442,17 +436,17 @@ async def ban(message: Message, args: Tuple[str]):
     all_data = await about.get_all_info(message, command=ban, time_delta=delta)
 
     if not database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
-        # вызываем отправку лога
-        await send_log(all_data)
+        # выдаем блокировку
+        database.add_ban(all_data)
 
         # отправляем уведомление в чат
         await send_respond(all_data)
 
-        # выдаем блокировку
-        database.add_ban(all_data)
-
         # исключаем из беседы
         await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+
+        # вызываем отправку лога
+        await send_log(all_data)
 
 
 @bl.chat_message(
@@ -494,8 +488,6 @@ async def unban(message: Message):
 Команда заглушения пользователя в беседе. 
 Временно не позволяет пользователю писать сообщения.
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['mute'], PREFIXES, 2),
     CollapseCommand(),
@@ -596,8 +588,6 @@ async def unmute(message: Message):
 Команда предупреждения пользователя в беседе. 
 Выдает пользователю одно временное предупреждение (* из 3).
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['warn'], PREFIXES, 0),
     CollapseCommand(),
@@ -699,8 +689,6 @@ async def unwarn(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда удаляет сообщение(я) пользователя в беседе. 
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
@@ -757,8 +745,6 @@ async def delete(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда копирует сообщение пользователя в беседе и отправляет от лица бота. 
 """
-
-
 @bl.chat_message(
     HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
@@ -793,3 +779,50 @@ async def copy(message: Message):
 
     # отправляем скопированное сообщение в чат
     await message.answer(message.reply_message.text)
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+Команда копирует сообщение пользователя в беседе и отправляет от лица бота. 
+"""
+@bl.chat_message(
+    HandleCommand(ALIASES['setting'], PREFIXES, 2),
+    CollapseCommand(),
+    AnswerCommand(use_reply=False, use_fwd=False),
+    CheckPermission(access_to=0),  # Admin
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def setting(message: Message, args: Tuple):
+    async def send_log(data, setting_name, setting_status):
+        # формируем лог
+        logger.compose_log_data(
+            initiator_name=data.get("initiator_name_tagged"),
+            initiator_role=data.get("initiator_role"),
+            peer_name=data.get("peer_name"),
+            command_name=data.get("command_name"),
+            setting_name=setting_name,
+            setting_status=setting_status,
+            now_time=data.get("now_time"),
+        )
+
+        # отправляем лог
+        await logger.log()
+
+    async def send_respond(stgn, stts):
+        title = f"Настройка {stgn} для этой беседы изменена на {stts}\n"
+        await message.answer(title)
+
+    setting_name = args[0]
+    setting_status = args[1]
+
+    # получаем все необходимые данные
+    all_data = await about.get_all_info(message, command=setting)
+
+    if database.get_setting(peer_id=all_data.get("peer_id"), setting_name=setting_name) is not None:
+        database.add_setting(all_data, setting_status=setting_status, setting_name=setting_name)
+
+        await send_respond(setting_name, setting_status)
+        await send_log(all_data, setting_name, setting_status)
+
+

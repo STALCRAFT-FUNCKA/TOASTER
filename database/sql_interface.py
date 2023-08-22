@@ -1,12 +1,12 @@
 import sqlite3
 from typing import List, Dict
-from database import tables
-from utils.singleton import MetaSingleton
+from additionals import SQLTables
+from additionals.METASingleton import MetaSingleton
 
 
 class Connection(metaclass=MetaSingleton):
     def _fill_std_form(self):
-        for table in tables.tables:
+        for table in SQLTables.tables:
             self.cursor.execute(table)
 
     """
@@ -132,7 +132,7 @@ class Connection(metaclass=MetaSingleton):
         self.cursor.execute(request)
         self.connection.commit()
 
-    def get_setting(self, peer_id, setting_name) -> bool:
+    def get_setting(self, peer_id, setting_name):
         request = f"""
             SELECT 
                 setting_status 
@@ -149,7 +149,7 @@ class Connection(metaclass=MetaSingleton):
         if record:
             return True if record[0] == "True" else False
 
-        return False
+        return None
 
     """
      --------------------------------------------------------------------------------------------------------------------
@@ -542,7 +542,7 @@ class Connection(metaclass=MetaSingleton):
     def add_queue(self, data: Dict):
         request = f"""
                 INSERT INTO 
-                    warned
+                    queue
                     (
                         peer_id,
                         user_id,
@@ -558,7 +558,7 @@ class Connection(metaclass=MetaSingleton):
                         '{data.get("initiator_name")}', 
                         '{data.get("initiator_url")}', 
                         {data.get("now_time_epoch")},
-                        {data.get("target_time_epoch")},
+                        {data.get("target_time_epoch")}
                     );
             """
 

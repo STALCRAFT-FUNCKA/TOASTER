@@ -1,9 +1,9 @@
 import json
 from typing import Optional
-from config import GROUP_ID, TOKEN, PERMISSION_LVL, STUFF_ADMIN_ID
-from database.interface import Connection
+from config import GROUP_ID, TOKEN, PERMISSION_LVL
+from database.sql_interface import Connection
 from vkbottle.bot import Bot
-from utils.singleton import MetaSingleton
+from additionals.METASingleton import MetaSingleton
 
 
 class Logger(metaclass=MetaSingleton):
@@ -39,6 +39,8 @@ class Logger(metaclass=MetaSingleton):
             reason=None,
             peer_name=None,
             command_name=None,
+            setting_name=None,
+            setting_status=None,
             set_role=None,
             target_name=None,
             target_role=None,
@@ -60,6 +62,10 @@ class Logger(metaclass=MetaSingleton):
             log_lines.append(f"Источник: {peer_name}")
         if command_name is not None:
             log_lines.append(f"Команда: /{command_name}")
+        if setting_name is not None:
+            log_lines.append(f"Настройка: {setting_name}")
+        if setting_status is not None:
+            log_lines.append(f"Значение: {setting_status}")
         if reason is not None:
             log_lines.append(f"Причина: {reason}")
         if set_role is not None:

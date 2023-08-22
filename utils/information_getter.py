@@ -1,15 +1,15 @@
 import time
 from vkbottle.bot import Bot, Message
-from utils.singleton import MetaSingleton
+from additionals.METASingleton import MetaSingleton
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
-from database.interface import Connection
+from database.sql_interface import Connection
 from utils.time_converter import Converter
 
 
 class About(metaclass=MetaSingleton):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
-        self.database = Connection('database/database.db')
+        self.database = Connection('database.db')
         self.converter = Converter()
 
     @staticmethod
@@ -43,7 +43,6 @@ class About(metaclass=MetaSingleton):
         )
         return conversations_info.items[0].chat_settings.title
 
-    # TODO: Разделить на 2 перегруженные функции
     async def get_all_info(
             self,
             message: Message = None,
@@ -78,7 +77,11 @@ class About(metaclass=MetaSingleton):
         initiator_url = self.get_user_url(initiator_id) if initiator_id else None
         # -----
         if message and (ctid is None):
-            target_id = message.reply_message.from_id
+            if message.reply_message:
+                target_id = message.reply_message.from_id
+            else:
+                target_id = None
+
         elif ctid is not None:
             target_id = ctid
         else:
