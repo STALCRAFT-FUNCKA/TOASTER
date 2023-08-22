@@ -3,17 +3,21 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/LICENSE" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/ABCHandler.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/ABCHandler.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/METASingleton.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/METASingleton.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/SQLTables.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/additionals/SQLTables.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/config.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/database/interface.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/database/tables.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/database/sql_interface.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/database/sql_interface.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/__init__.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/handlers/abc_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/ban_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/mute_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/queue_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/warn_handler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/warnoverflow_handler.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/logger/logger.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/main.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/requirements.txt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/AccAgeChecker.py" charset="UTF-8" />
@@ -27,8 +31,8 @@
     <file url="file://$PROJECT_DIR$/routes/forbidden.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/queue.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rules/custom_rules.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/utils/chat_logger.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/utils/information_getter.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/utils/singleton.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/utils/time_converter.py" charset="UTF-8" />
     <file url="PROJECT" charset="windows-1251" />
   </component>
