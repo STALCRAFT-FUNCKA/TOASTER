@@ -1,5 +1,5 @@
 import time
-from .abc_handler import ABCHandler
+from additionals.ABCHandler import ABCHandler
 
 
 class Handler(ABCHandler):
