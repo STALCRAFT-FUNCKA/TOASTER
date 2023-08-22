@@ -23,7 +23,7 @@ settings = """CREATE TABLE IF NOT EXISTS settings
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
-                    setting_name TEXT UNIQUE ON CONFLICT IGNORE,
+                    setting_name TEXT UNIQUE ON CONFLICT REPLACE,
                     setting_status INTEGER
                 );"""
 

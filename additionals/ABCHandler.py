@@ -2,8 +2,8 @@ import time
 from abc import ABC, abstractmethod
 from vkbottle import Bot
 from config import TOKEN
-from database.interface import Connection
-from logger.logger import Logger
+from database.sql_interface import Connection
+from utils.chat_logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
 
