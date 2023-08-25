@@ -21,3 +21,5 @@ converter = Converter()
 async def mutepunish(message: Message):
     if not database.get_mute(peer_id=message.peer_id, user_id=message.from_id):
         return
+
+    # TODO:

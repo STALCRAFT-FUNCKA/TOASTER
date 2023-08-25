@@ -25,18 +25,15 @@ converter = Converter()
     blocking=False
 )
 async def account_age(message: Message):
-    async def send_log(data, command, reason):
+    async def send_log(data, command):
         # формируем лог
         logger.compose_log_data(
             initiator_name=data.get("initiator_name"),
-            initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=command,
-            reason=reason,
+            reason=data.get('reason'),
             target_name=data.get("target_name_tagged"),
-            target_warns=data.get("target_warns"),
             now_time=data.get("now_time"),
-            target_time=data.get("target_time")
         )
         logger.compose_log_attachments(
             peer_id=data.get("peer_id"),
@@ -47,10 +44,8 @@ async def account_age(message: Message):
         await logger.log()
 
     async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) получил предупреждение.\n" \
+        title = f"@id{data.get('target_id')} (Пользователь) исключен.\n" \
                 f"Причина: {data.get('reason')}.\n" \
-                f"Текущее количество предупреждений: {data.get('target_warns')}/3.\n" \
-                f"Время снятия предупреждений: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
@@ -103,7 +98,7 @@ async def account_age(message: Message):
                 database.add_kick(all_data)
 
                 await send_respond(all_data)
-                await send_log(all_data, command="kick", reason=reason)
+                await send_log(all_data, command="kick")
 
                 await collapse(message)
 

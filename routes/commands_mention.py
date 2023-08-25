@@ -22,12 +22,13 @@ logger = Logger()
 about = About()
 converter = Converter()
 
-
 """
 ------------------------------------------------------------------------------------------------------------------------
 Команда кика пользователя со ВСЕХ бесед. 
 Бессрочно исключает пользователя из  ВСЕХ бесед.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['terminate'], PREFIXES, 1),
     CollapseCommand(),
@@ -66,8 +67,8 @@ async def terminate(message: Message, args: Tuple[str]):
         )
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -100,10 +101,13 @@ async def terminate(message: Message, args: Tuple[str]):
             # Исключаем из беседы
             await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
 
+
 """
 ------------------------------------------------------------------------------------------------------------------------
 Команда, устанавливающая группу прав пользователю в беседе. 
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['permission'], PREFIXES, 2),
     CollapseCommand(),
@@ -130,8 +134,8 @@ async def permission(message: Message, args: Tuple[str]):
         await logger.log()
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -155,12 +159,13 @@ async def permission(message: Message, args: Tuple[str]):
         print("Command aborted: ", error)
 
 
-
 """
 ------------------------------------------------------------------------------------------------------------------------
 Команда кика пользователя с беседы. 
 Бессрочно исключает пользователя из беседы.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['kick'], PREFIXES, 1),
     CollapseCommand(),
@@ -195,8 +200,8 @@ async def kick(message: Message, args: Tuple[str]):
         await message.answer(title)
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -269,8 +274,8 @@ async def ban(message: Message, args: Tuple[str]):
         # выводим дельту времени
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -325,8 +330,8 @@ async def unban(message: Message, args: Tuple[str]):
         await logger.log()
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -352,6 +357,8 @@ async def unban(message: Message, args: Tuple[str]):
 Команда заглушения пользователя в беседе. 
 Временно не позволяет пользователю писать сообщения.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['mute'], PREFIXES, 3),
     CollapseCommand(),
@@ -389,8 +396,8 @@ async def mute(message: Message, args: Tuple[str]):
         await message.answer(title)
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -448,8 +455,8 @@ async def unmute(message: Message, args: Tuple[str]):
         await logger.log()
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -476,6 +483,8 @@ async def unmute(message: Message, args: Tuple[str]):
 Команда предупреждения пользователя в беседе. 
 Выдает пользователю одно временное предупреждение (* из 3).
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['warn'], PREFIXES, 1),
     CollapseCommand(),
@@ -514,8 +523,8 @@ async def warn(message: Message, args: Tuple[str]):
         await message.answer(title)
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -574,8 +583,8 @@ async def unwarn(message: Message, args: Tuple[str]):
         await logger.log()
 
     async def get_cuid(arg):
-        screen_name = arg.replace("@","")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id","")
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
         uid = await about.get_user_id(screen_name=screen_name)
         return uid
 
@@ -597,5 +606,3 @@ async def unwarn(message: Message, args: Tuple[str]):
 
         # выдаем предупреждение
         database.remove_warn(all_data.get("peer_id"), all_data.get("target_id"))
-
-

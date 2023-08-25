@@ -24,8 +24,10 @@ converter = Converter()
 
 """
 ------------------------------------------------------------------------------------------------------------------------
-Команда вывода справки\справочной информации.
+Команда вывода справочной информации.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['reference'], PREFIXES, 0),
     CollapseCommand(),
@@ -46,6 +48,8 @@ async def reference(message: Message):
 Команда регистрации беседы. 
 Бот не будет производить никаких действий в беседе, пока она не будет зарегистрирована.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['enroll'], PREFIXES, 0),
     CollapseCommand(),
@@ -90,8 +94,6 @@ async def enroll(message: Message):
 
     # вызываем отправку лога
     await send_log(all_data)
-
-
 
 
 @bl.chat_message(
@@ -142,6 +144,8 @@ async def drop(message: Message):
 Таких лог-чатов может быть несколько.
 Бот отправляет логи своих действий в каждый из помеченных этой командой чатов.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['enroll_log'], PREFIXES, 0),
     CollapseCommand(),
@@ -229,6 +233,8 @@ async def drop_log(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда, устанавливающая группу прав пользователю в беседе. 
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['permission'], PREFIXES, 1),
     CollapseCommand(),
@@ -272,6 +278,8 @@ async def permission(message: Message, args: Tuple[str]):
 Команда кика пользователя со ВСЕХ бесед. 
 Бессрочно исключает пользователя из  ВСЕХ бесед.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['terminate'], PREFIXES, 0),
     CollapseCommand(),
@@ -338,6 +346,8 @@ async def terminate(message: Message):
 Команда кика пользователя с беседы. 
 Бессрочно исключает пользователя из беседы.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['kick'], PREFIXES, 0),
     CollapseCommand(),
@@ -394,6 +404,8 @@ async def kick(message: Message):
 Команда блокировки пользователя в беседе. 
 Временно исключает пользователя из беседы.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['ban'], PREFIXES, 2),
     CollapseCommand(),
@@ -488,6 +500,8 @@ async def unban(message: Message):
 Команда заглушения пользователя в беседе. 
 Временно не позволяет пользователю писать сообщения.
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['mute'], PREFIXES, 2),
     CollapseCommand(),
@@ -588,6 +602,8 @@ async def unmute(message: Message):
 Команда предупреждения пользователя в беседе. 
 Выдает пользователю одно временное предупреждение (* из 3).
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['warn'], PREFIXES, 0),
     CollapseCommand(),
@@ -643,6 +659,7 @@ async def warn(message: Message):
     # выдаем предупреждение
     database.add_warn(all_data)
 
+
 @bl.chat_message(
     HandleCommand(ALIASES['unwarn'], PREFIXES, 0),
     CollapseCommand(),
@@ -689,6 +706,8 @@ async def unwarn(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда удаляет сообщение(я) пользователя в беседе. 
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
@@ -745,6 +764,8 @@ async def delete(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда копирует сообщение пользователя в беседе и отправляет от лица бота. 
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
@@ -785,6 +806,8 @@ async def copy(message: Message):
 ------------------------------------------------------------------------------------------------------------------------
 Команда копирует сообщение пользователя в беседе и отправляет от лица бота. 
 """
+
+
 @bl.chat_message(
     HandleCommand(ALIASES['setting'], PREFIXES, 2),
     CollapseCommand(),
@@ -824,5 +847,3 @@ async def setting(message: Message, args: Tuple):
 
         await send_respond(setting_name, setting_status)
         await send_log(all_data, setting_name, setting_status)
-
-

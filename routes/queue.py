@@ -21,14 +21,13 @@ converter = Converter()
     blocking=False
 )
 async def queue(message: Message):
-    async def send_log(data, command, reason):
+    async def send_log(data, command):
         # формируем лог
         logger.compose_log_data(
             initiator_name=data.get("initiator_name"),
-            initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=command,
-            reason=reason,
+            reason=data.get('reason'),
             target_name=data.get("target_name_tagged"),
             target_warns=data.get("target_warns"),
             now_time=data.get("now_time"),
@@ -84,7 +83,7 @@ async def queue(message: Message):
         database.add_warn(all_data)
 
         await send_respond(all_data)
-        await send_log(all_data, command="warn", reason=reason)
+        await send_log(all_data, command="warn")
 
         await collapse(message)
 
