@@ -3,8 +3,9 @@ from . import (
     commands_mention,
     queue,
     forbidden,
-    mutepunish
+    mutepunish,
+    account_age
 )
 
 
-labelers = [queue.bl, forbidden.bl, mutepunish.bl, commands.bl, commands_mention.bl]
+labelers = [queue.bl, forbidden.bl, account_age.bl, mutepunish.bl, commands.bl, commands_mention.bl]
