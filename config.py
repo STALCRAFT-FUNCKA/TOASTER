@@ -90,6 +90,8 @@ SETTINGS = {
     'Allow_Reply': False,
     'Slow_Mode': False,
     'Filter_Url': False,
+    'Filter_Junk': False,
+    'Account_Age': False,
 }
 
 """
