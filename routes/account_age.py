@@ -26,7 +26,7 @@ converter = Converter()
 )
 async def account_age(message: Message):
     async def send_log(data, command):
-        # формируем лог
+        # С„РѕСЂРјРёСЂСѓРµРј Р»РѕРі
         logger.compose_log_data(
             initiator_name=data.get("initiator_name"),
             peer_name=data.get("peer_name"),
@@ -40,13 +40,13 @@ async def account_age(message: Message):
             cmids=data.get("cmids")
         )
 
-        # отправляем лог
+        # РѕС‚РїСЂР°РІР»СЏРµРј Р»РѕРі
         await logger.log()
 
     async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) исключен.\n" \
-                f"Причина: {data.get('reason')}.\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+        title = f"@id{data.get('target_id')} (РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ) РёСЃРєР»СЋС‡РµРЅ.\n" \
+                f"РџСЂРёС‡РёРЅР°: {data.get('reason')}.\n" \
+                f"РџРѕ РІРѕРїСЂРѕСЃР°Рј РѕР±СЂР°С‰Р°С‚СЊСЃСЏ Рє @id{STUFF_ADMIN_ID} (РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂСѓ)."
         await message.answer(title)
 
     async def collapse(m: Message):
@@ -83,14 +83,14 @@ async def account_age(message: Message):
             week = 60 * 60 * 24 * 7
 
             if delta_seconds < week*2:
-                reason = 'Подозрительный аккаунт'
+                reason = 'РџРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹Р№ Р°РєРєР°СѓРЅС‚'
                 all_data = await about.get_all_info(
                     cpid=message.peer_id,
                     ctid=message.from_id,
                     rsn=reason
                 )
                 all_data["initiator_id"] = 0
-                all_data["initiator_name"] = "Система"
+                all_data["initiator_name"] = "РЎРёСЃС‚РµРјР°"
                 all_data["initiator_url"] = GROUP_URL
                 all_data["chat_id"] = message.peer_id - 2000000000
                 all_data["cmids"] = [message.conversation_message_id]
@@ -102,7 +102,7 @@ async def account_age(message: Message):
 
                 await collapse(message)
 
-                # Исключаем из беседы
+                # РСЃРєР»СЋС‡Р°РµРј РёР· Р±РµСЃРµРґС‹
                 await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
 
     except Exception as error:
