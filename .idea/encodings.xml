@@ -4,13 +4,9 @@
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/LICENSE" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/additionals/ABCHandler.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/additionals/ABCHandler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/additionals/METASingleton.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/additionals/METASingleton.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/additionals/SQLTables.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/additionals/SQLTables.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/config.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/database/sql_interface.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/database/sql_interface.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/__init__.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/ban_handler.py" charset="UTF-8" />
@@ -26,10 +22,11 @@
     <file url="file://$PROJECT_DIR$/routes/MessageQueueHandler.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/URLFilter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/__init__.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/routes/account_age.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/commands.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/commands_mention.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/forbidden.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/routes/queue.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/routes/message_queue.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rules/custom_rules.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/utils/chat_logger.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/utils/information_getter.py" charset="UTF-8" />

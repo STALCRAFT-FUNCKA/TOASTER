@@ -1,11 +1,11 @@
 from . import (
     commands,
     commands_mention,
-    queue,
+    message_queue,
     forbidden,
     mutepunish,
     account_age
 )
 
 
-labelers = [queue.bl, forbidden.bl, account_age.bl, mutepunish.bl, commands.bl, commands_mention.bl]
+labelers = [message_queue.bl, forbidden.bl, account_age.bl, mutepunish.bl, commands.bl, commands_mention.bl]

@@ -1,5 +1,4 @@
 import datetime
-
 import requests
 from bs4 import BeautifulSoup
 from vkbottle.bot import Bot, BotLabeler, Message
