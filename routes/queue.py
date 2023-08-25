@@ -58,6 +58,9 @@ async def queue(message: Message):
             delete_for_all=True
         )
 
+    if database.get_mute(peer_id=message.peer_id, user_id=message.from_id):
+        return
+
     if not database.get_setting(peer_id=message.peer_id, setting_name="Slow_Mode"):
         return
 
