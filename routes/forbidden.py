@@ -59,6 +59,8 @@ async def forbidden(message: Message):
             delete_for_all=True
         )
 
+    if database.get_mute(peer_id=message.peer_id, user_id=message.from_id):
+        return
 
     if message.deleted is None:
         reason = None
@@ -95,8 +97,15 @@ async def forbidden(message: Message):
                             reason = 'Переслано чужое сообщение'
 
         # TODO: Добавить фильтр слов
+        if reason is None:
+            if database.get_setting(message.peer_id, 'Filter_Junk'):
+                text = message.text
 
         # TODO: Добавить фильтр ссылок
+        if reason is None:
+            if database.get_setting(message.peer_id, 'Filter_Url'):
+                text = message.text
+
 
         if reason is not None:
             delta = converter.delta(0, "d")
