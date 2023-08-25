@@ -7,7 +7,7 @@ from routes import labelers
 bot = Bot(token=TOKEN)
 
 
-def _load(modules):
+def load(modules):
     for module in modules:
         bot.labeler.load(module)
 
@@ -19,8 +19,6 @@ async def check_punish_state():
 
 
 if __name__ == "__main__":
-    _load(labelers)
+    load(labelers)
 
     bot.run_forever()
-
-# TODO: Добавить настройку CheckPunished
