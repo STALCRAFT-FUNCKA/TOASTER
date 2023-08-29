@@ -87,20 +87,6 @@ warned = """CREATE TABLE IF NOT EXISTS warned
                     CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT REPLACE 
                 );"""
 
-blacklist = """CREATE TABLE IF NOT EXISTS blacklist
-                (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
-                    url TEXT
-                );"""
-
-whitelist = """CREATE TABLE IF NOT EXISTS whitelist
-                (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
-                    domain TEXT
-                );"""
-
 queue = """CREATE TABLE IF NOT EXISTS queue
                 (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,4 +99,4 @@ queue = """CREATE TABLE IF NOT EXISTS queue
                     CONSTRAINT someone UNIQUE (user_id, peer_id) ON CONFLICT IGNORE
                 );"""
 
-tables = [conversations, settings, permissions, kicked, banned, warned, muted, blacklist, whitelist, queue]
+tables = [conversations, settings, permissions, kicked, banned, warned, muted, queue]
