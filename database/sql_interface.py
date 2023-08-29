@@ -1,12 +1,12 @@
 import sqlite3
 from typing import List, Dict
-from additionals import SQLTables
-from additionals.METASingleton import MetaSingleton
+from database import sql_tables
+from singltone import MetaSingleton
 
 
 class Connection(metaclass=MetaSingleton):
     def _fill_std_form(self):
-        for table in SQLTables.tables:
+        for table in sql_tables.tables:
             self.cursor.execute(table)
 
     """
@@ -427,6 +427,7 @@ class Connection(metaclass=MetaSingleton):
     """
      --------------------------------------------------------------------------------------------------------------------
     """
+
     def add_warn(self, data: Dict):
         request = f"""
                 INSERT INTO 
@@ -460,7 +461,6 @@ class Connection(metaclass=MetaSingleton):
         self.cursor.execute(request)
         self.connection.commit()
 
-
     def remove_warn(self, peer_id, user_id, force=False):
         target_warns = self.get_warn(peer_id, user_id)
 
@@ -487,7 +487,6 @@ class Connection(metaclass=MetaSingleton):
                 """
         self.cursor.execute(request)
         self.connection.commit()
-
 
     def get_warn(self, peer_id, user_id) -> int:
         request = f"""
@@ -539,6 +538,7 @@ class Connection(metaclass=MetaSingleton):
     """
     --------------------------------------------------------------------------------------------------------------------
     """
+
     def add_queue(self, data: Dict):
         request = f"""
                 INSERT INTO 
@@ -615,10 +615,10 @@ class Connection(metaclass=MetaSingleton):
 
         return ()
 
-
     """
     --------------------------------------------------------------------------------------------------------------------
     """
+
 
 if __name__ == "__main__":
     database = Connection('database.db')

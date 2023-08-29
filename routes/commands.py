@@ -5,7 +5,7 @@ from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID, PREFIXES
 from utils.chat_logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
-from rules.custom_rules import (
+from routes.rules.custom_rules import (
     HandleCommand,
     CollapseCommand,
     AnswerCommand,
@@ -89,8 +89,8 @@ async def enroll(message: Message):
     database.add_conversation(all_data)
 
     if k:
-        for setting in SETTINGS:
-            database.add_setting(data=all_data, setting_name=setting, setting_status=SETTINGS[setting])
+        for stng in SETTINGS:
+            database.add_setting(data=all_data, setting_name=stng, setting_status=SETTINGS[stng])
 
     # вызываем отправку лога
     await send_log(all_data)
@@ -804,7 +804,7 @@ async def copy(message: Message):
 
 """
 ------------------------------------------------------------------------------------------------------------------------
-Команда копирует сообщение пользователя в беседе и отправляет от лица бота. 
+Команда изменяет значение настроек в беседе. 
 """
 
 
@@ -817,15 +817,15 @@ async def copy(message: Message):
     OnlyEnrolled()
 )
 async def setting(message: Message, args: Tuple):
-    async def send_log(data, setting_name, setting_status):
+    async def send_log(data, stgn, stts):
         # формируем лог
         logger.compose_log_data(
             initiator_name=data.get("initiator_name_tagged"),
             initiator_role=data.get("initiator_role"),
             peer_name=data.get("peer_name"),
             command_name=data.get("command_name"),
-            setting_name=setting_name,
-            setting_status=setting_status,
+            setting_name=stgn,
+            setting_status=stts,
             now_time=data.get("now_time"),
         )
 

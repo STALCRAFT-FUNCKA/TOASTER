@@ -3,7 +3,7 @@ from typing import Optional
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
 from database.sql_interface import Connection
 from vkbottle.bot import Bot
-from additionals.METASingleton import MetaSingleton
+from singltone import MetaSingleton
 
 
 class Logger(metaclass=MetaSingleton):
@@ -56,8 +56,6 @@ class Logger(metaclass=MetaSingleton):
         if initiator_role is not None:
             role_name = PERMISSION_LVL.get(initiator_role, "Неизвестная роль")
             log_lines.append(f"Роль: {initiator_role} - {role_name}")
-        if reason is not None:
-            log_lines.append(f"Причина: {reason}")
         if peer_name is not None:
             log_lines.append(f"Источник: {peer_name}")
         if command_name is not None:

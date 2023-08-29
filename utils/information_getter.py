@@ -1,6 +1,6 @@
 import time
 from vkbottle.bot import Bot, Message
-from additionals.METASingleton import MetaSingleton
+from singltone import MetaSingleton
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
 from database.sql_interface import Connection
 from utils.time_converter import Converter
@@ -50,10 +50,10 @@ class About(metaclass=MetaSingleton):
             cpid=None,
             ciid=None,
             ctid=None,
-            set_role = 0,
-            command = None,
-            time_delta = 0,
-            destination = None
+            set_role=0,
+            command=None,
+            time_delta=0,
+            destination=None
     ):
         if message is not None and cpid is None:
             peer_id = message.peer_id
@@ -110,7 +110,6 @@ class About(metaclass=MetaSingleton):
                 cmids = []
         else:
             cmids = []
-
 
         all_data = {
             "peer_id": peer_id,

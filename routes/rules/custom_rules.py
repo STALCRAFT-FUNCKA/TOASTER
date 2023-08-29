@@ -15,7 +15,7 @@ class HandleCommand(ABCRule[BaseMessageMin]):
             self,
             command_aliases: Optional[Tuple[str]] = None,
             prefixes: Optional[Tuple[str]] = None,
-            arg_count = 0
+            arg_count=0
     ):
         self.prefixes = prefixes or PREFIXES
         self.command_aliases = command_aliases or DEFAULT_ALIASES
@@ -78,7 +78,7 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
                 delete_for_all=True
             )
             message.deleted = True
-            return  True
+            return True
 
         except Exception as error:
             print("Rule aborted command completion:", error)
@@ -106,7 +106,7 @@ class CheckPermission(ABCRule[BaseMessageMin]):
 
 class IgnorePermission(ABCRule[BaseMessageMin]):
 
-    def __init__(self, ignore_from: int = 0, mode:str = "Target"):
+    def __init__(self, ignore_from: int = 0, mode: str = "Target"):
         self.ignore_from = ignore_from
         self.mode = mode
 
@@ -153,7 +153,7 @@ class IgnoreMention(ABCRule[BaseMessageMin]):
         peer_id = message.peer_id
 
         text = message.text
-        screen_name = text[text.find("[")+1:text.find("|")].replace("id", "")
+        screen_name = text[text.find("[") + 1:text.find("|")].replace("id", "")
         uid = await bot.api.users.get(screen_name)
         if uid:
             target_id = uid[0].id
@@ -208,10 +208,10 @@ class OnlyEnrolled(ABCRule[BaseMessageMin]):
         peer_id = message.peer_id
 
         if database.get_conversation(peer_id=peer_id, destination="LOG"):
-                return True
+            return True
 
         elif database.get_conversation(peer_id=peer_id, destination="CHAT"):
-                return True
+            return True
 
         else:
             title = f"Отказ в исполнении команды. Беседа не зарегистрирована."

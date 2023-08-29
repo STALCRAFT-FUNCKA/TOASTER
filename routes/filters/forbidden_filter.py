@@ -3,7 +3,7 @@ from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentTy
 from config import TOKEN, GROUP_ID, STUFF_ADMIN_ID, GROUP_URL
 from database.sql_interface import Connection
 from utils.chat_logger import Logger
-from rules.custom_rules import IgnorePermission, HandleIn
+from routes.rules.custom_rules import IgnorePermission, HandleIn
 from utils.information_getter import About
 from utils.time_converter import Converter
 
@@ -67,6 +67,7 @@ async def forbidden(message: Message):
             ('Allow_Picture', AttachmentType.PHOTO, 'Вложенная фотография'),
             ('Allow_Video', AttachmentType.VIDEO, 'Вложенное видео'),
             ('Allow_Music', AttachmentType.AUDIO, 'Вложенная музыка'),
+            ('Allow_Links', AttachmentType.LINK, 'Ссылающее вложение'),
             ('Allow_Voice', AttachmentType.AUDIO_MESSAGE, 'Голосовое сообщение'),
             ('Allow_Post', (AttachmentType.WALL_REPLY, AttachmentType.WALL), 'Репост'),
             ('Allow_Votes', AttachmentType.POLL, 'Вложенное голосование'),
@@ -93,16 +94,6 @@ async def forbidden(message: Message):
                     for msg in message.fwd_messages:
                         if message.from_id != msg.from_id:
                             reason = 'Переслано чужое сообщение'
-
-        # TODO: Добавить фильтр слов
-        if reason is None:
-            if database.get_setting(message.peer_id, 'Filter_Junk'):
-                text = message.text
-
-        # TODO: Добавить фильтр ссылок
-        if reason is None:
-            if database.get_setting(message.peer_id, 'Filter_Url'):
-                text = message.text
 
         if reason is not None:
             delta = converter.delta(0, "d")

@@ -5,7 +5,7 @@ from config import ALIASES, TOKEN, STUFF_ADMIN_ID, PREFIXES
 from utils.chat_logger import Logger
 from utils.information_getter import About
 from utils.time_converter import Converter
-from rules.custom_rules import (
+from routes.rules.custom_rules import (
     HandleCommand,
     CollapseCommand,
     AnswerCommand,

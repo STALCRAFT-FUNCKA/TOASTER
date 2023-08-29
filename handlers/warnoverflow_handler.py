@@ -1,5 +1,5 @@
 from config import TIME_COEFFICENT, GROUP_URL, STUFF_ADMIN_ID
-from additionals.ABCHandler import ABCHandler
+from handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
