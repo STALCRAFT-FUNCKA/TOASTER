@@ -4,22 +4,27 @@
 
 """
 Токен бота.
+Сообщество > управление > настройки > работа с API > создать ключ
+Указать ВСЕ галочки при выдаче доступов.
 """
-# TODO: Вписать его способ получения в доку
 TOKEN = 'vk1.a.zgY9PVhHltfqgBW-DGSbvizCe-pj3yqZyrSq3PDD-hRuRbIGALz2UN19tWaQRU8ANzSP12DPook-E9RrytgIG7k2wEIkUUDGOsCkFPq-PR_RmHyBCVthqdIg6I09K2WvRNTsQpifVF8-9-FKGWbrU87UFAEXp2aqh6LmOe5EqwMxbtOygx4yxC0I3k5sheMaOoM7r9hgOEdTAq8L3eeXAw'
 
 """
 ID группы, на которой инициализирован бот.
+Ссылку на сообщество можно найти в строке ссылки браузера. Ссылку указывать в формате vk.com/community_name
+ID группы: Сообщество > управление > настройки
 """
-# TODO: Вписать его способ получения в доку
+
 GROUP_ID = 218730916
 GROUP_URL = "vk.com/toaster"
 
 """
 ID главного админа.
 Важно! Здесь должно быть именно численное ID.
+ID стаф-админа определяет главного администратора с исключительными правами.
+Он может ВСЕ, без использования VK-admin.
+Так же будет указываться ссылка на него в репонда, чтобы помогать пользователям.
 """
-# TODO: Вписать его назначение
 STUFF_ADMIN_ID = 1
 
 """
@@ -80,6 +85,7 @@ SETTINGS = {
     'Allow_Picture': False,
     'Allow_Video': False,
     'Allow_Music': False,
+    'Allow_Links': False,
     'Allow_Voice': False,
     'Allow_Post': False,
     'Allow_Votes': False,
@@ -88,10 +94,10 @@ SETTINGS = {
     'Allow_Graffiti': False,
     'Allow_Sticker': False,
     'Allow_Reply': False,
+    'Filter_Curse': False,
     'Slow_Mode': False,
-    'Filter_Url': False,
-    'Filter_Junk': False,
     'Account_Age': False,
+    'Hard_Mode': False
 }
 
 """
@@ -128,5 +134,52 @@ ALIASES = {
     'unwarn': ('unwarn', 'разпред'),
     # ----------------------------------
     'setting': ('setting', 'настройка'),
-
 }
+
+"""
+Разрешенные и запрещенные ссылки.
+В режиме обычного модерирования: Выдается наказание только за ссылки из раздела CRITICAL
+В режиме Hard модерирования: Выдается наказание за ссылки из раздела CRITICAL. За все остальные ссылки - следует
+предупреждение. Исключением выступают ссылки из раздела ALLOWED - за них наказание не выдается.
+"""
+
+# Разрешены всегда
+ALLOWED_URL = (
+    'discord.com/invite/stalcraft',
+    'vk.com/stalcraft_official',
+    'vk.com/exbo_official',
+    't.me/stalcraft',
+    'www.tiktok.com/@stalcraft_official',
+    'www.youtube.com/EXBO_official',
+    'store.steampowered.com/app/1818450/STALCRAFT',
+    'www.twitch.tv/exbo_official'
+)
+
+ALLOWED_DOMAIN = (
+    'stalcraft.net',
+    'exbo.net',
+    'support.exbo.net',
+    'forum.exbo.net',
+)
+
+# Мут. Запрещены всегда.
+CRITICAL_URL = ()
+
+CRITICAL_DOMAIN = (
+    'https://yougame.biz',
+    'https://funpay.com',
+    'https://stalcase.ru'
+)
+
+"""
+Curse filter
+"""
+CURSE_WORDS = (
+    ' чр ',
+    ' фп ',
+    ' чит ',
+    ' читы ',
+    ' fp ',
+    ' фан пей ',
+    ' фан пэй ',
+)
