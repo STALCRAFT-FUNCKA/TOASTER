@@ -3,7 +3,7 @@ from config import TOKEN, GROUP_ID, STUFF_ADMIN_ID, GROUP_URL, ALLOWED_URL, ALLO
     CRITICAL_DOMAIN
 from database.sql_interface import Connection
 from utils.chat_logger import Logger
-from routes.rules.custom_rules import IgnorePermission, HandleIn
+from routes.rules.custom_rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils.information_getter import About
 from utils.time_converter import Converter
 from urlextract import URLExtract
@@ -19,6 +19,7 @@ converter = Converter()
 @bl.chat_message(
     IgnorePermission(ignore_from=1, mode="SELF"),
     HandleIn(handle_log=False, handle_chat=True, send_respond=False),
+    OnlyEnrolled(send_respond=False),
     blocking=False
 )
 async def url_filter(message: Message):
@@ -61,7 +62,7 @@ async def url_filter(message: Message):
         # отправляем лог
         await logger.log()
 
-    async def send_mute_respond(data):
+    async def send_warn_respond(data):
         title = f"@id{data.get('target_id')} (Пользователь) получил предупреждение.\n" \
                 f"Причина: {data.get('reason')}.\n" \
                 f"Текущее количество предупреждений: {data.get('target_warns')}/3.\n" \
@@ -69,8 +70,8 @@ async def url_filter(message: Message):
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
         await message.answer(title)
 
-    async def send_warn_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) был заблокирован.\n" \
+    async def send_mute_respond(data):
+        title = f"@id{data.get('target_id')} (Пользователь) был заглушен.\n" \
                 f"Причина: {data.get('reason')}.\n" \
                 f"Время снятия блокировки: {data.get('target_time')}\n" \
                 f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
@@ -86,22 +87,25 @@ async def url_filter(message: Message):
 
     extractor = URLExtract()
     urls = extractor.find_urls(message.text)
-    domains = [url.split("//")[-1].split("/")[0] for url in urls]
-    content = {f'{domains[i]}': f'{urls[i]}' for i in range(len(urls))}
+    urls = [url.split("//")[-1] for url in urls]
+    domains = [url.split("/")[0] for url in urls]
+    content = ((domains[i], urls[i]) for i in range(len(urls)))
+
+    print(content)
 
     if urls:
         reason = None
         hard_mode = database.get_setting(message.peer_id, 'Hard_Mode')
         for domain, url in content:
+            print(domain, url)
             if hard_mode:
                 if domain in ALLOWED_DOMAIN or url in ALLOWED_URL:
                     return
 
-            else:
-                if domain in CRITICAL_DOMAIN or url in CRITICAL_URL:
-                    reason = "Запрещенная ссылка"
+            if domain in CRITICAL_DOMAIN or url in CRITICAL_URL:
+                reason = "Запрещенная ссылка"
 
-        if reason is None:
+        if reason is None and hard_mode:
             reason = "Нежелательная ссылка"
             delta = converter.delta(0, "d")
             all_data = await about.get_all_info(
@@ -114,6 +118,7 @@ async def url_filter(message: Message):
             all_data["initiator_name"] = "Система"
             all_data["initiator_url"] = GROUP_URL
             all_data["chat_id"] = message.peer_id - 2000000000
+            all_data["target_warns"] += 1
             all_data["cmids"] = [message.conversation_message_id]
 
             database.add_warn(all_data)
@@ -121,7 +126,9 @@ async def url_filter(message: Message):
             await send_warn_respond(all_data)
             await send_warn_log(all_data, command="warn")
 
-        else:
+            await collapse(message)
+
+        elif reason is not None:
             delta = converter.delta(0, "d")
             all_data = await about.get_all_info(
                 cpid=message.peer_id,
@@ -140,4 +147,6 @@ async def url_filter(message: Message):
             await send_mute_respond(all_data)
             await send_mute_log(all_data, command="mute")
 
-        await collapse(message)
+            await collapse(message)
+
+
