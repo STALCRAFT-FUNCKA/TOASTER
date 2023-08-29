@@ -152,7 +152,8 @@ ALLOWED_URL = (
     'www.tiktok.com/@stalcraft_official',
     'www.youtube.com/EXBO_official',
     'store.steampowered.com/app/1818450/STALCRAFT',
-    'www.twitch.tv/exbo_official'
+    'www.twitch.tv/exbo_official',
+    'disk.yandex.ru/d/2LNeePtemDTsNg'
 )
 
 ALLOWED_DOMAIN = (
@@ -160,15 +161,18 @@ ALLOWED_DOMAIN = (
     'exbo.net',
     'support.exbo.net',
     'forum.exbo.net',
+    'stalcraftmap.net',
+    'stalcraft.wiki',
+    'stalcalc.net'
 )
 
 # Мут. Запрещены всегда.
 CRITICAL_URL = ()
 
 CRITICAL_DOMAIN = (
-    'https://yougame.biz',
-    'https://funpay.com',
-    'https://stalcase.ru'
+    'yougame.biz',
+    'funpay.com',
+    'stalcase.ru'
 )
 
 """

@@ -203,6 +203,8 @@ class HandleIn(ABCRule[BaseMessageMin]):
 
 
 class OnlyEnrolled(ABCRule[BaseMessageMin]):
+    def __init__(self, send_respond=True):
+        self.send_respond = send_respond
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
@@ -214,6 +216,7 @@ class OnlyEnrolled(ABCRule[BaseMessageMin]):
             return True
 
         else:
-            title = f"Отказ в исполнении команды. Беседа не зарегистрирована."
-            await message.answer(title)
+            if self.send_respond:
+                title = f"Отказ в исполнении команды. Беседа не зарегистрирована."
+                await message.answer(title)
             return False

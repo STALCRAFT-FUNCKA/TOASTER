@@ -3,7 +3,7 @@ from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentTy
 from config import TOKEN, GROUP_ID, STUFF_ADMIN_ID, GROUP_URL
 from database.sql_interface import Connection
 from utils.chat_logger import Logger
-from routes.rules.custom_rules import IgnorePermission, HandleIn
+from routes.rules.custom_rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils.information_getter import About
 from utils.time_converter import Converter
 
@@ -18,6 +18,7 @@ converter = Converter()
 @bl.chat_message(
     IgnorePermission(ignore_from=1, mode="SELF"),
     HandleIn(handle_log=False, handle_chat=True, send_respond=False),
+    OnlyEnrolled(send_respond=False),
     blocking=False
 )
 async def forbidden(message: Message):
