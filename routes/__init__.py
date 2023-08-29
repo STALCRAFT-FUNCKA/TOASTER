@@ -1,11 +1,24 @@
 from . import (
     commands,
-    commands_mention,
-    message_queue,
-    forbidden,
-    mutepunish,
-    account_age
+    commands_mention
 )
+from .filters import (
+    mute_filter,
+    queue_filter,
+    url_filter,
+    curse_filter,
+    age_filter,
+    forbidden_filter)
 
+# Сначала фильтры, потом блок команд
+labelers = [
+    queue_filter.bl,
+    forbidden_filter.bl,
+    curse_filter.bl,
+    url_filter.bl,
+    age_filter.bl,
+    mute_filter.bl,
 
-labelers = [message_queue.bl, forbidden.bl, account_age.bl, mutepunish.bl, commands.bl, commands_mention.bl]
+    commands.bl,
+    commands_mention.bl
+]
