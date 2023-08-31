@@ -141,6 +141,7 @@ ALIASES = {
 В режиме обычного модерирования: Выдается наказание только за ссылки из раздела CRITICAL
 В режиме Hard модерирования: Выдается наказание за ссылки из раздела CRITICAL. За все остальные ссылки - следует
 предупреждение. Исключением выступают ссылки из раздела ALLOWED - за них наказание не выдается.
+Внимание: ССЫЛКИ УКАЗЫВАТЬ БЕЗ ПРОТОКОЛА HTTP (HTTPS)
 """
 
 # Разрешены всегда
@@ -172,7 +173,20 @@ CRITICAL_URL = ()
 CRITICAL_DOMAIN = (
     'yougame.biz',
     'funpay.com',
-    'stalcase.ru'
+    'stalcase.ru',
+    'www.pwn.ac',
+    'scmarket.ru',
+    'cubedrop.ru',
+    'www.unknowncheats.me',
+    'stalcraftgurus.mysellix.io',
+    'ezyhack.ru',
+    'mir-hack.ru',
+    'gamexworld.com',
+    'trainer-engine.ru',
+    'www.game-rpg.ru,'
+    'plati.market',
+    'stolcraft.online',
+    'cheatermad.com',
 )
 
 """
