@@ -1,14 +1,5 @@
-from . import (
-    commands,
-    commands_mention
-)
-from .filters import (
-    mute_filter,
-    queue_filter,
-    url_filter,
-    curse_filter,
-    age_filter,
-    forbidden_filter)
+from . import (commands, commands_mention)
+from .filters import *
 
 # Сначала фильтры, потом блок команд
 labelers = [
