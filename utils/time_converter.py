@@ -1,4 +1,6 @@
 import datetime
+import time
+
 from singltone import MetaSingleton
 from config import TIME_COEFFICENT
 
@@ -14,6 +16,10 @@ class Converter(metaclass=MetaSingleton):
         if MSK_time.find('.') != -1:
             MSK_time = MSK_time[0:MSK_time.find('.')]
         return MSK_time
+
+    @staticmethod
+    def now():
+        return time.time()
 
     @staticmethod
     def delta(time, coefficent):
