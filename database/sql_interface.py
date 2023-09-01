@@ -25,7 +25,6 @@ class Connection(metaclass=MetaSingleton):
             self.cursor.execute('''PRAGMA foreign_keys=ON''')
             self.connection.commit()
 
-
         except sqlite3.Error as error:
             if allow_debug_text:
                 print("Ошибка при подключении к SQLite", error)
