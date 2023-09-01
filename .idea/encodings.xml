@@ -4,6 +4,8 @@
     <file url="file://$PROJECT_DIR$/Alert/Alerter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/LICENSE" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/config.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/database/orm/orm.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/database/proc/proc.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/database/sql_interface.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/database/sql_tables.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/handlers/__init__.py" charset="UTF-8" />
@@ -29,7 +31,6 @@
     <file url="file://$PROJECT_DIR$/routes/filters/mute_filter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/filters/queue_filter.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/filters/url_filter.py" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/routes/rules/custom_rules.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/routes/rules/custom_rules.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/singltone.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/utils/chat_logger.py" charset="UTF-8" />

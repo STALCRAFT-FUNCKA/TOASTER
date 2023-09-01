@@ -2,18 +2,8 @@ from typing import Tuple
 from vkbottle.bot import Bot, BotLabeler, Message
 from database.sql_interface import Connection
 from config import ALIASES, TOKEN, STUFF_ADMIN_ID, PREFIXES
-from utils.chat_logger import Logger
-from utils.information_getter import About
-from utils.time_converter import Converter
-from routes.rules.custom_rules import (
-    HandleCommand,
-    CollapseCommand,
-    AnswerCommand,
-    CheckPermission,
-    HandleIn,
-    OnlyEnrolled,
-    IgnoreMention
-)
+from utils import *
+from rules import *
 
 bot = Bot(token=TOKEN)
 bl = BotLabeler()

@@ -2,10 +2,8 @@ from vkbottle.bot import Bot, BotLabeler, Message
 from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentType
 from config import TOKEN, GROUP_ID, STUFF_ADMIN_ID, GROUP_URL
 from database.sql_interface import Connection
-from utils.chat_logger import Logger
-from routes.rules.custom_rules import IgnorePermission, HandleIn, OnlyEnrolled
-from utils.information_getter import About
-from utils.time_converter import Converter
+from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
+from utils import *
 
 bot = Bot(token=TOKEN)
 bl = BotLabeler()
