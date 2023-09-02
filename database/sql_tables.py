@@ -7,7 +7,8 @@ conversations = """CREATE TABLE IF NOT EXISTS conversations
 
 permissions = """CREATE TABLE IF NOT EXISTS permissions
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     target_id INTEGER, 
                     target_name TEXT,
                     target_lvl INTEGER,
@@ -16,15 +17,17 @@ permissions = """CREATE TABLE IF NOT EXISTS permissions
 
 settings = """CREATE TABLE IF NOT EXISTS settings
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     setting_name TEXT,
                     setting_status INTEGER,
-                    CONSTRAINT someone UNIQUE (peer_id, setting_name) ON CONFLICT REPLACE
+                    CONSTRAINT someone UNIQUE (peer_id, setting_name) ON CONFLICT IGNORE
                 );"""
 
 kicked = """CREATE TABLE IF NOT EXISTS kicked
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     initiator_id INTEGER,
                     initiator_name TEXT,
                     target_id INTEGER,
@@ -35,7 +38,8 @@ kicked = """CREATE TABLE IF NOT EXISTS kicked
 
 banned = """CREATE TABLE IF NOT EXISTS banned
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     initiator_id INTEGER,
                     initiator_name TEXT,
                     target_id INTEGER,
@@ -47,7 +51,8 @@ banned = """CREATE TABLE IF NOT EXISTS banned
 
 muted = """CREATE TABLE IF NOT EXISTS muted
                (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     initiator_id INTEGER,
                     initiator_name TEXT,
                     target_id INTEGER,
@@ -59,7 +64,8 @@ muted = """CREATE TABLE IF NOT EXISTS muted
 
 warned = """CREATE TABLE IF NOT EXISTS warned
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     initiator_id INTEGER,
                     initiator_name TEXT,
                     target_id INTEGER,
@@ -72,7 +78,8 @@ warned = """CREATE TABLE IF NOT EXISTS warned
 
 queue = """CREATE TABLE IF NOT EXISTS queue
                 (
-                    peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
+                    id INTEGER PRIMARY KEY,
+                    peer_id INTEGER REFERENCES conversations (peer_id) ON DELETE CASCADE,
                     target_id INTEGER,
                     target_name TEXT,
                     send_time INTEGER,
