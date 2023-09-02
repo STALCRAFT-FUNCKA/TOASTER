@@ -1,7 +1,7 @@
 from typing import Tuple
 from vkbottle.bot import BotLabeler, Message
 from database import Processor
-from config import ALIASES, PREFIXES, PERMISSION_LVL
+from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
 from utils import *
 from rules import *
 
@@ -22,7 +22,7 @@ processor = Processor()
     HandleCommand(ALIASES['terminate'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Administrator
+    CheckPermission(access_to=PERMISSION_ACCESS['terminate']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -66,7 +66,7 @@ async def terminate(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['permission'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['permission']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=True, handle_chat=True),
     OnlyEnrolled()
@@ -121,7 +121,7 @@ async def permission(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['kick'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['kick']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -166,7 +166,7 @@ async def kick(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['ban'], PREFIXES, 3),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['ban']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -214,7 +214,7 @@ async def ban(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unban'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['unban']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -260,7 +260,7 @@ async def unban(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['mute'], PREFIXES, 3),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['mute']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -307,7 +307,7 @@ async def mute(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unmute'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['unmute']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -353,7 +353,7 @@ async def unmute(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['warn'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['warn']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -396,7 +396,7 @@ async def warn(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unwarn'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['unwarn']),
     IgnoreMention(ignore_from=1),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
