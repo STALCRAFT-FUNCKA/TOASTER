@@ -2,12 +2,7 @@ from typing import Optional, Union, Tuple
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
-from database import Processor
-
-bot = Bot(token=TOKEN)
-processor = Processor()
-
-DEFAULT_ALIASES = ["Command", "command"]
+from database.orm import DataBase
 
 
 class HandleCommand(ABCRule[BaseMessageMin]):
@@ -18,9 +13,11 @@ class HandleCommand(ABCRule[BaseMessageMin]):
             arg_count=0
     ):
         self.prefixes = prefixes or PREFIXES
-        self.command_aliases = command_aliases or DEFAULT_ALIASES
+        self.command_aliases = command_aliases
         self.args_count = arg_count
         self.sep = " "
+
+        self.bot = Bot(token=TOKEN)
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         text = message.text
@@ -49,6 +46,8 @@ class AnswerCommand(ABCRule[BaseMessageMin]):
         self.use_reply = use_reply
         self.use_fwd = use_fwd
 
+        self.bot = Bot(token=TOKEN)
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         # Может быть упрощено.
         if message.reply_message is not None:
@@ -69,9 +68,12 @@ class AnswerCommand(ABCRule[BaseMessageMin]):
 
 
 class CollapseCommand(ABCRule[BaseMessageMin]):
+    def __init__(self):
+        self.bot = Bot(token=TOKEN)
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         try:
-            await bot.api.messages.delete(
+            await self.bot.api.messages.delete(
                 group_id=GROUP_ID,
                 peer_id=message.peer_id,
                 cmids=message.conversation_message_id,
@@ -91,6 +93,8 @@ class CheckPermission(ABCRule[BaseMessageMin]):
     def __init__(self, access_to: int = 0):
         self.access_to = access_to
 
+        self.database = DataBase()
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
         initiator_id = message.from_id
@@ -98,7 +102,13 @@ class CheckPermission(ABCRule[BaseMessageMin]):
         if initiator_id == STUFF_ADMIN_ID:
             return True
 
-        if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=initiator_id) >= self.access_to:
+        lvl = self.database.permissions.select(
+            ("target_lvl",),
+            peer_id=peer_id,
+            target_id=initiator_id
+        )
+        lvl = lvl[0][0] if lvl else 0
+        if lvl >= self.access_to:
             return True
 
         return False
@@ -110,6 +120,8 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
         self.ignore_from = ignore_from
         self.mode = mode
 
+        self.database = DataBase()
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
 
@@ -120,10 +132,15 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
                 if target_id == STUFF_ADMIN_ID:
                     return False
 
-                if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
+                lvl = self.database.permissions.select(
+                    ("target_lvl",),
+                    peer_id=peer_id,
+                    target_id=target_id
+                )
+                lvl = lvl[0][0] if lvl else 0
+                if lvl < self.ignore_from:
                     return True
 
-            # TODO: Пофиксить
             elif message.fwd_messages:
                 for msg in message.fwd_messages:
                     target_id = msg.from_id
@@ -131,8 +148,16 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
                     if target_id == STUFF_ADMIN_ID:
                         return False
 
-                    if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
-                        return True
+                    lvl = self.database.permissions.select(
+                        ("target_lvl",),
+                        peer_id=peer_id,
+                        target_id=target_id
+                    )
+                    lvl = lvl[0][0] if lvl else 0
+                    if lvl >= self.ignore_from:
+                        return False
+
+                return True
 
         elif self.mode == "SELF":
             initiator_id = message.from_id
@@ -140,7 +165,13 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
             if initiator_id == STUFF_ADMIN_ID:
                 return True
 
-            if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=initiator_id) < self.ignore_from:
+            lvl = self.database.permissions.select(
+                ("target_lvl",),
+                peer_id=peer_id,
+                target_id=initiator_id
+            )
+            lvl = lvl[0][0] if lvl else 0
+            if lvl < self.ignore_from:
                 return True
 
         return False
@@ -150,19 +181,28 @@ class IgnoreMention(ABCRule[BaseMessageMin]):
     def __init__(self, ignore_from: int = 0):
         self.ignore_from = ignore_from
 
+        self.bot = Bot(token=TOKEN)
+        self.database = DataBase()
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
 
         text = message.text
         screen_name = text[text.find("[") + 1:text.find("|")].replace("id", "")
-        uid = await bot.api.users.get(screen_name)
+        uid = await self.bot.api.users.get(screen_name)
         if uid:
             target_id = uid[0].id
 
             if target_id == STUFF_ADMIN_ID:
                 return True
 
-            if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
+            lvl = self.database.permissions.select(
+                ("target_lvl",),
+                peer_id=peer_id,
+                target_id=target_id
+            )
+            lvl = lvl[0][0] if lvl else 0
+            if lvl < self.ignore_from:
                 return True
 
         return False
@@ -175,11 +215,17 @@ class HandleIn(ABCRule[BaseMessageMin]):
         self.handle_chat = handle_chat
         self.send_respond = send_respond
 
+        self.database = DataBase()
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
-        destination = "LOG"
 
-        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type=destination):
+        peer_type = "LOG"
+        if self.database.conversations.select(
+            ("peer_name",),
+            peer_id=peer_id,
+            peer_type=peer_type
+        ):
             if self.handle_log:
                 return True
 
@@ -189,8 +235,12 @@ class HandleIn(ABCRule[BaseMessageMin]):
                     await message.answer(title)
                 return False
 
-        destination = "CHAT"
-        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type=destination):
+        peer_type = "CHAT"
+        if self.database.conversations.select(
+            ("peer_name",),
+            peer_id=peer_id,
+            peer_type=peer_type
+        ):
             if self.handle_chat:
                 return True
 
@@ -207,13 +257,23 @@ class OnlyEnrolled(ABCRule[BaseMessageMin]):
     def __init__(self, send_respond=True):
         self.send_respond = send_respond
 
+        self.database = DataBase()
+
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
 
-        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type="LOG"):
+        if self.database.conversations.select(
+            ("peer_name",),
+            peer_id=peer_id,
+            peer_type="LOG"
+        ):
             return True
 
-        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type="CHAT"):
+        if self.database.conversations.select(
+            ("peer_name",),
+            peer_id=peer_id,
+            peer_type="CHAT"
+        ):
             return True
 
         if self.send_respond:
