@@ -2,10 +2,10 @@ from typing import Optional, Union, Tuple
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
-from database.sql_interface import Connection
+from database import Processor
 
 bot = Bot(token=TOKEN)
-database = Connection('database/database.db')
+processor = Processor()
 
 DEFAULT_ALIASES = ["Command", "command"]
 
@@ -98,7 +98,7 @@ class CheckPermission(ABCRule[BaseMessageMin]):
         if initiator_id == STUFF_ADMIN_ID:
             return True
 
-        if database.get_permission(peer_id=peer_id, user_id=initiator_id) >= self.access_to:
+        if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=initiator_id) >= self.access_to:
             return True
 
         return False
@@ -118,19 +118,20 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
                 target_id = message.reply_message.from_id
 
                 if target_id == STUFF_ADMIN_ID:
+                    return False
+
+                if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
                     return True
 
-                if database.get_permission(peer_id=peer_id, user_id=target_id) < self.ignore_from:
-                    return True
-
+            # TODO: Пофиксить
             elif message.fwd_messages:
                 for msg in message.fwd_messages:
                     target_id = msg.from_id
 
                     if target_id == STUFF_ADMIN_ID:
-                        return True
+                        return False
 
-                    if database.get_permission(peer_id=peer_id, user_id=target_id) < self.ignore_from:
+                    if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
                         return True
 
         elif self.mode == "SELF":
@@ -139,7 +140,7 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
             if initiator_id == STUFF_ADMIN_ID:
                 return True
 
-            if database.get_permission(peer_id=peer_id, user_id=initiator_id) < self.ignore_from:
+            if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=initiator_id) < self.ignore_from:
                 return True
 
         return False
@@ -161,7 +162,7 @@ class IgnoreMention(ABCRule[BaseMessageMin]):
             if target_id == STUFF_ADMIN_ID:
                 return True
 
-            if database.get_permission(peer_id=peer_id, user_id=target_id) < self.ignore_from:
+            if processor.subproc.permission_get_sub(peer_id=peer_id, target_id=target_id) < self.ignore_from:
                 return True
 
         return False
@@ -178,7 +179,7 @@ class HandleIn(ABCRule[BaseMessageMin]):
         peer_id = message.peer_id
         destination = "LOG"
 
-        if database.get_conversation(peer_id=peer_id, destination=destination):
+        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type=destination):
             if self.handle_log:
                 return True
 
@@ -189,7 +190,7 @@ class HandleIn(ABCRule[BaseMessageMin]):
                 return False
 
         destination = "CHAT"
-        if database.get_conversation(peer_id=peer_id, destination=destination):
+        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type=destination):
             if self.handle_chat:
                 return True
 
@@ -209,14 +210,13 @@ class OnlyEnrolled(ABCRule[BaseMessageMin]):
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
 
-        if database.get_conversation(peer_id=peer_id, destination="LOG"):
+        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type="LOG"):
             return True
 
-        elif database.get_conversation(peer_id=peer_id, destination="CHAT"):
+        if processor.subproc.conversation_get_sub(peer_id=peer_id, peer_type="CHAT"):
             return True
 
-        else:
-            if self.send_respond:
-                title = f"Отказ в исполнении команды. Беседа не зарегистрирована."
-                await message.answer(title)
-            return False
+        if self.send_respond:
+            title = f"Отказ в исполнении команды. Беседа не зарегистрирована."
+            await message.answer(title)
+        return False
