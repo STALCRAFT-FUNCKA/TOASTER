@@ -1,7 +1,7 @@
 from vkbottle.bot import Bot
 from singltone import MetaSingleton
 from config import GROUP_ID, TOKEN
-from utils.convertor import Converter
+from utils.converter import Converter
 
 
 class Info(metaclass=MetaSingleton):
