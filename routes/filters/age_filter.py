@@ -2,7 +2,8 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 from vkbottle.bot import BotLabeler, Message
-from database import Processor
+from database.orm import DataBase
+from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
@@ -10,6 +11,7 @@ from utils import *
 bl = BotLabeler()
 
 info = Info()
+database = DataBase()
 converter = Converter()
 processor = Processor()
 
@@ -21,17 +23,21 @@ processor = Processor()
     blocking=False
 )
 async def age_filter(message: Message):
-    is_muted = processor.subproc.mute_get_sub(
+    is_muted = database.muted.select(
+        ("target_name",),
         peer_id=message.peer_id,
         target_id=message.from_id
     )
     if is_muted:
         return
 
-    check = processor.subproc.setting_get_sub(
+    check = database.settings.select(
+        ("setting_status",),
         peer_id=message.peer_id,
-        setting_name="Age_Check"
+        setting_name="Account_Age"
     )
+    check = check[0][0] if check else False
+    check = True if check == "True" else False
     if not check:
         return
 
