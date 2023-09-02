@@ -1,9 +1,9 @@
-from .chat_logger import Logger
-from .time_converter import Converter
-from .information_getter import About
+from .logger import Logger
+from .convertor import Converter
+from .informer import Info
 
 __all__ = (
     "Logger",
     "Converter",
-    "About"
+    "Info"
 )
