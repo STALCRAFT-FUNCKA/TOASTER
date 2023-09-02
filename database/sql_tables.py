@@ -73,8 +73,6 @@ warned = """CREATE TABLE IF NOT EXISTS warned
 queue = """CREATE TABLE IF NOT EXISTS queue
                 (
                     peer_id INTEGER PRIMARY KEY REFERENCES conversations (peer_id) ON DELETE CASCADE,
-                    initiator_id INTEGER,
-                    initiator_name TEXT,
                     target_id INTEGER,
                     target_name TEXT,
                     send_time INTEGER,
