@@ -1,16 +1,15 @@
 from typing import Tuple
-from vkbottle.bot import Bot, BotLabeler, Message
-from database.sql_interface import Connection
-from config import ALIASES, TOKEN, STUFF_ADMIN_ID, PREFIXES
+from vkbottle.bot import BotLabeler, Message
+from database import Processor
+from config import ALIASES, PREFIXES, PERMISSION_LVL
 from utils import *
 from rules import *
 
-bot = Bot(token=TOKEN)
 bl = BotLabeler()
-database = Connection('database/database.db')
-logger = Logger()
-about = About()
+
+info = Info()
 converter = Converter()
+processor = Processor()
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -29,37 +28,10 @@ converter = Converter()
     OnlyEnrolled()
 )
 async def terminate(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            target_name=data.get("target_name_tagged"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await bot.api.messages.send(
-            chat_id=all_data.get("chat_id"),
-            message=title,
-            random_id=0
-        )
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -68,28 +40,20 @@ async def terminate(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=terminate, ctid=cuid)
+    context = {
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "terminate",
+        "now_time": converter.now(),
+    }
 
-    for peer_id in database.get_conversation(peer_id=-1, destination="CHAT"):
-        all_data["peer_id"] = peer_id
-        all_data["chat_id"] = peer_id - 2000000000
-
-        # проверяем наличие пользователя в бд
-        if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
-            if all_data["peer_name"] != "Все беседы":
-                all_data["peer_name"] = "Все беседы"
-                # формируем лог
-                await send_log(all_data)
-
-            # отправляем уведомление в чат
-            await send_respond(all_data)
-
-            # Выдаем кик
-            database.add_kick(all_data)
-
-            # Исключаем из беседы
-            await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+    await processor.terminate_proc(context, log=True, respond=True)
 
 
 """
@@ -108,25 +72,10 @@ async def terminate(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged)"),
-            set_role=data.get("target_set_role"),
-            now_time=data.get("now_time")
-        )
-
-        # отправляем лог
-        await logger.log()
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -136,17 +85,29 @@ async def permission(message: Message, args: Tuple[str]):
         return
 
     try:
-        # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]), ctid=cuid)
-
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # добавляем пользователю группу прав
-        database.set_permission(all_data)
-
+        lvl = int(args[0])
+        if lvl not in PERMISSION_LVL.keys():
+            lvl = 0
     except Exception as error:
-        print("Command aborted: ", error)
+        print("Setting standard lvl: ", error)
+        lvl = 0
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": "Все беседы",
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "target_lvl": lvl,
+        "command_name": "permission",
+        "now_time": converter.now(),
+    }
+
+    await processor.kick_proc(context, log=True, respond=True)
 
 
 """
@@ -166,33 +127,10 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            target_name=data.get("target_name_tagged"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) исключен из беседы навсегда.\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await message.answer(title)
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -201,23 +139,21 @@ async def kick(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=kick, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "kick",
+        "now_time": converter.now(),
+    }
 
-    # проверяем наличие пользователя в бд
-    if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
-        # формируем лог
-        await send_log(all_data)
-
-        # отправляем уведомление в чат
-        await send_respond(all_data)
-
-        # Выдаем кик
-        database.add_kick(all_data)
-
-        # Исключаем из беседы
-        await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
-
+    await processor.kick_proc(context, log=True, respond=True)
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -236,37 +172,10 @@ async def kick(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            now_time=data.get("now_time"),
-            target_time=data.get("target_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) временно заблокирован.\n" \
-                f"Время снятия блокировки: {data.get('target_time')}\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await message.answer(title)
-
-        # выводим дельту времени
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -275,24 +184,30 @@ async def ban(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем дельту времени
-    delta = converter.delta(args[0], args[1])
+    try:
+        time = int(args[0])
+        coefficent = args[1]
+    except Exception as error:
+        print("Wrong args format. Setting default punish time: ", error)
+        time = 1
+        coefficent = "h"
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=ban, time_delta=delta, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "ban",
+        "now_time": converter.now(),
+        "target_time": converter.now() + converter.delta(time, coefficent),
+    }
 
-    if not database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # отправляем уведомление в чат
-        await send_respond(all_data)
-
-        # выдаем блокировку
-        database.add_ban(all_data)
-
-        # исключаем из беседы
-        await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+    await processor.ban_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -305,24 +220,10 @@ async def ban(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unban(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            now_time=data.get("now_time"),
-        )
-
-        # отправляем лог
-        await logger.log()
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -331,15 +232,21 @@ async def unban(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unban, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "unban",
+        "now_time": converter.now(),
+    }
 
-    if database.get_ban(all_data.get("peer_id"), all_data.get("target_id")):
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # снимаем блокировку
-        database.remove_ban(all_data.get("peer_id"), all_data.get("target_id"))
+    await processor.unban_proc(context, log=True, respond=False)
 
 
 """
@@ -359,60 +266,41 @@ async def unban(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            now_time=data.get("now_time"),
-            target_time=data.get("target_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) временно заглушен.\n" \
-                f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
-                f"Время снятия заглушения: {data.get('target_time')}\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await message.answer(title)
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[2])
     if cuid is None:
         print("Command aborted: Wrong mention")
         return
 
-    # выводим дельту времени
-    delta = converter.delta(args[0], args[1])
+    try:
+        time = int(args[0])
+        coefficent = args[1]
+    except Exception as error:
+        print("Wrong args format. Setting default punish time: ", error)
+        time = 1
+        coefficent = "h"
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=mute, time_delta=delta, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "mute",
+        "now_time": converter.now(),
+        "target_time": converter.now() + converter.delta(time, coefficent),
+    }
 
-    # проверяем наличие пользователя в базе данных
-    if not database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # отправляем уведомление в чат
-        await send_respond(all_data)
-
-        # выдаем блокировку
-        database.add_mute(all_data)
+    await processor.mute_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -425,29 +313,10 @@ async def mute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unmute(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            now_time=data.get("now_time"),
-            target_time=data.get("target_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -456,16 +325,21 @@ async def unmute(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unmute, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "unmute",
+        "now_time": converter.now(),
+    }
 
-    # проверяем наличие пользователя в базе данных
-    if database.get_mute(all_data.get("peer_id"), all_data.get("target_id")):
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # выдаем блокировку
-        database.remove_mute(all_data.get("peer_id"), all_data.get("target_id"))
+    await processor.unmute_proc(context, log=True, respond=False)
 
 
 """
@@ -485,37 +359,10 @@ async def unmute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def warn(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            target_warns=data.get("target_warns"),
-            now_time=data.get("now_time"),
-            target_time=data.get("target_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) получил предупреждение.\n" \
-                f"Текущее количество предупреждений: {data.get('target_warns')}/3.\n" \
-                f"Время снятия предупреждений: {data.get('target_time')}\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await message.answer(title)
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -524,23 +371,25 @@ async def warn(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # выводим дельту времени
-    delta = converter.delta(0, "d")
+    time = 1
+    coefficent = "d"
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=warn, time_delta=delta, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "warn",
+        "now_time": converter.now(),
+        "target_time": converter.now() + converter.delta(time, coefficent),
+    }
 
-    # инкриминируем предупреждение
-    all_data["target_warns"] += 1
-
-    # вызываем отправку лога
-    await send_log(all_data)
-
-    # отправляем уведомление
-    await send_respond(all_data)
-
-    # выдаем предупреждение
-    database.add_warn(all_data)
+    await processor.warn_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -553,29 +402,10 @@ async def warn(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unwarn(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged"),
-            target_warns=data.get("target_warns"),
-            now_time=data.get("now_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
-
-        # отправляем лог
-        await logger.log()
-
     async def get_cuid(arg):
         screen_name = arg.replace("@", "")
         screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await about.get_user_id(screen_name=screen_name)
+        uid = await info.user_id(screen_name=screen_name)
         return uid
 
     # Получаем кастомный id пользователя
@@ -584,15 +414,18 @@ async def unwarn(message: Message, args: Tuple[str]):
         print("Command aborted: Wrong mention")
         return
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=unwarn, ctid=cuid)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "unwarn",
+        "now_time": converter.now(),
+    }
 
-    # инкриминируем предупреждение
-    if all_data.get("target_warns") != 0:
-        all_data["target_warns"] -= 1
-
-        # вызываем отправку логаы
-        await send_log(all_data)
-
-        # выдаем предупреждение
-        database.remove_warn(all_data.get("peer_id"), all_data.get("target_id"))
+    await processor.unwarn_proc(context, log=True, respond=True)
