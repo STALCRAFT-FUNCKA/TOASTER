@@ -17,7 +17,6 @@ class Connection:
             self.cursor = self.connection.cursor()
             if allow_debug_text:
                 print("База данных успешно подключена к SQLite")
-                print(self)
 
             self._fill_std_form()
 
@@ -56,8 +55,7 @@ class BaseTable:
     def select(self, fields: tuple, **rows):
         summary_fields = ', '.join(fields)
         summary_rows = ' AND '.join(self._get_ratio(rows))
-        query = f"SELECT ({summary_fields}) FROM {self.table_name} WHERE {summary_rows}"
-        print(query)
+        query = f"SELECT {summary_fields} FROM {self.table_name} WHERE {summary_rows}"
         self.cur.execute(query)
         return self.cur.fetchall()
 
@@ -65,7 +63,6 @@ class BaseTable:
         summary_keys = ', '.join([key for key in rows.keys()])
         summary_values = ', '.join([f"'{value}'" for value in rows.values()])
         query = f"INSERT INTO {self.table_name} ({summary_keys}) VALUES ({summary_values})"
-        print(query)
         self.cur.execute(query)
         self.con.commit()
 
@@ -73,14 +70,12 @@ class BaseTable:
         summary_fields = ', '.join([f"{key} = '{value}'" for key, value in new_data.items()])
         summary_rows = ' AND '.join(self._get_ratio(rows))
         query = f"UPDATE {self.table_name} SET {summary_fields} WHERE {summary_rows}"
-        print(query)
         self.cur.execute(query)
         self.con.commit()
 
     def delete(self, **rows):
         summary_rows = ' AND '.join(self._get_ratio(rows))
         query = f"DELETE FROM {self.table_name} WHERE {summary_rows}"
-        print(query)
         self.cur.execute(query)
         self.con.commit()
 
@@ -89,8 +84,8 @@ class BaseTable:
 
 class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable
-    _database_path = "..\\{0}"
-    _tunnel = Connection(database_path="..\\{0}")
+    _database_path = "database\\{0}"
+    _tunnel = Connection(database_path=_database_path)
 
     @property
     def conversations(self):
