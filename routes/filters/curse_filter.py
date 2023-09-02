@@ -1,6 +1,7 @@
 from vkbottle.bot import BotLabeler, Message
-from config import GROUP_ID, GROUP_URL, CURSE_WORDS
-from database import Processor
+from config import CURSE_WORDS
+from database.orm import DataBase
+from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
@@ -8,6 +9,7 @@ from utils import *
 bl = BotLabeler()
 
 info = Info()
+database = DataBase()
 converter = Converter()
 processor = Processor()
 
@@ -19,12 +21,15 @@ processor = Processor()
     blocking=False
 )
 async def curse_filter(message: Message):
-    check = processor.subproc.setting_get_sub(
+    check = database.settings.select(
+        ("setting_status",),
         peer_id=message.peer_id,
-        setting_name="Age_Check"
+        setting_name="Filter_Curse"
     )
+    check = check[0][0] if check else False
+    check = True if check == "True" else False
     if not check:
-        return
+        return True
 
     for word in CURSE_WORDS:
         if word in message.text:

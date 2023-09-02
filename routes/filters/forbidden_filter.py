@@ -1,12 +1,15 @@
 from vkbottle.bot import BotLabeler, Message
 from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentType
-from database import Processor
+
+from database.orm import DataBase
+from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
 bl = BotLabeler()
 
 info = Info()
+database = DataBase()
 converter = Converter()
 processor = Processor()
 
@@ -18,7 +21,8 @@ processor = Processor()
     blocking=False
 )
 async def forbidden_filter(message: Message):
-    is_muted = processor.subproc.mute_get_sub(
+    is_muted = database.muted.select(
+        ("target_name",),
         peer_id=message.peer_id,
         target_id=message.from_id
     )
@@ -43,13 +47,27 @@ async def forbidden_filter(message: Message):
     if reason is None:
         if message.attachments:
             for setting, attachment_type, r in attachment_checks:
-                if not processor.subproc.setting_get_sub(message.peer_id, setting):
+                check = database.settings.select(
+                    ("setting_status",),
+                    peer_id=message.peer_id,
+                    setting_name=setting
+                )
+                check = check[0][0] if check else False
+                check = True if check == "True" else False
+                if not check:
                     for attachment in message.attachments:
                         if attachment.type == attachment_type:
                             reason = r
 
     if reason is None and (message.reply_message or message.fwd_messages):
-        if not processor.subproc.setting_get_sub(message.peer_id, 'Allow_Reply'):
+        check = database.settings.select(
+            ("setting_status",),
+            peer_id=message.peer_id,
+            setting_name='Allow_Reply'
+        )
+        check = check[0][0] if check else False
+        check = True if check == "True" else False
+        if not check:
             if message.reply_message:
                 if message.from_id != message.reply_message.from_id:
                     reason = 'Переслано чужое сообщение'
@@ -73,6 +91,7 @@ async def forbidden_filter(message: Message):
             "target_name": await info.user_name(message.from_id, tag=False),
             "target_nametag": await info.user_name(message.from_id, tag=True),
             "command_name": "warn",
+            "reason": reason,
             "now_time": converter.now(),
             "target_time": converter.now() + converter.delta(time, coefficent),
             "cmids": [message.conversation_message_id]

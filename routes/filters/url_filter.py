@@ -1,6 +1,7 @@
 from vkbottle.bot import BotLabeler, Message
 from config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
-from database import Processor
+from database.orm import DataBase
+from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 from urlextract import URLExtract
@@ -9,6 +10,7 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
+database = DataBase()
 processor = Processor()
 
 
@@ -27,7 +29,13 @@ async def url_filter(message: Message):
 
     if urls:
         reason = None
-        hard_mode = processor.subproc.setting_get_sub(message.peer_id, 'Hard_Mode')
+        hard_mode = database.settings.select(
+            ("setting_status",),
+            peer_id=message.peer_id,
+            setting_name='Hard_Mode'
+        )
+        hard_mode = hard_mode[0][0] if hard_mode else False
+        hard_mode = True if hard_mode == "True" else False
         for domain, url in content:
             if hard_mode:
                 if domain in ALLOWED_DOMAIN or url in ALLOWED_URL:
@@ -80,6 +88,5 @@ async def url_filter(message: Message):
                 "cmids": [message.conversation_message_id]
             }
 
+            await processor.unwarn_proc(context, log=False, respond=False)
             await processor.mute_proc(context, collapse=True, log=True, respond=True)
-
-

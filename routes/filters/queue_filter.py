@@ -1,5 +1,7 @@
 from vkbottle.bot import BotLabeler, Message
-from database import Processor
+
+from database.orm import DataBase
+from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
@@ -8,6 +10,7 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
+database = DataBase()
 processor = Processor()
 
 
@@ -18,17 +21,21 @@ processor = Processor()
     blocking=False
 )
 async def queue(message: Message):
-    is_muted = processor.subproc.mute_get_sub(
+    is_muted = database.muted.select(
+        ("target_name",),
         peer_id=message.peer_id,
         target_id=message.from_id
     )
     if is_muted:
         return
 
-    check = processor.subproc.setting_get_sub(
+    check = database.settings.select(
+        ("setting_status",),
         peer_id=message.peer_id,
-        setting_name="Slow_Mode"
+        setting_name='Slow_Mode'
     )
+    check = check[0][0] if check else False
+    check = True if check == "True" else False
     if not check:
         return
 
@@ -53,11 +60,12 @@ async def queue(message: Message):
         "cmids": [message.conversation_message_id]
     }
 
-    in_queue = processor.subproc.queue_get_sub(
+    in_queue = database.queue.select(
+        ("target_name",),
         peer_id=message.peer_id,
         target_id=message.from_id
     )
     if in_queue:
         await processor.warn_proc(context, collapse=True, log=True, respond=True)
     else:
-        await processor.subproc.queue_proc(context, log=False, respond=False)
+        await processor.queue_proc(context, log=False, respond=False)
