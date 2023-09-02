@@ -1,16 +1,14 @@
 from typing import Tuple
-from vkbottle.bot import Bot, BotLabeler, Message
-from database.sql_interface import Connection
+from vkbottle.bot import BotLabeler, Message
 from database import Processor
-from config import ALIASES, TOKEN, GROUP_ID, SETTINGS, STUFF_ADMIN_ID, PREFIXES
+from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
 from utils import *
 from rules import *
 
-bot = Bot(token=TOKEN)
+
 bl = BotLabeler()
-database = Connection('database/database.db')
-logger = Logger()
-info = About()
+
+info = Info()
 converter = Converter()
 processor = Processor()
 
@@ -24,15 +22,22 @@ processor = Processor()
     HandleCommand(ALIASES['reference'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=1),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['reference']),
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def reference(message: Message):
-    async def send_respond(title):
-        await message.answer(title)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": info.user_name(message.from_id, tag=False),
+        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "command_name": "reference",
+        "now_time": converter.now()
+    }
 
-    url = "https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md"
-    await send_respond(f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}")
+    await processor.reference_proc(context, log=False, respond=True)
 
 
 """
@@ -46,88 +51,44 @@ async def reference(message: Message):
     HandleCommand(ALIASES['enroll'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['enroll']),
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def enroll(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "enroll",
+        "now_time": converter.now(),
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(title):
-        await message.answer(title)
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=enroll, destination="CHAT")
-
-    # отправляем уведомления в чат
-    if database.get_conversation(all_data.get("peer_id"), destination="CHAT"):
-        k = False
-        await send_respond("Данные беседы обновлены.")
-    else:
-        k = True
-        await send_respond(f"Беседа зарегистрирована.")
-
-    # регистрируем беседу в БД
-    database.add_conversation(all_data)
-
-    if k:
-        for stng in SETTINGS:
-            database.add_setting(data=all_data, setting_name=stng, setting_status=SETTINGS[stng])
-
-    # вызываем отправку лога
-    await send_log(all_data)
+    await processor.enroll_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
     HandleCommand(ALIASES['drop'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['drop']),
     HandleIn(handle_log=False, handle_chat=True)
 )
 async def drop(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "drop",
+        "now_time": converter.now(),
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(title):
-        await message.answer(title)
-
-    # получаем предварительные данные
-    all_data = await about.get_all_info(message, command=drop, destination="CHAT")
-
-    if database.get_conversation(all_data.get("peer_id"), destination="CHAT"):
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # отправляем уведомление в чат
-        await send_respond("Регистрация данной беседы упразднена.")
-
-        # удаляем регистрацию беседы из БД
-        database.remove_conversation(all_data.get("peer_id"))
-
-    else:
-        # отправляем уведомление в чат
-        await send_respond("Данная беседа не зарегистрирована.")
+    await processor.drop_proc(context, log=True, respond=True)
 
 
 """
@@ -142,83 +103,44 @@ async def drop(message: Message):
     HandleCommand(ALIASES['enroll_log'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['enroll_log']),
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def enroll_log(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "enroll_log",
+        "now_time": converter.now(),
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(title):
-        await message.answer(title)
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=enroll_log, destination="LOG")
-
-    # регистрируем лог-чат в БД
-    database.add_conversation(all_data)
-
-    # отправляем уведомления в чат
-    if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
-        await send_respond("Данные беседы обновлены.")
-    else:
-        await send_respond(f"Беседа назначена в качестве лог-чата.")
-
-    # вызываем отправку лога
-    await send_log(all_data)
+    await processor.enroll_log_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
     HandleCommand(ALIASES['drop_log'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['drop_log']),
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def drop_log(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "drop_log",
+        "now_time": converter.now(),
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(title):
-        await message.answer(title)
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=drop_log, destination="LOG")
-
-    # проверяем наличие регистрации беседы в БД
-    if database.get_conversation(all_data.get("peer_id"), destination="LOG"):
-        # отправляем уведомление
-        await send_respond("Данный лог-чат упразднён.")
-
-        # удаляем регистрацию лог-чата
-        database.remove_conversation(all_data)
-
-        # вызываем отправку лога
-        await send_log(all_data)
-
-    else:
-        # отправляем уведомление
-        await send_respond("Беседа не является лог-чатом.")
+    await processor.drop_log_proc(context, log=True, respond=True)
 
 
 """
@@ -231,38 +153,35 @@ async def drop_log(message: Message):
     HandleCommand(ALIASES['permission'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['permission']),
     HandleIn(handle_log=True, handle_chat=True),
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            target_name=data.get("target_name_tagged)"),
-            set_role=data.get("target_set_role"),
-            now_time=data.get("now_time")
-        )
-
-        # отправляем лог
-        await logger.log()
-
     try:
-        # получаем все необходимые данные
-        all_data = await about.get_all_info(message, command=permission, set_role=int(args[0]))
-
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # добавляем пользователю группу прав
-        database.set_permission(all_data)
-
+        lvl = int(args[0])
+        if lvl not in PERMISSION_LVL.keys():
+            lvl = 0
     except Exception as error:
-        print("Command aborted: ", error)
+        print("Setting standard lvl: ", error)
+        lvl = 0
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": "Все беседы",
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": message.reply_message.from_id,
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_lvl": lvl,
+        "command_name": "permission",
+        "now_time": converter.now(),
+    }
+
+    await processor.kick_proc(context, log=True, respond=True)
 
 
 """
@@ -276,61 +195,27 @@ async def permission(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['terminate'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Administrator
+    CheckPermission(access_to=PERMISSION_ACCESS['terminate']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def terminate(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            target_name=data.get("target_name_tagged"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time")
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
+    context = {
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": message.reply_message.from_id,
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "command_name": "terminate",
+        "now_time": converter.now(),
+        "cmids": [message.reply_message.conversation_message_id]
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(data):
-        title = f"@id{data.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
-                f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-        await bot.api.messages.send(
-            chat_id=all_data.get("chat_id"),
-            message=title,
-            random_id=0
-        )
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=terminate)
-
-    for peer_id in database.get_conversation(peer_id=-1, destination="CHAT"):
-        all_data["peer_id"] = peer_id
-        all_data["chat_id"] = peer_id - 2000000000
-
-        # проверяем наличие пользователя в бд
-        if not database.get_kick(all_data.get("peer_id"), all_data.get("target_id")):
-            if all_data["peer_name"] != "Все беседы":
-                all_data["peer_name"] = "Все беседы"
-                # формируем лог
-                await send_log(all_data)
-
-            # отправляем уведомление в чат
-            await send_respond(all_data)
-
-            # Выдаем кик
-            database.add_kick(all_data)
-
-            # Исключаем из беседы
-            await bot.api.messages.remove_chat_user(all_data.get("chat_id"), all_data.get("target_id"))
+    await processor.terminate_proc(context, log=True, respond=True)
 
 
 """
@@ -344,7 +229,7 @@ async def terminate(message: Message):
     HandleCommand(ALIASES['kick'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['kick']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -353,17 +238,17 @@ async def kick(message: Message):
     # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "kick",
         "now_time": converter.now(),
-        "cmids": [message.conversation_message_id]
+        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.kick_proc(context, log=True, respond=True)
@@ -380,7 +265,7 @@ async def kick(message: Message):
     HandleCommand(ALIASES['ban'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['ban']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -397,18 +282,18 @@ async def ban(message: Message, args: Tuple[str]):
     # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "ban",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.conversation_message_id]
+        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.ban_proc(context, log=True, respond=True)
@@ -418,21 +303,21 @@ async def ban(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unban'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['unban']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def unban(message: Message):
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "unban",
         "now_time": converter.now(),
     }
@@ -450,7 +335,7 @@ async def unban(message: Message):
     HandleCommand(ALIASES['mute'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['mute']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -467,18 +352,18 @@ async def mute(message: Message, args: Tuple[str]):
     # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "mute",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.conversation_message_id]
+        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.mute_proc(context, log=True, respond=True)
@@ -488,7 +373,7 @@ async def mute(message: Message, args: Tuple[str]):
     HandleCommand(ALIASES['unmute'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=1),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['unmute']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -496,14 +381,14 @@ async def mute(message: Message, args: Tuple[str]):
 async def unmute(message: Message):
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "unmute",
         "now_time": converter.now(),
     }
@@ -522,7 +407,7 @@ async def unmute(message: Message):
     HandleCommand(ALIASES['warn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -533,18 +418,18 @@ async def warn(message: Message):
 
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "warn",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.conversation_message_id]
+        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.warn_proc(context, log=True, respond=True)
@@ -554,24 +439,24 @@ async def warn(message: Message):
     HandleCommand(ALIASES['unwarn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def unwarn(message: Message):
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "target_id": message.reply_message.from_id,
-        "target_name": info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": info.user_name(message.reply_message.from_id, tag=True),
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "unwarn",
         "now_time": converter.now(),
-        "cmids": [message.conversation_message_id]
+        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.unwarn_proc(context, log=True, respond=True)
@@ -586,52 +471,30 @@ async def unwarn(message: Message):
     HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=True),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def delete(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time"),
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
+    if message.reply_message is not None:
+        cmids = [message.reply_message.conversation_message_id]
+    else:
+        cmids = [msg.conversation_message_id for msg in message.fwd_messages]
 
-        # отправляем лог
-        await logger.log()
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "copy",
+        "now_time": converter.now(),
+        "cmids": cmids,
+        "copied": message.reply_message.text
+    }
 
-    async def collapse(m: Message):
-        await bot.api.messages.delete(
-            group_id=GROUP_ID,
-            peer_id=message.peer_id,
-            cmids=m.conversation_message_id,
-            delete_for_all=True
-        )
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=delete)
-
-    try:
-        # вызываем отправку лога
-        await send_log(all_data)
-
-        # удаляем сообщения
-        if message.reply_message:
-            await collapse(message.reply_message)
-        else:
-            for msg in message.fwd_messages:
-                await collapse(msg)
-
-    except Exception as error:
-        print("Command aborted:", error)
+    await processor.copy_proc(context, log=True, respond=True)
 
 
 """
@@ -644,36 +507,25 @@ async def delete(message: Message):
     HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=0),  # Moderator
+    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def copy(message: Message):
-    async def send_log(data):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            now_time=data.get("now_time"),
-        )
-        logger.compose_log_attachments(
-            peer_id=data.get("peer_id"),
-            cmids=data.get("cmids")
-        )
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "copy",
+        "now_time": converter.now(),
+        "cmids": [message.reply_message.conversation_message_id],
+        "copied": message.reply_message.text
+    }
 
-        # отправляем лог
-        await logger.log()
-
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=copy)
-
-    # вызываем отправку лога
-    await send_log(all_data)
-
-    # отправляем скопированное сообщение в чат
-    await message.answer(message.reply_message.text)
+    await processor.copy_proc(context, log=True, respond=True)
 
 
 """
@@ -686,38 +538,25 @@ async def copy(message: Message):
     HandleCommand(ALIASES['setting'], PREFIXES, 2),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=0),  # Admin
+    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
 async def setting(message: Message, args: Tuple):
-    async def send_log(data, stgn, stts):
-        # формируем лог
-        logger.compose_log_data(
-            initiator_name=data.get("initiator_name_tagged"),
-            initiator_role=data.get("initiator_role"),
-            peer_name=data.get("peer_name"),
-            command_name=data.get("command_name"),
-            setting_name=stgn,
-            setting_status=stts,
-            now_time=data.get("now_time"),
-        )
-
-        # отправляем лог
-        await logger.log()
-
-    async def send_respond(stgn, stts):
-        title = f"Настройка {stgn} для этой беседы изменена на {stts}\n"
-        await message.answer(title)
-
     setting_name = args[0]
     setting_status = args[1]
 
-    # получаем все необходимые данные
-    all_data = await about.get_all_info(message, command=setting)
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "setting",
+        "setting_name": setting_name,
+        "setting_status": setting_status,
+        "now_time": converter.now()
+    }
 
-    if database.get_setting(peer_id=all_data.get("peer_id"), setting_name=setting_name) is not None:
-        database.add_setting(all_data, setting_status=setting_status, setting_name=setting_name)
-
-        await send_respond(setting_name, setting_status)
-        await send_log(all_data, setting_name, setting_status)
+    await processor.setting_proc(context, log=True, respond=True)
