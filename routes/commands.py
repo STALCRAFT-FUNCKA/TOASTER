@@ -235,7 +235,6 @@ async def terminate(message: Message):
     OnlyEnrolled()
 )
 async def kick(message: Message):
-    # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
