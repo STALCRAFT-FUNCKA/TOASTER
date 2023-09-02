@@ -1,9 +1,9 @@
 from typing import Tuple
 from vkbottle.bot import BotLabeler, Message
-from database import Processor
+from database.proc import Processor
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
 from utils import *
-from rules import *
+from .rules import *
 
 
 bl = BotLabeler()
@@ -28,11 +28,11 @@ processor = Processor()
 async def reference(message: Message):
     context = {
         "peer_id": message.peer_id,
-        "peer_name": info.peer_name(message.peer_id),
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
-        "initiator_name": info.user_name(message.from_id, tag=False),
-        "initiator_nametag": info.user_name(message.from_id, tag=True),
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
         "command_name": "reference",
         "now_time": converter.now()
     }
@@ -58,6 +58,7 @@ async def enroll(message: Message):
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
+        "peer_type": "CHAT",
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
@@ -110,6 +111,7 @@ async def enroll_log(message: Message):
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
+        "peer_type": "LOG",
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
@@ -168,7 +170,7 @@ async def permission(message: Message, args: Tuple[str]):
 
     context = {
         "peer_id": message.peer_id,
-        "peer_name": "Все беседы",
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
@@ -181,7 +183,7 @@ async def permission(message: Message, args: Tuple[str]):
         "now_time": converter.now(),
     }
 
-    await processor.permission_proc(context, log=True, respond=True)
+    await processor.permission_proc(context, log=True, respond=False)
 
 
 """
@@ -202,7 +204,7 @@ async def permission(message: Message, args: Tuple[str]):
 )
 async def terminate(message: Message):
     context = {
-        "peer_name": await info.peer_name(message.peer_id),
+        "peer_name": "Все беседы",
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
@@ -485,7 +487,7 @@ async def delete(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "copy",
+        "command_name": "delete",
         "now_time": converter.now(),
         "cmids": cmids,
     }
@@ -515,7 +517,7 @@ async def copy(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "delete",
+        "command_name": "copy",
         "now_time": converter.now(),
         "cmids": [message.reply_message.conversation_message_id],
         "copied": message.reply_message.text
