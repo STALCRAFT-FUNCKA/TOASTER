@@ -1,14 +1,18 @@
 import json
 from typing import Optional
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
-from database.sql_interface import Connection
 from vkbottle.bot import Bot
+from database import Processor
 from singltone import MetaSingleton
 
 
 class Logger(metaclass=MetaSingleton):
     def _get_log_peers(self):
-        return self.database.get_conversation(peer_id=-1, destination="LOG")
+        res = self.processor.subproc.conversation_get_sub(
+            ("peer_id",),
+            peer_type="LOG"
+        )
+        return [peer_id[0] for peer_id in res]
 
     def _std_log_data(self):
         self.log_data = {
@@ -17,7 +21,7 @@ class Logger(metaclass=MetaSingleton):
         }
 
     def __init__(self):
-        self.database = Connection('database/database.db')
+        self.processor = Processor()
         self.bot = Bot(token=TOKEN)
 
         self.log_data = {}
