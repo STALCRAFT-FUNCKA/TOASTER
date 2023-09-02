@@ -181,7 +181,7 @@ async def permission(message: Message, args: Tuple[str]):
         "now_time": converter.now(),
     }
 
-    await processor.kick_proc(context, log=True, respond=True)
+    await processor.permission_proc(context, log=True, respond=True)
 
 
 """
@@ -215,7 +215,7 @@ async def terminate(message: Message):
         "cmids": [message.reply_message.conversation_message_id]
     }
 
-    await processor.terminate_proc(context, log=True, respond=True)
+    await processor.terminate_proc(context, collapse=True, log=True, respond=True)
 
 
 """
@@ -250,7 +250,7 @@ async def kick(message: Message):
         "cmids": [message.reply_message.conversation_message_id]
     }
 
-    await processor.kick_proc(context, log=True, respond=True)
+    await processor.kick_proc(context, collapse=True, log=True, respond=True)
 
 
 """
@@ -295,7 +295,7 @@ async def ban(message: Message, args: Tuple[str]):
         "cmids": [message.reply_message.conversation_message_id]
     }
 
-    await processor.ban_proc(context, log=True, respond=True)
+    await processor.ban_proc(context, collapse=True, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -348,7 +348,6 @@ async def mute(message: Message, args: Tuple[str]):
         time = 1
         coefficent = "h"
 
-    # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -365,7 +364,7 @@ async def mute(message: Message, args: Tuple[str]):
         "cmids": [message.reply_message.conversation_message_id]
     }
 
-    await processor.mute_proc(context, log=True, respond=True)
+    await processor.mute_proc(context, collapse=True, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -431,7 +430,7 @@ async def warn(message: Message):
         "cmids": [message.reply_message.conversation_message_id]
     }
 
-    await processor.warn_proc(context, log=True, respond=True)
+    await processor.warn_proc(context, collapse=True, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -455,7 +454,6 @@ async def unwarn(message: Message):
         "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
         "command_name": "unwarn",
         "now_time": converter.now(),
-        "cmids": [message.reply_message.conversation_message_id]
     }
 
     await processor.unwarn_proc(context, log=True, respond=True)
@@ -490,10 +488,9 @@ async def delete(message: Message):
         "command_name": "copy",
         "now_time": converter.now(),
         "cmids": cmids,
-        "copied": message.reply_message.text
     }
 
-    await processor.copy_proc(context, log=True, respond=True)
+    await processor.delete_proc(context, log=True, respond=False)
 
 
 """
@@ -518,7 +515,7 @@ async def copy(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "copy",
+        "command_name": "delete",
         "now_time": converter.now(),
         "cmids": [message.reply_message.conversation_message_id],
         "copied": message.reply_message.text
@@ -558,4 +555,4 @@ async def setting(message: Message, args: Tuple):
         "now_time": converter.now()
     }
 
-    await processor.setting_proc(context, log=True, respond=True)
+    await processor.setting_proc(context, log=True, respond=False)
