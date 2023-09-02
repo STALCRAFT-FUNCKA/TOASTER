@@ -1,11 +1,23 @@
-import time
 from handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
     async def check(self):
-        expired = self.database.get_expired_mute(time.time())
+        expired = self.processor.subproc.mute_exp_sub(target_time=self.converter.now())
         if expired:
-            for mute in expired:
-                self.database.remove_mute(peer_id=mute[0], user_id=mute[1])
-                await self._send_log(peer_id=mute[0], user_id=mute[1], command="unmute")
+            for peer_id, target_id in expired:
+                context = {
+                    "peer_id": peer_id,
+                    "peer_name": await self.info.peer_name(peer_id),
+                    "chat_id": peer_id - 2000000000,
+                    "initiator_id": 0,
+                    "initiator_name": "Система",
+                    "initiator_nametag": "Система",
+                    "target_id": target_id,
+                    "target_name": await self.info.user_name(target_id, tag=False),
+                    "target_nametag": await self.info.user_name(target_id, tag=True),
+                    "command_name": "unmute",
+                    "now_time": self.converter.now(),
+                }
+
+                await self.processor.unmute_proc(context, log=True, respond=False)

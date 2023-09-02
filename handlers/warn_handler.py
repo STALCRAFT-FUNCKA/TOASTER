@@ -1,11 +1,23 @@
-import time
 from handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
     async def check(self):
-        expired = self.database.get_expired_warn(time.time())
+        expired = self.processor.subproc.warn_exp_sub(target_time=self.converter.now())
         if expired:
-            for warn in expired:
-                self.database.remove_warn(peer_id=warn[0], user_id=warn[1], force=True)
-                await self._send_log(peer_id=warn[0], user_id=warn[1], command="unwarn")
+            for peer_id, target_id in expired:
+                context = {
+                    "peer_id": peer_id,
+                    "peer_name": await self.info.peer_name(peer_id),
+                    "chat_id": peer_id - 2000000000,
+                    "initiator_id": 0,
+                    "initiator_name": "Система",
+                    "initiator_nametag": "Система",
+                    "target_id": target_id,
+                    "target_name": await self.info.user_name(target_id, tag=False),
+                    "target_nametag": await self.info.user_name(target_id, tag=True),
+                    "command_name": "unwarn",
+                    "now_time": self.converter.now(),
+                }
+
+                await self. processor.unwarn_proc(context, log=True, respond=True)
