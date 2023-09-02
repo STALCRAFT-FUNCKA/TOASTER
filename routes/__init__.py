@@ -1,7 +1,7 @@
 from . import (commands, commands_mention)
 from .filters import *
 
-# Сначала фильтры, потом блок команд
+# !Сначала фильтры!, потом блок команд
 labelers = [
     queue_filter.bl,
     forbidden_filter.bl,
