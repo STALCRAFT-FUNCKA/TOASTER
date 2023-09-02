@@ -4,12 +4,11 @@
 Основным способом обмена информацией для функций-процессоров является словарь:Dict:.
 """
 from vkbottle import Bot
-from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL
+from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
 from database.orm import DataBase
 from utils import *
 
 
-# TODO: Пофиксить роли в логах
 class Processor:
     def __init__(self):
         self.logger = Logger()
@@ -18,20 +17,316 @@ class Processor:
         self.database = DataBase()
         # Подключениек ORM\DB
 
-    async def enroll_proc(self):
-        ...
+    async def reference_proc(self, context, log=True, respond=True):
+        async def send_log(ctx):
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_lvl"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
 
-    async def enroll_log_proc(self):
-        ...
+            await self.logger.log()
 
-    async def drop_proc(self):
-        ...
+        async def send_respond(ctx):
+            url = "https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md"
+            text = f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}"
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
 
-    async def drop_log_proc(self):
-        ...
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
 
-    async def terminate_proc(self):
-        ...
+    async def enroll_proc(self, context, log=True, respond=True):
+        async def send_log(ctx):
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_name_tagged"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
+
+            await self.logger.log()
+
+        async def send_respond(ctx, text):
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        is_enrolled = all(
+            self.database.conversations.select(
+                ("peer_id",),
+                peer_id=context.get("peer_id"),
+                peer_type="CHAT"
+            )
+        )
+        if is_enrolled:
+            k = False
+            if respond:
+                await send_respond(context, "Данные беседы обновлены.")
+        else:
+            k = True
+            if respond:
+                await send_respond(context, "Беседа зарегистрирована.")
+
+        if log:
+            await send_log(context)
+
+        self.database.conversations.insert(
+            peer_id=context.get("peer_id"),
+            peer_name=context.get("peer_name"),
+            peer_type="CHAT"
+        )
+
+        if k:
+            for name, status in SETTINGS.items():
+                self.database.settings.insert(
+                    peer_id=context.get("peer_id"),
+                    setting_name=name,
+                    setting_status=status
+                )
+
+    async def enroll_log_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
+
+            await self.logger.log()
+
+        async def send_respond(ctx, text):
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        if respond:
+            is_enrolled = all(
+                self.database.conversations.select(
+                    ("peer_id",),
+                    peer_id=context.get("peer_id"),
+                    peer_type=context.get("peer_type")
+                )
+            )
+            # отправляем уведомления в чат
+            if is_enrolled:
+                await send_respond(context, "Данные беседы обновлены.")
+            else:
+                await send_respond(context, "Беседа назначена в качестве лог-чата.")
+        if log:
+            await send_log(context)
+
+        self.database.conversations.insert(
+            peer_id=context.get("peer_id"),
+            peer_name=context.get("peer_name"),
+            peer_type=context.get("peer_type")
+        )
+
+    async def drop_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
+
+            await self.logger.log()
+
+        async def send_respond(ctx, text):
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        is_enrolled = all(
+            self.database.conversations.select(
+                ("peer_id",),
+                peer_id=context.get("peer_id"),
+                peer_type="CHAT"
+            )
+        )
+        if is_enrolled:
+            if respond:
+                await send_respond(context, "Регистрация данной беседы упразднена.")
+            if log:
+                await send_log(context)
+
+            self.database.conversations.delete(
+                peer_id=context.get("peer_id"),
+                peer_type="CHAT"
+            )
+
+        else:
+            if log:
+                await send_respond(context, "Данная беседа не зарегистрирована.")
+
+    async def drop_log_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
+
+            # отправляем лог
+            await self.logger.log()
+
+        async def send_respond(ctx, text):
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        is_log = all(
+            self.database.conversations.select(
+                peer_id=context.get("peer_id"),
+                peer_type="LOG"
+            )
+        )
+        # проверяем наличие регистрации беседы в БД
+        if is_log:
+            if respond:
+                await send_respond(context, "Данный лог-чат упразднён.")
+            if log:
+                await send_log(context)
+
+            self.database.conversations.delete(
+                peer_id=context.get("peer_id"),
+                peer_type="LOG"
+            )
+
+        else:
+            if respond:
+                await send_respond(context, "Беседа не является лог-чатом.")
+
+    async def terminate_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_name_tagged"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                target_name=ctx.get("target_name_tagged"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time")
+            )
+            self.logger.compose_log_attachments(
+                peer_id=ctx.get("peer_id"),
+                cmids=ctx.get("cmids")
+            )
+
+            # отправляем лог
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            title = f"@id{ctx.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
+                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=title,
+                random_id=0
+            )
+
+        logged = False
+        peers = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        peers = [peer_id[0] for peer_id in peers]
+        for peer_id in peers:
+            context["peer_id"] = peer_id
+            context["chat_id"] = peer_id - 2000000000
+
+            is_kicked = all(
+                self.database.kicked.select(
+                    ("target_name",),
+                    peer_id=context.get("peer_id"),
+                    target_id=context.get("target_id")
+                )
+            )
+            if not is_kicked:
+                if not logged and log:
+                    logged = True
+                    await send_log(context)
+
+                if respond:
+                    await send_respond(context)
+
+                # Выдаем кик
+                self.database.kicked.insert(
+                    peer_id=context.get("peer_id"),
+                    initiator_id=context.get("initiator_id"),
+                    initiator_name=context.get("initiator_name"),
+                    target_id=context.get("target_name"),
+                    target_name=context.get("target_name"),
+                    kick_time=context.get("kick_time")
+                )
+
+                # Исключаем из беседы
+                await self.bot.api.messages.remove_chat_user(
+                    context.get("chat_id"),
+                    context.get("target_id")
+                )
+
+    async def permission_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                target_name=ctx.get("target_nametag)"),
+                set_role=ctx.get("target_lvl"),
+                now_time=ctx.get("now_time")
+            )
+
+            # отправляем лог
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            text = f"@id{ctx.get('target_id')} (Пользователь) исключен из беседы.\n" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
+
+        self.database.permissions.insert(
+            peer_id=context.get("peer_id"),
+            target_id=context.get("target_id"),
+            target_name=context.get("target_name"),
+            target_lvl=context.get("target_lvl")
+        )
 
     async def kick_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
@@ -497,11 +792,152 @@ class Processor:
                 target_id=context.get("target_id")
             )
 
-    async def copy_proc(self):
-        ...
+    async def copy_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time"),
+            )
+            self.logger.compose_log_attachments(
+                peer_id=ctx.get("peer_id"),
+                cmids=ctx.get("cmids")
+            )
 
-    async def delete_proc(self):
-        ...
+            # отправляем лог
+            await self.logger.log()
 
-    async def setting_proc(self):
-        ...
+        async def send_respond(ctx):
+            text = ctx.get("copied")
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        role = self.database.permissions.select(
+            ("initiator_lvl",),
+            peer_id=context.get("peer_id"),
+            user_id=context.get("target_id")
+        )
+        if role:
+            role = role[0][0]
+        else:
+            role = 0
+        context["initiator_lvl"] = f"{role} - {PERMISSION_LVL[role]}"
+
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
+
+    async def delete_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                now_time=ctx.get("now_time"),
+            )
+            self.logger.compose_log_attachments(
+                peer_id=ctx.get("peer_id"),
+                cmids=ctx.get("cmids")
+            )
+
+            # отправляем лог
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            text = "Сообщение(я) удалены."
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        role = self.database.permissions.select(
+            ("initiator_lvl",),
+            peer_id=context.get("peer_id"),
+            user_id=context.get("target_id")
+        )
+        if role:
+            role = role[0][0]
+        else:
+            role = 0
+        context["initiator_lvl"] = f"{role} - {PERMISSION_LVL[role]}"
+
+        try:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
+        except Exception as error:
+            print("Process aborted:", error)
+            return
+
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
+
+    async def setting_proc(self, context, log=True, respond=True):
+        async def send_log(ctx):
+            # формируем лог
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_name_tagged"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                command_name=ctx.get("command_name"),
+                setting_name=ctx.get("setting_name"),
+                setting_status=ctx.get("setting_status"),
+                now_time=ctx.get("now_time"),
+            )
+
+            # отправляем лог
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            text = f"Настройка {ctx.get('setting_name')} для этой беседы изменена на {ctx.get('setting_status')}\n"
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        is_setting = all(
+            self.database.settings.select(
+                ("setting_name",),
+                peer_id=context.get("peer_id"),
+                setting_name=context.get("setting_name")
+            )
+        )
+        if is_setting:
+            role = self.database.permissions.select(
+                ("initiator_lvl",),
+                peer_id=context.get("peer_id"),
+                user_id=context.get("target_id")
+            )
+            if role:
+                role = role[0][0]
+            else:
+                role = 0
+            context["initiator_lvl"] = f"{role} - {PERMISSION_LVL[role]}"
+
+            self.database.settings.update(
+                {"setting_status": context.get("setting_status")},
+                peer_id=context.get("peer_id"),
+                setting_name=context.get("setting_name")
+            )
+
+            if respond:
+                await send_respond(context)
+            if log:
+                await send_log(context)
