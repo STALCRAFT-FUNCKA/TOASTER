@@ -1,10 +1,12 @@
-from config import TIME_COEFFICENT
 from handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
     async def check(self):
-        overflow = self.processor.subproc.warn_ovfl_sub()
+        overflow = self.database.warned.select(
+            ("peer_id", "target_id"),
+            warn_count__ge=3
+        )
         if overflow:
             for peer_id, target_id in overflow:
                 time = 1

@@ -3,7 +3,10 @@ from handlers.abc import ABCHandler
 
 class Handler(ABCHandler):
     async def check(self):
-        expired = self.processor.subproc.queue_get_sub(target_time=self.converter.now())
+        expired = self.database.queue.select(
+            ("peer_id", "target_id"),
+            next_time__le=self.converter.now()
+        )
         if expired:
             for peer_id, target_id in expired:
                 context = {
