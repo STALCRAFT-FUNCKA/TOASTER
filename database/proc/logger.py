@@ -2,13 +2,14 @@ import json
 from typing import Optional
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
 from vkbottle.bot import Bot
-from database import Processor
+from database.orm import DataBase
 from singltone import MetaSingleton
+from utils import Converter
 
 
 class Logger(metaclass=MetaSingleton):
     def _get_log_peers(self):
-        res = self.processor.subproc.conversation_get_sub(
+        res = self.database.conversations.select(
             ("peer_id",),
             peer_type="LOG"
         )
@@ -21,7 +22,8 @@ class Logger(metaclass=MetaSingleton):
         }
 
     def __init__(self):
-        self.processor = Processor()
+        self.converter = Converter()
+        self.database = DataBase()
         self.bot = Bot(token=TOKEN)
 
         self.log_data = {}
@@ -48,9 +50,9 @@ class Logger(metaclass=MetaSingleton):
             set_role=None,
             target_name=None,
             target_role=None,
-            target_warns=None,
-            now_time=None,
-            target_time=None
+            target_warns: int = None,
+            now_time: int = None,
+            target_time: int = None
 
     ):
         log_lines = []
@@ -81,9 +83,9 @@ class Logger(metaclass=MetaSingleton):
         if target_warns is not None:
             log_lines.append(f"Предупреждения: {target_warns}/3")
         if now_time is not None:
-            log_lines.append(f"Время (МСК): {now_time}")
+            log_lines.append(f"Время (МСК): {self.converter.convert(now_time)}")
         if target_time is not None:
-            log_lines.append(f"Время cнятия (МСК): {target_time}")
+            log_lines.append(f"Время cнятия (МСК): {self.converter.convert(target_time)}")
 
         self.log_data['text'] = "\n".join(log_lines)
 
