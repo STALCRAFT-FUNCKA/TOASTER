@@ -1,15 +1,13 @@
-import time
-from vkbottle.bot import Bot, Message
+from vkbottle.bot import Bot
 from singltone import MetaSingleton
-from config import GROUP_ID, TOKEN, PERMISSION_LVL
-from database.sql_interface import Connection
+from config import GROUP_ID, TOKEN
 from utils.convertor import Converter
 
 
 class Info(metaclass=MetaSingleton):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
-        self.database = Connection('database.db')
+
         self.converter = Converter()
 
     async def user_id(self, screen_name):
