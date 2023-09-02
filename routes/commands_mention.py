@@ -1,9 +1,9 @@
 from typing import Tuple
 from vkbottle.bot import BotLabeler, Message
-from database import Processor
+from database.proc import Processor
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
 from utils import *
-from rules import *
+from .rules import *
 
 bl = BotLabeler()
 
@@ -67,7 +67,6 @@ async def terminate(message: Message, args: Tuple[str]):
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['permission']),
-    IgnoreMention(ignore_from=1),
     HandleIn(handle_log=True, handle_chat=True),
     OnlyEnrolled()
 )
@@ -94,7 +93,7 @@ async def permission(message: Message, args: Tuple[str]):
 
     context = {
         "peer_id": message.peer_id,
-        "peer_name": "Все беседы",
+        "peer_name": await info.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
@@ -107,7 +106,7 @@ async def permission(message: Message, args: Tuple[str]):
         "now_time": converter.now(),
     }
 
-    await processor.kick_proc(context, log=True, respond=True)
+    await processor.permission_proc(context, log=True, respond=False)
 
 
 """
@@ -428,4 +427,4 @@ async def unwarn(message: Message, args: Tuple[str]):
         "now_time": converter.now(),
     }
 
-    await processor.unwarn_proc(context, log=True, respond=True)
+    await processor.unwarn_proc(context, log=True, respond=False)
