@@ -21,13 +21,13 @@ class Converter(metaclass=MetaSingleton):
         return int(time.time())
 
     @staticmethod
-    def delta(time, coefficent):
+    def delta(t, coefficent):
         try:
-            time = int(time)
+            t = int(t)
             coefficent = TIME_COEFFICENT[coefficent]
 
-            if time > 0:
-                return time * coefficent
+            if t > 0:
+                return t * coefficent
             else:
                 return coefficent
 
