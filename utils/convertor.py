@@ -1,6 +1,5 @@
 import datetime
 import time
-
 from singltone import MetaSingleton
 from config import TIME_COEFFICENT
 
@@ -19,7 +18,7 @@ class Converter(metaclass=MetaSingleton):
 
     @staticmethod
     def now():
-        return time.time()
+        return int(time.time())
 
     @staticmethod
     def delta(time, coefficent):
