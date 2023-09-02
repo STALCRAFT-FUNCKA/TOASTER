@@ -3,10 +3,10 @@ from vkbottle.bot import Bot, Message
 from singltone import MetaSingleton
 from config import GROUP_ID, TOKEN, PERMISSION_LVL
 from database.sql_interface import Connection
-from utils.time_converter import Converter
+from utils.convertor import Converter
 
 
-class About(metaclass=MetaSingleton):
+class Info(metaclass=MetaSingleton):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
         self.database = Connection('database.db')
