@@ -6,16 +6,119 @@
 from vkbottle import Bot
 from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
 from database.orm import DataBase
+from singltone import MetaSingleton
 from utils import *
 
 
-class Processor:
+class SubProcessor:
+    def __init__(self, database):
+        self.database = database
+
+    def setting_get_sub(self, peer_id, setting_name):
+        setting = self.database.settings.select(
+            ("setting_status",),
+            peer_id=peer_id,
+            setting_name=setting_name
+        )
+
+        if setting:
+            return True if setting[0][0] == "True" else False
+        else:
+            return False
+
+    def mute_get_sub(self, peer_id, target_id):
+        is_muted = all(
+            self.database.muted.select(
+                ("target_name",),
+                peer_id=peer_id,
+                user_id=target_id
+            )
+        )
+
+        return is_muted
+
+    def queue_get_sub(self, peer_id, target_id):
+        in_queue = all(
+            self.database.queue.select(
+                ("target_name",),
+                peer_id=peer_id,
+                user_id=target_id
+            )
+        )
+
+        return in_queue
+
+    def permission_get_sub(self, peer_id, target_id):
+        lvl = self.database.permissions.select(
+            ("target_lvl",),
+            peer_id=peer_id,
+            target_id=target_id
+        )
+
+        if lvl:
+            return lvl[0][0]
+        else:
+            return 0
+
+    def conversation_get_sub(self, peer_id, peer_type):
+        conversation = self.database.conversations.select(
+            ("peer_name",),
+            peer_id=peer_id,
+            peer_type=peer_type
+        )
+
+        if conversation:
+            return True
+        else:
+            return False
+
+    def ban_exp_sub(self, target_time):
+        exp = self.database.banned.select(
+            ("peer_id", "target_id"),
+            target_time__le=target_time
+        )
+
+        return exp
+
+    def mute_exp_sub(self, target_time):
+        exp = self.database.muted.select(
+            ("peer_id", "target_id"),
+            target_time__le=target_time
+        )
+
+        return exp
+
+    def warn_exp_sub(self, target_time):
+        exp = self.database.warned.select(
+            ("peer_id", "target_id"),
+            target_time__le=target_time
+        )
+
+        return exp
+
+    def warn_ovfl_sub(self):
+        ovfl = self.database.warned.select(
+            ("peer_id", "target_id"),
+            warn_count__ge=3
+        )
+
+    def queue_exp_sub(self, target_time):
+        exp = self.database.queue.select(
+            ("peer_id", "target_id"),
+            target_time__le=target_time
+        )
+
+        return exp
+
+
+class Processor(metaclass=MetaSingleton):
+    _subproc = SubProcessor
+
     def __init__(self):
         self.logger = Logger()
 
         self.bot = Bot(token=TOKEN)
         self.database = DataBase()
-        # Подключениек ORM\DB
 
     async def reference_proc(self, context, log=True, respond=True):
         async def send_log(ctx):
@@ -24,6 +127,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
 
@@ -50,6 +154,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
 
@@ -103,6 +208,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
 
@@ -145,6 +251,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
 
@@ -187,6 +294,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
 
@@ -222,7 +330,7 @@ class Processor:
             if respond:
                 await send_respond(context, "Беседа не является лог-чатом.")
 
-    async def terminate_proc(self, context: dict, log=True, respond=True):
+    async def terminate_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -231,6 +339,7 @@ class Processor:
                 peer_name=ctx.get("peer_name"),
                 target_name=ctx.get("target_name_tagged"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
             self.logger.compose_log_attachments(
@@ -291,6 +400,14 @@ class Processor:
                     context.get("target_id")
                 )
 
+        if collapse:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
     async def permission_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
@@ -299,6 +416,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag)"),
                 set_role=ctx.get("target_lvl"),
                 now_time=ctx.get("now_time")
@@ -328,7 +446,7 @@ class Processor:
             target_lvl=context.get("target_lvl")
         )
 
-    async def kick_proc(self, context: dict, log=True, respond=True):
+    async def kick_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -337,6 +455,7 @@ class Processor:
                 peer_name=ctx.get("peer_name"),
                 target_name=ctx.get("target_nametag"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time")
             )
             self.logger.compose_log_attachments(
@@ -395,7 +514,15 @@ class Processor:
                 user_id=context.get("target_id")
             )
 
-    async def ban_proc(self, context: dict, log=True, respond=True):
+        if collapse:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
+    async def ban_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -403,6 +530,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag"),
                 now_time=ctx.get("now_time"),
                 target_time=ctx.get("target_time")
@@ -464,6 +592,14 @@ class Processor:
                 user_id=context.get("target_id")
             )
 
+        if collapse:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
     async def unban_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
@@ -472,6 +608,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag"),
                 now_time=ctx.get("now_time"),
             )
@@ -518,7 +655,7 @@ class Processor:
                 target_id=context.get("target_id")
             )
 
-    async def mute_proc(self, context: dict, log=True, respond=True):
+    async def mute_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -526,6 +663,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag"),
                 now_time=ctx.get("now_time"),
                 target_time=ctx.get("target_time")
@@ -584,6 +722,14 @@ class Processor:
                 unmute_time=context.get("target_time")
             )
 
+        if collapse:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
     async def unmute_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
@@ -592,6 +738,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag"),
                 now_time=ctx.get("now_time"),
                 target_time=ctx.get("target_time")
@@ -641,7 +788,7 @@ class Processor:
                 target_id=context.get("target_id")
             )
             
-    async def warn_proc(self, context: dict, log=True, respond=True):
+    async def warn_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -649,6 +796,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_nametag"),
                 target_warns=ctx.get("target_warns"),
                 now_time=ctx.get("now_time"),
@@ -724,6 +872,14 @@ class Processor:
                 target_id=context.get("target_id")
             )
 
+        if collapse:
+            await self.bot.api.messages.delete(
+                group_id=GROUP_ID,
+                peer_id=context.get("peer_id"),
+                cmids=context.get("cmids"),
+                delete_for_all=True
+            )
+
     async def unwarn_proc(self, context: dict, force=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
@@ -732,6 +888,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_lvl"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 target_name=ctx.get("target_name_ag"),
                 target_warns=ctx.get("target_warns"),
                 now_time=ctx.get("now_time")
@@ -800,6 +957,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time"),
             )
             self.logger.compose_log_attachments(
@@ -842,6 +1000,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 now_time=ctx.get("now_time"),
             )
             self.logger.compose_log_attachments(
@@ -888,7 +1047,7 @@ class Processor:
         if log:
             await send_log(context)
 
-    async def setting_proc(self, context, log=True, respond=True):
+    async def setting_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -896,6 +1055,7 @@ class Processor:
                 initiator_role=ctx.get("initiator_role"),
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
                 setting_name=ctx.get("setting_name"),
                 setting_status=ctx.get("setting_status"),
                 now_time=ctx.get("now_time"),
@@ -941,3 +1101,77 @@ class Processor:
                 await send_respond(context)
             if log:
                 await send_log(context)
+
+    async def queue_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                target_name=ctx.get("target_nametag"),
+                command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
+                now_time=ctx.get("now_time"),
+            )
+            self.logger.compose_log_attachments(
+                peer_id=ctx.get("peer_id"),
+                cmids=ctx.get("cmids")
+            )
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            text = f"@id{ctx.get('target_id')} (Пользователь) добавлен в очередь.\n"
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
+
+        self.database.queue.insert(
+            peer_id=context.get("peer_id"),
+            target_id=context.get("target_id"),
+            target_name=context.get("target_name"),
+            send_time=context.get("now_time"),
+            next_time=context.get("target_time")
+        )
+
+    async def unqueue_proc(self, context: dict, log=True, respond=True):
+        async def send_log(ctx):
+            self.logger.compose_log_data(
+                initiator_name=ctx.get("initiator_nametag"),
+                initiator_role=ctx.get("initiator_role"),
+                peer_name=ctx.get("peer_name"),
+                target_name=ctx.get("target_nametag"),
+                command_name=ctx.get("command_name"),
+                reason=ctx.get("reason", None),
+                now_time=ctx.get("now_time"),
+            )
+
+            await self.logger.log()
+
+        async def send_respond(ctx):
+            text = f"@id{ctx.get('target_id')} (Пользователь) удален из очереди.\n"
+            await self.bot.api.messages.send(
+                chat_id=ctx.get("chat_id"),
+                message=text,
+                random_id=0
+            )
+
+        if respond:
+            await send_respond(context)
+        if log:
+            await send_log(context)
+
+        self.database.queue.delete(
+            peer_id=context.get("peer_id"),
+            target_id=context.get("target_id"),
+        )
+
+    @property
+    def subproc(self):
+        return self._subproc(self.database)
