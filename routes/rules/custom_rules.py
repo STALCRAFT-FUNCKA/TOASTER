@@ -163,7 +163,7 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
             initiator_id = message.from_id
 
             if initiator_id == STUFF_ADMIN_ID:
-                return True
+                return False
 
             lvl = self.database.permissions.select(
                 ("target_lvl",),
