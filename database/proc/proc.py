@@ -56,7 +56,7 @@ class Processor(metaclass=MetaSingleton):
         if log:
             await send_log(context)
 
-    async def enroll_proc(self, context, log=True, respond=True):
+    async def chat_proc(self, context, log=True, respond=True):
         async def send_log(ctx):
             self.logger.compose_log_data(
                 initiator_name=ctx.get("initiator_nametag"),
@@ -118,7 +118,7 @@ class Processor(metaclass=MetaSingleton):
                     setting_status=status
                 )
 
-    async def enroll_log_proc(self, context: dict, log=True, respond=True):
+    async def log_proc(self, context: dict, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
             self.logger.compose_log_data(
@@ -193,7 +193,6 @@ class Processor(metaclass=MetaSingleton):
         is_enrolled = self.database.conversations.select(
             ("peer_id",),
             peer_id=context.get("peer_id"),
-            peer_type="CHAT"
         )
         if is_enrolled:
             role = self.database.permissions.select(
@@ -213,66 +212,12 @@ class Processor(metaclass=MetaSingleton):
                 await send_log(context)
 
             self.database.conversations.delete(
-                peer_id=context.get("peer_id"),
-                peer_type="CHAT"
+                peer_id=context.get("peer_id")
             )
 
         else:
             if log:
                 await send_respond(context, "Данная беседа не зарегистрирована.")
-
-    async def drop_log_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx, text):
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        is_log = self.database.conversations.select(
-            ("peer_type",),
-            peer_id=context.get("peer_id"),
-            peer_type="LOG"
-        )
-        if is_log:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
-
-            if respond:
-                await send_respond(context, "Данный лог-чат упразднён.")
-            if log:
-                await send_log(context)
-
-            self.database.conversations.delete(
-                peer_id=context.get("peer_id"),
-                peer_type="LOG"
-            )
-
-        else:
-            if respond:
-                await send_respond(context, "Беседа не является лог-чатом.")
 
     async def terminate_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
