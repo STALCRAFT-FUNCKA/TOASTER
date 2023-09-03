@@ -292,8 +292,8 @@ class Processor(metaclass=MetaSingleton):
 
                 if not self.__debug:
                     await self.bot.api.messages.remove_chat_user(
-                        context.get("chat_id"),
-                        context.get("target_id")
+                        chat_id=context.get("chat_id"),
+                        user_id=context.get("target_id")
                     )
 
         if collapse:
@@ -422,7 +422,7 @@ class Processor(metaclass=MetaSingleton):
             if not self.__debug:
                 await self.bot.api.messages.remove_chat_user(
                     chat_id=context.get("chat_id"),
-                    target_id=context.get("target_id")
+                    user_id=context.get("target_id")
                 )
 
         if collapse:
@@ -499,7 +499,7 @@ class Processor(metaclass=MetaSingleton):
             if not self.__debug:
                 await self.bot.api.messages.remove_chat_user(
                     chat_id=context.get("chat_id"),
-                    target_id=context.get("target_id")
+                    user_id=context.get("target_id")
                 )
 
         if collapse:
