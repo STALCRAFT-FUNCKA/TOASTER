@@ -1,6 +1,7 @@
 conversations = """CREATE TABLE IF NOT EXISTS conversations
                (
-                   peer_id INTEGER PRIMARY KEY UNIQUE ON CONFLICT REPLACE,
+                   id INTEGER PRIMARY KEY,
+                   peer_id INTEGER UNIQUE ON CONFLICT REPLACE,
                    peer_name TEXT,
                    peer_type TEXT
                );"""
