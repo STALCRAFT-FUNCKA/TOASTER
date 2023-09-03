@@ -1,7 +1,7 @@
 from typing import Tuple
 from vkbottle.bot import BotLabeler, Message
 from database.proc import Processor
-from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
+from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from utils import *
 from .rules import *
 
@@ -428,3 +428,88 @@ async def unwarn(message: Message, args: Tuple[str]):
     }
 
     await processor.unwarn_proc(context, log=True, respond=False)
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+Команда изменяет значение настроек в беседе. 
+"""
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['queue'], PREFIXES, 1),
+    CollapseCommand(),
+    AnswerCommand(use_reply=False, use_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['queue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def queue(message: Message, args: Tuple):
+    async def get_cuid(arg):
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
+        uid = await info.user_id(screen_name=screen_name)
+        return uid
+
+    # Получаем кастомный id пользователя
+    cuid = await get_cuid(args[0])
+    if cuid is None:
+        print("Command aborted: Wrong mention")
+        return
+
+    delta = QUEUE_TIME
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "queue",
+        "now_time": converter.now(),
+        "target_time": converter.now() + delta,
+    }
+
+    await processor.queue_proc(context, log=True, respond=False)
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['unqueue'], PREFIXES, 1),
+    CollapseCommand(),
+    AnswerCommand(use_reply=False, use_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['unqueue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def unqueue(message: Message, args: Tuple):
+    async def get_cuid(arg):
+        screen_name = arg.replace("@", "")
+        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
+        uid = await info.user_id(screen_name=screen_name)
+        return uid
+
+    # Получаем кастомный id пользователя
+    cuid = await get_cuid(args[0])
+    if cuid is None:
+        print("Command aborted: Wrong mention")
+        return
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": cuid,
+        "target_name": await info.user_name(cuid, tag=False),
+        "target_nametag": await info.user_name(cuid, tag=True),
+        "command_name": "unqueue",
+        "now_time": converter.now(),
+    }
+
+    await processor.unqueue_proc(context, log=True, respond=False)
