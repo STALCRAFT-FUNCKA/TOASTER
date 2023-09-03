@@ -1,5 +1,4 @@
 from vkbottle.bot import BotLabeler, Message
-
 from database.orm import DataBase
 from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
