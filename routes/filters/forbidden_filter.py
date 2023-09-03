@@ -1,6 +1,5 @@
 from vkbottle.bot import BotLabeler, Message
 from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentType
-
 from database.orm import DataBase
 from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
