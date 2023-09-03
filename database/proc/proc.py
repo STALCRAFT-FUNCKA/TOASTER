@@ -313,7 +313,7 @@ class Processor(metaclass=MetaSingleton):
                 peer_name=ctx.get("peer_name"),
                 command_name=ctx.get("command_name"),
                 reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag)"),
+                target_name=ctx.get("target_nametag"),
                 set_role=ctx.get("target_lvl"),
                 now_time=ctx.get("now_time")
             )
