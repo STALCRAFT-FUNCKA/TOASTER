@@ -1,8 +1,3 @@
-"""
-В этом файле описаны основные функции, которые отвечают за взаимодействие с базой данных и выдачу наказаний.
-Функции-процессоры включают в себя не только взаимодействие с БД, но и отправку логов (респондов).
-Основным способом обмена информацией для функций-процессоров является словарь:Dict:.
-"""
 from vkbottle import Bot
 from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
 from database.orm import DataBase
@@ -12,7 +7,8 @@ from utils import Converter
 
 
 class Processor(metaclass=MetaSingleton):
-    __debug = True
+    __debug = False
+
     # Если этот параметр True - то пользователя не исключит из беседы, при исполнении процессов бана, кика и т.п.
 
     def __init__(self):
@@ -437,8 +433,10 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
+            rsn = f"Причина: {ctx.get('reason')} \n"
             text = f"@id{ctx.get('target_id')} (Пользователь) исключен из беседы.\n" \
-                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                   f"{rsn if ctx.get('reason') is not None else ''}" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -510,9 +508,11 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
+            rsn = f"Причина: {ctx.get('reason')} \n"
             text = f"@id{ctx.get('target_id')} (Пользователь) временно заблокирован.\n" \
-                    f"Время снятия блокировки: {self.converter.convert(ctx.get('target_time'))}\n" \
-                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                   f"{rsn if ctx.get('reason') is not None else ''}" \
+                   f"Время снятия блокировки: {self.converter.convert(ctx.get('target_time'))}\n" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -636,10 +636,12 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
+            rsn = f"Причина: {ctx.get('reason')} \n"
             text = f"@id{ctx.get('target_id')} (Пользователь) временно заглушен.\n" \
-                    f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
-                    f"Время снятия заглушения: {self.converter.convert(ctx.get('target_time'))}\n" \
-                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                   f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
+                   f"{rsn if ctx.get('reason') is not None else ''}" \
+                   f"Время снятия заглушения: {self.converter.convert(ctx.get('target_time'))}\n" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -742,7 +744,7 @@ class Processor(metaclass=MetaSingleton):
                 peer_id=context.get("peer_id"),
                 target_id=context.get("target_id")
             )
-            
+
     async def warn_proc(self, context: dict, collapse=False, log=True, respond=True):
         async def send_log(ctx):
             # формируем лог
@@ -766,10 +768,12 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
+            rsn = f"Причина: {ctx.get('reason')} \n"
             text = f"@id{ctx.get('target_id')} (Пользователь) получил предупреждение.\n" \
-                    f"Текущее количество предупреждений: {ctx.get('target_warns')}/3.\n" \
-                    f"Время снятия предупреждений: {self.converter.convert(ctx.get('target_time'))}\n" \
-                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                   f"{rsn if ctx.get('reason') is not None else ''}" \
+                   f"Текущее количество предупреждений: {ctx.get('target_warns')}/3.\n" \
+                   f"Время снятия предупреждений: {self.converter.convert(ctx.get('target_time'))}\n" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -1080,6 +1084,17 @@ class Processor(metaclass=MetaSingleton):
                 random_id=0
             )
 
+        role = self.database.permissions.select(
+            ("target_lvl",),
+            peer_id=context.get("peer_id"),
+            target_id=context.get("target_id")
+        )
+        if role:
+            role = role[0][0]
+        else:
+            role = 0
+        context["initiator_lvl"] = role
+
         if respond:
             await send_respond(context)
         if log:
@@ -1114,6 +1129,17 @@ class Processor(metaclass=MetaSingleton):
                 message=text,
                 random_id=0
             )
+
+        role = self.database.permissions.select(
+            ("target_lvl",),
+            peer_id=context.get("peer_id"),
+            target_id=context.get("target_id")
+        )
+        if role:
+            role = role[0][0]
+        else:
+            role = 0
+        context["initiator_lvl"] = role
 
         if respond:
             await send_respond(context)
