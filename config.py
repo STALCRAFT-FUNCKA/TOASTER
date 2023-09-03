@@ -88,10 +88,9 @@ PERMISSION_LVL = {
 """
 PERMISSION_ACCESS = {
     "reference": 0,
-    "enroll": 2,
+    "chat": 2,
     "drop": 2,
-    "enroll_log": 2,
-    "drop_log": 2,
+    "log": 2,
     "permission": 2,
     "terminate": 2,
     "kick": 1,
@@ -145,13 +144,11 @@ ALIASES = {
     'delete': ('delete', 'del', 'удалить'),
     'copy': ('copy', 'копировать'),
     # ----------------------------------
-    'enroll': ('enroll', 'зарегистрировать'),
-    'drop': ('drop', 'сбросить'),
+    'chat': ('chat', 'чат'),
+    'log': ('log', 'лог'),
+    'drop': ('drop', 'уронить'),
     # ----------------------------------
-    'enroll_log': ('enroll_log', 'зарегистрировать_лог'),
-    'drop_log': ('drop_log', 'сбросить_лог'),
-    # ----------------------------------
-    'permission': ('permission', 'права'),
+    'permission': ('permission', 'perm', 'права'),
     # ----------------------------------
     'terminate': ('terminate', 'term', 'терминировать'),
     # ----------------------------------
