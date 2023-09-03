@@ -10,7 +10,7 @@
   - [Команды](#-команды)
   - [Forbidden Filter](#%EF%B8%8F-система-forbidden-filter)
   - [URL Filter](#%EF%B8%8F-система-url-filter)
-  - [[README#⚙ Команды|Команды]]
+  - [README#⚙ Команды|Команды]
 
 ## 📄 Введение ##
   Данный бот был создан и заточен исключительно для работы с ресурсами модерации неформального фан-сообщества [FUNCKA](https://vk.com/funcka) по игре [STALCRAFT](https://vk.com/stalcraft_official). <br/>
