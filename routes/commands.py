@@ -48,13 +48,13 @@ async def reference(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['enroll'], PREFIXES, 0),
+    HandleCommand(ALIASES['chat'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['enroll']),
+    CheckPermission(access_to=PERMISSION_ACCESS['chat']),
     HandleIn(handle_log=False, handle_chat=True)
 )
-async def enroll(message: Message):
+async def chat(message: Message):
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -63,11 +63,34 @@ async def enroll(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "enroll",
+        "command_name": "chat",
         "now_time": converter.now(),
     }
 
-    await processor.enroll_proc(context, log=True, respond=True)
+    await processor.chat_proc(context, log=True, respond=True)
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['log'], PREFIXES, 0),
+    CollapseCommand(),
+    AnswerCommand(use_reply=False, use_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['log']),
+    HandleIn(handle_log=True, handle_chat=False)
+)
+async def log(message: Message):
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "peer_type": "LOG",
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "command_name": "log",
+        "now_time": converter.now(),
+    }
+
+    await processor.log_proc(context, log=True, respond=True)
 
 
 @bl.chat_message(
@@ -90,60 +113,6 @@ async def drop(message: Message):
     }
 
     await processor.drop_proc(context, log=True, respond=True)
-
-
-"""
-------------------------------------------------------------------------------------------------------------------------
-Команда регистрации лог-чата. 
-Таких лог-чатов может быть несколько.
-Бот отправляет логи своих действий в каждый из помеченных этой командой чатов.
-"""
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['enroll_log'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['enroll_log']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def enroll_log(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "peer_type": "LOG",
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "enroll_log",
-        "now_time": converter.now(),
-    }
-
-    await processor.enroll_log_proc(context, log=True, respond=True)
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['drop_log'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['drop_log']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def drop_log(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "drop_log",
-        "now_time": converter.now(),
-    }
-
-    await processor.drop_log_proc(context, log=True, respond=True)
-
 
 """
 ------------------------------------------------------------------------------------------------------------------------
