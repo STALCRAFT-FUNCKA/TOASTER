@@ -1,7 +1,7 @@
-from typing import Tuple
+from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from vkbottle.bot import BotLabeler, Message
 from database.proc import Processor
-from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS
+from typing import Tuple
 from utils import *
 from .rules import *
 
@@ -558,3 +558,66 @@ async def setting(message: Message, args: Tuple):
     }
 
     await processor.setting_proc(context, log=True, respond=False)
+
+
+"""
+------------------------------------------------------------------------------------------------------------------------
+Команда изменяет значение настроек в беседе. 
+"""
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['queue'], PREFIXES, 0),
+    CollapseCommand(),
+    AnswerCommand(use_reply=True, use_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['queue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def queue(message: Message):
+    delta = QUEUE_TIME
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": message.reply_message.from_id,
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "command_name": "queue",
+        "now_time": converter.now(),
+        "target_time": converter.now() + delta,
+        "cmids": [message.reply_message.conversation_message_id]
+    }
+
+    await processor.queue_proc(context, log=True, respond=False)
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['unqueue'], PREFIXES, 0),
+    CollapseCommand(),
+    AnswerCommand(use_reply=True, use_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['unqueue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def unqueue(message: Message):
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": message.reply_message.from_id,
+        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
+        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "command_name": "unqueue",
+        "now_time": converter.now(),
+    }
+
+    await processor.unqueue_proc(context, log=True, respond=False)
