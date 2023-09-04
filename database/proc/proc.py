@@ -32,7 +32,7 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
-            url = "https://github.com/Oidaho/FUNCKA-BOT/blob/master/README.md"
+            url = "https://github.com/STALCRAFT-FUNCKA/TOASTER/README.md"
             text = f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}"
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
