@@ -11,7 +11,7 @@ class Connection:
         for table in sql_tables.tables:
             self.cursor.execute(table)
 
-    def __init__(self, allow_debug_text=True, database_path=".\\{0}"):
+    def __init__(self, allow_debug_text=True, database_path="./{0}"):
         try:
             self.connection = sqlite3.connect(database_path.format(self.filename))
             self.cursor = self.connection.cursor()
@@ -84,7 +84,7 @@ class BaseTable:
 
 class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable
-    _database_path = "database\\{0}"
+    _database_path = "database/{0}"
     _tunnel = Connection(database_path=_database_path)
 
     @property
