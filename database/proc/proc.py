@@ -36,6 +36,7 @@ class Processor(metaclass=MetaSingleton):
             url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
             text = f"Документация: \n {url_tech} \n" \
                    f"Обновления: \n {url_upd} \n"
+      
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
