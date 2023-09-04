@@ -1,5 +1,5 @@
 from vkbottle import Bot
-from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
+from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS, QUEUE_TIME
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton
@@ -32,8 +32,11 @@ class Processor(metaclass=MetaSingleton):
             await self.logger.log()
 
         async def send_respond(ctx):
-            url = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
-            text = f"Перейдя по этой ссылке, вы сможете найти документацию на GitHub:\n {url}"
+            url_tech = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
+            url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
+            text = f"Документация: \n {url_tech} \n" \
+                   f"Обновления: \n {url_upd} \n"
+      
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -1050,7 +1053,7 @@ class Processor(metaclass=MetaSingleton):
             target_id=context.get("target_id"),
             target_name=context.get("target_name"),
             send_time=context.get("now_time"),
-            next_time=context.get("target_time")
+            next_time=context.get("now_time") + QUEUE_TIME
         )
 
     async def unqueue_proc(self, context: dict, log=True, respond=True):
