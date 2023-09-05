@@ -1,5 +1,5 @@
 from vkbottle import Bot
-from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS, QUEUE_TIME
+from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton
@@ -46,7 +46,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -82,7 +82,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -145,7 +145,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -201,7 +201,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -254,7 +254,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -336,7 +336,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -400,7 +400,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -476,7 +476,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -544,7 +544,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -605,7 +605,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -675,7 +675,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -733,7 +733,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -819,7 +819,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -886,7 +886,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -929,7 +929,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -988,7 +988,7 @@ class Processor(metaclass=MetaSingleton):
             role = self.database.permissions.select(
                 ("target_lvl",),
                 peer_id=context.get("peer_id"),
-                target_id=context.get("target_id")
+                target_id=context.get("initiator_id")
             )
             if role:
                 role = role[0][0]
@@ -1035,7 +1035,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
@@ -1053,7 +1053,7 @@ class Processor(metaclass=MetaSingleton):
             target_id=context.get("target_id"),
             target_name=context.get("target_name"),
             send_time=context.get("now_time"),
-            next_time=context.get("now_time") + QUEUE_TIME
+            next_time=context.get("target_time")
         )
 
     async def unqueue_proc(self, context: dict, log=True, respond=True):
@@ -1081,7 +1081,7 @@ class Processor(metaclass=MetaSingleton):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
-            target_id=context.get("target_id")
+            target_id=context.get("initiator_id")
         )
         if role:
             role = role[0][0]
