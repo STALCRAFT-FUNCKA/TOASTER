@@ -1,4 +1,6 @@
 from vkbottle.bot import BotLabeler, Message
+
+from config import QUEUE_TIME
 from database.orm import DataBase
 from database.proc import Processor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
@@ -67,4 +69,5 @@ async def queue(message: Message):
     if in_queue:
         await processor.warn_proc(context, collapse=True, log=True, respond=True)
     else:
+        context["target_time"] = converter.now() + QUEUE_TIME
         await processor.queue_proc(context, log=False, respond=False)
