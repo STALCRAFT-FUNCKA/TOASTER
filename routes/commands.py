@@ -376,7 +376,7 @@ async def unmute(message: Message):
     HandleCommand(ALIASES['warn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
+    CheckPermission(access_to=PERMISSION_ACCESS['warn']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -408,7 +408,7 @@ async def warn(message: Message):
     HandleCommand(ALIASES['unwarn'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
+    CheckPermission(access_to=PERMISSION_ACCESS['unwarn']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
@@ -439,7 +439,7 @@ async def unwarn(message: Message):
     HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=True),
-    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
+    CheckPermission(access_to=PERMISSION_ACCESS['delete']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
@@ -474,7 +474,7 @@ async def delete(message: Message):
     HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
     AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['setting']),
+    CheckPermission(access_to=PERMISSION_ACCESS['copy']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
