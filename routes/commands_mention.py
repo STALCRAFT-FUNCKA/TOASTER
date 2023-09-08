@@ -11,6 +11,13 @@ info = Info()
 converter = Converter()
 processor = Processor()
 
+
+async def get_cuid(arg):
+    screen_name = arg.replace("@", "")
+    screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
+    uid = await info.user_id(screen_name=screen_name)
+    return uid
+
 """
 ------------------------------------------------------------------------------------------------------------------------
 Команда кика пользователя со ВСЕХ бесед. 
@@ -28,13 +35,6 @@ processor = Processor()
     OnlyEnrolled()
 )
 async def terminate(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -71,13 +71,6 @@ async def terminate(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[1])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -126,13 +119,6 @@ async def permission(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def kick(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -171,13 +157,6 @@ async def kick(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def ban(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[2])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -219,13 +198,6 @@ async def ban(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unban(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -265,12 +237,6 @@ async def unban(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
     cuid = await get_cuid(args[2])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -312,13 +278,6 @@ async def mute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unmute(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -358,13 +317,6 @@ async def unmute(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def warn(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -401,13 +353,6 @@ async def warn(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def unwarn(message: Message, args: Tuple[str]):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -445,13 +390,6 @@ async def unwarn(message: Message, args: Tuple[str]):
     OnlyEnrolled()
 )
 async def queue(message: Message, args: Tuple):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
@@ -486,13 +424,6 @@ async def queue(message: Message, args: Tuple):
     OnlyEnrolled()
 )
 async def unqueue(message: Message, args: Tuple):
-    async def get_cuid(arg):
-        screen_name = arg.replace("@", "")
-        screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
-        uid = await info.user_id(screen_name=screen_name)
-        return uid
-
-    # Получаем кастомный id пользователя
     cuid = await get_cuid(args[0])
     if cuid is None:
         print("Command aborted: Wrong mention")
