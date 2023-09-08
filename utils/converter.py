@@ -1,7 +1,7 @@
 import datetime
 import time
 from singltone import MetaSingleton
-from config import TIME_COEFFICENT
+from config import TIME_COEFFICIENT
 
 
 class Converter(metaclass=MetaSingleton):
@@ -24,7 +24,7 @@ class Converter(metaclass=MetaSingleton):
     def delta(t, coefficent):
         try:
             t = int(t)
-            coefficent = TIME_COEFFICENT[coefficent]
+            coefficent = TIME_COEFFICIENT[coefficent]
 
             if t > 0:
                 return t * coefficent
@@ -33,4 +33,4 @@ class Converter(metaclass=MetaSingleton):
 
         except Exception as error:
             print("Converting aborted. Returning standard delta: ", error)
-            return TIME_COEFFICENT["h"]
+            return TIME_COEFFICIENT["h"]

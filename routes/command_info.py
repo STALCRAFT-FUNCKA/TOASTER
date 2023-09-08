@@ -21,15 +21,30 @@ processor = Processor()
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def info(message: Message, args: Tuple):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "info" + args[0],
-        "now_time": converter.now()
-    }
+    if args[0] == "permission":
+        pass
+        # process with context
 
-    await processor.reference_proc(context, log=False, respond=True)
+    if args[0] == "settings":
+        pass
+        # process with context
+
+    if args[0] == "conversation":
+        pass
+        # process with context
+
+    if args[0] == "kick":
+        pass
+        # process with context
+
+    if args[0] == "ban":
+        pass
+        # process with context
+
+    if args[0] == "mute":
+        pass
+        # process with context
+
+    if args[0] == "warn":
+        pass
+        # process with context
