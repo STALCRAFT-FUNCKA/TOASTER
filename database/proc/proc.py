@@ -1220,4 +1220,4 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
         text = f"Документация: \n {url_tech} \n" \
                f"Обновления: \n {url_upd} \n"
 
-        await self._send_respond(context)
+        await self._send_respond(text, context)
