@@ -1216,7 +1216,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
 
     async def ref_all_proc(self, context):
         url_tech = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
-        url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
+        url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases"
         text = f"Документация: \n {url_tech} \n" \
                f"Обновления: \n {url_upd} \n"
 
