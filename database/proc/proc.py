@@ -1088,19 +1088,120 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             await self._send_respond(text, context)
 
     async def info_setting_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
 
-    async def info_conversation_proc(self, context):
-        ...
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Настройки: \n"
+
+            settings = self.database.settings.select(
+                ("setting_name", "setting_status"),
+                peer_id=peer_id
+            )
+            for name, status in settings:
+                text += f"* {name} -- {status}\n"
+
+            await self._send_respond(text, context)
+
+    async def info_chat_proc(self, context):
+        conversations = self.database.conversations.select(
+            ("peer_name", "peer_type")
+        )
+        text = "Зарегистрированные беседы: \n"
+        for cname, ctype in conversations:
+            text += f"* {cname} -- {ctype} \n"
+
+        await self._send_respond(text, context)
 
     async def info_kick_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
+
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Исключенные пользователи: \n"
+
+            kicks = self.database.kicked.select(
+                ("initiator_name", "target_name", "kick_time"),
+                peer_id=peer_id
+            )
+            for initiator_name, target_name, kick_time in kicks:
+                text += f"* {target_name} -- {self.converter.convert(kick_time)}\n" \
+                        f"\-Инициатор: {target_name}\n"
+
+            await self._send_respond(text, context)
 
     async def info_ban_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
+
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Заблокированные пользователи: \n"
+
+            bans = self.database.banned.select(
+                ("initiator_name", "target_name", "ban_time", "unban_time"),
+                peer_id=peer_id
+            )
+            for initiator_name, target_name, ban_time, unban_time in bans:
+                text += f"* {target_name} -- {self.converter.convert(ban_time)}\n" \
+                        f"|-Время снятия: {self.converter.convert(unban_time)}\b" \
+                        f"\-Инициатор: {target_name}\n"
+
+            await self._send_respond(text, context)
 
     async def info_mute_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
+
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Заглушенные пользователи: \n"
+
+            mutes = self.database.muted.select(
+                ("initiator_name", "target_name", "mute_time", "unmute_time"),
+                peer_id=peer_id
+            )
+            for initiator_name, target_name, mute_time, unmute_time in mutes:
+                text += f"* {target_name} -- {self.converter.convert(mute_time)}\n" \
+                        f"|-Время снятия: {self.converter.convert(unmute_time)}\b" \
+                        f"\-Инициатор: {target_name}\n"
+
+            await self._send_respond(text, context)
 
     async def info_warn_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
+
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Заглушенные пользователи: \n"
+
+            warns = self.database.muted.select(
+                ("initiator_name", "target_name", "warn_time", "unwarn_time", "warn_count"),
+                peer_id=peer_id
+            )
+            for initiator_name, target_name, warn_time, unwarn_time, warn_count in warns:
+                text += f"* {target_name} -- {self.converter.convert(warn_time)}\n" \
+                        f"|- Время снятия: {self.converter.convert(unwarn_time)}\b" \
+                        f"|- Количество предупреждений: {warn_count}\n" \
+                        f"\- Инициатор: {target_name}\n"
+
+            await self._send_respond(text, context)
+
