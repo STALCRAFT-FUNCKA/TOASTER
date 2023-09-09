@@ -18,56 +18,6 @@ class StdProcessor:
 class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
     __debug = False
 
-    # Если этот параметр True - то пользователя не исключит из беседы, при исполнении процессов бана, кика и т.п.
-
-    def __init__(self):
-        self.logger = Logger()
-        self.converter = Converter()
-
-        self.bot = Bot(token=TOKEN)
-        self.database = DataBase()
-
-    async def reference_proc(self, context, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            url_tech = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
-            url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
-            text = f"Документация: \n {url_tech} \n" \
-                   f"Обновления: \n {url_upd} \n"
-
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
-
-        if respond:
-            await send_respond(context)
-        if log:
-            await send_log(context)
-
     async def chat_proc(self, context, log=True, respond=True):
         async def send_log(ctx):
             self.logger.compose_log_data(
@@ -1109,12 +1059,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         )
 
 
-class InformationProcessor(metaclass=MetaSingleton):
-    def __init__(self):
-        self.bot = Bot(token=TOKEN)
-        self.database = DataBase()
-        self.info = Info()
-
+class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
     async def _send_respond(self, text, ctx):
         await self.bot.api.messages.send(
             chat_id=ctx.get("chat_id"),
