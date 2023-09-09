@@ -12,33 +12,6 @@ info = Info()
 converter = Converter()
 processor = CommandProcessor()
 
-"""
-------------------------------------------------------------------------------------------------------------------------
-Команда вывода справочной информации.
-"""
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['reference'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['reference']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def reference(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "reference",
-        "now_time": converter.now()
-    }
-
-    await processor.reference_proc(context, log=False, respond=True)
-
 
 """
 ------------------------------------------------------------------------------------------------------------------------
