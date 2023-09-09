@@ -62,30 +62,23 @@ async def info(message: Message, args: Tuple):
         "chat_id": message.chat_id
     }
 
-    if args[0] == "permission":
-        pass
-        # process with context
+    if args[0] in ALIASES['permission']:
+        await info_processor.info_permission_proc(context)
 
-    if args[0] == "settings":
-        pass
-        # process with context
+    if args[0] in ALIASES['setting']:
+        await info_processor.info_setting_proc(context)
 
-    if args[0] == "conversation":
-        pass
-        # process with context
+    if args[0] in ALIASES['chat']:
+        await info_processor.info_chat_proc(context)
 
-    if args[0] == "kick":
-        pass
-        # process with context
+    if args[0] in ALIASES['kick']:
+        await info_processor.info_kick_proc(context)
 
-    if args[0] == "ban":
-        pass
-        # process with context
+    if args[0] in ALIASES['ban']:
+        await info_processor.info_ban_proc(context)
 
-    if args[0] == "mute":
-        pass
-        # process with context
+    if args[0] in ALIASES['mute']:
+        await info_processor.info_mute_proc(context)
 
-    if args[0] == "warn":
-        pass
-        # process with context
+    if args[0] in ALIASES['warn']:
+        await info_processor.info_warn_proc(context)
