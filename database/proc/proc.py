@@ -178,7 +178,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
         else:
-            if log:
+            if respond:
                 await send_respond(context, "Данная беседа не зарегистрирована.")
 
     async def terminate_proc(self, context: dict, collapse=False, log=True, respond=True):
