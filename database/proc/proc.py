@@ -1099,3 +1099,29 @@ class CommandProcessor(metaclass=MetaSingleton):
             target_id=context.get("target_id"),
         )
 
+
+class InformationProcessor(metaclass=MetaSingleton):
+    def __init__(self):
+        self.bot = Bot(token=TOKEN)
+        self.database = DataBase()
+
+    async def info_permission_proc(self):
+        ...
+
+    async def info_setting_proc(self):
+        ...
+
+    async def info_conversation_proc(self):
+        ...
+
+    async def info_kick_proc(self):
+        ...
+
+    async def info_ban_proc(self):
+        ...
+
+    async def info_mute_proc(self):
+        ...
+
+    async def info_warn_proc(self):
+        ...
