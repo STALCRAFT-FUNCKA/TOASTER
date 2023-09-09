@@ -1,6 +1,6 @@
 from typing import Tuple
 from vkbottle.bot import BotLabeler, Message
-from database.proc import Processor
+from database.proc import CommandProcessor
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from utils import *
 from .rules import *
@@ -9,7 +9,7 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
-processor = Processor()
+processor = CommandProcessor()
 
 
 async def get_cuid(arg):

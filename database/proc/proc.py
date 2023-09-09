@@ -6,7 +6,7 @@ from singltone import MetaSingleton
 from utils import Converter
 
 
-class Processor(metaclass=MetaSingleton):
+class CommandProcessor(metaclass=MetaSingleton):
     __debug = False
 
     # Если этот параметр True - то пользователя не исключит из беседы, при исполнении процессов бана, кика и т.п.
@@ -1098,3 +1098,4 @@ class Processor(metaclass=MetaSingleton):
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id"),
         )
+

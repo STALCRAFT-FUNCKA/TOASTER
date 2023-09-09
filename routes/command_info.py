@@ -1,6 +1,6 @@
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from vkbottle.bot import BotLabeler, Message
-from database.proc import Processor
+from database.proc import CommandProcessor
 from typing import Tuple
 from utils import *
 from .rules import *
@@ -10,7 +10,7 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
-processor = Processor()
+processor = CommandProcessor()
 
 
 @bl.chat_message(
