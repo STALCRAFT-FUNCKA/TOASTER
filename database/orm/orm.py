@@ -55,8 +55,10 @@ class BaseTable:
 
     def select(self, fields: tuple, **rows):
         summary_fields = ', '.join(fields)
-        summary_rows = ' AND '.join(self._get_ratio(rows))
-        query = f"SELECT {summary_fields} FROM {self.table_name} WHERE {summary_rows}"
+        query = f"SELECT {summary_fields} FROM {self.table_name}"
+        if rows:
+            summary_rows = ' AND '.join(self._get_ratio(rows))
+            query += f" WHERE {summary_rows}"
         self.cur.execute(query)
         return self.cur.fetchall()
 
