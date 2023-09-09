@@ -1,6 +1,6 @@
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from vkbottle.bot import BotLabeler, Message
-from database.proc import InformationProcessor
+from database.proc import InformationProcessor, ReferenceProcessor
 from typing import Tuple
 from utils import *
 from .rules import *

@@ -1205,3 +1205,19 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
             await self._send_respond(text, context)
 
+
+class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
+    async def _send_respond(self, text, ctx):
+        await self.bot.api.messages.send(
+            chat_id=ctx.get("chat_id"),
+            message=text,
+            random_id=0
+        )
+
+    async def ref_all_proc(self, context):
+        url_tech = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
+        url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
+        text = f"Документация: \n {url_tech} \n" \
+               f"Обновления: \n {url_upd} \n"
+
+        await self._send_respond(context)
