@@ -1083,7 +1083,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                 peer_id=peer_id
             )
             for name, role in users:
-                text += f"* {name} -- {role}:{PERMISSION_LVL[role]}"
+                text += f"* {name} -- {role}:{PERMISSION_LVL[role]}\n"
 
             await self._send_respond(text, context)
 
