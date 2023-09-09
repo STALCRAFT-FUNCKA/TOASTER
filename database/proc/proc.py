@@ -3,7 +3,7 @@ from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton
-from utils import Converter
+from utils import Converter, Info
 
 
 class CommandProcessor(metaclass=MetaSingleton):
@@ -1104,6 +1104,7 @@ class InformationProcessor(metaclass=MetaSingleton):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
         self.database = DataBase()
+        self.info = Info()
 
     async def _send_respond(self, text, ctx):
         await self.bot.api.messages.send(
@@ -1113,7 +1114,24 @@ class InformationProcessor(metaclass=MetaSingleton):
         )
 
     async def info_permission_proc(self, context):
-        ...
+        conversations = self.database.conversations.select(
+            ("peer_id",),
+            peer_type="CHAT"
+        )
+        conversations = [peer_id[0] for peer_id in conversations]
+
+        for peer_id in conversations:
+            peer_name = await self.info.peer_name(peer_id)
+            text = f"{peer_name} | Роли: \n"
+
+            users = self.database.permissions.select(
+                ("target_name", "target_lvl"),
+                peer_id=peer_id
+            )
+            for name, role in users:
+                text += f"* {name} -- {role}:{PERMISSION_LVL[role]}"
+
+            await self._send_respond(text, context)
 
     async def info_setting_proc(self, context):
         ...
