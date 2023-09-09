@@ -34,7 +34,8 @@ class BaseTable:
         '__le': '<=',
         '__lt': '<',
         '__ge': '>=',
-        '__gt': '>'
+        '__gt': '>',
+        '__nt': '!='
     }
 
     def _get_ratio(self, rows: dict) -> list:
