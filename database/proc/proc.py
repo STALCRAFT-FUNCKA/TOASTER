@@ -6,7 +6,16 @@ from singltone import MetaSingleton
 from utils import Converter, Info
 
 
-class CommandProcessor(metaclass=MetaSingleton):
+class StdProcessor:
+    def __init__(self):
+        self.bot = Bot(token=TOKEN)
+        self.database = DataBase()
+        self.logger = Logger()
+        self.info = Info()
+        self.converter = Converter()
+
+
+class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
     __debug = False
 
     # Если этот параметр True - то пользователя не исключит из беседы, при исполнении процессов бана, кика и т.п.
