@@ -1,6 +1,6 @@
 from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
 from vkbottle.bot import BotLabeler, Message
-from database.proc import CommandProcessor
+from database.proc import InformationProcessor
 from typing import Tuple
 from utils import *
 from .rules import *
@@ -10,7 +10,7 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
-processor = CommandProcessor()
+processor = InformationProcessor()
 
 
 @bl.chat_message(
@@ -21,6 +21,11 @@ processor = CommandProcessor()
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def info(message: Message, args: Tuple):
+    context = {
+        "peer_id": message.peer_id,
+        "chat_id": message.chat_id
+    }
+
     if args[0] == "permission":
         pass
         # process with context
