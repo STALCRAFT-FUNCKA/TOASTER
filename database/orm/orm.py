@@ -53,6 +53,7 @@ class BaseTable:
         self.con = connection
         self.cur = cursor
 
+    # TODO: Пофиксить
     def select(self, fields: tuple, **rows):
         summary_fields = ', '.join(fields)
         query = f"SELECT {summary_fields} FROM {self.table_name}"
