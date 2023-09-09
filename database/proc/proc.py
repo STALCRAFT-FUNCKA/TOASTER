@@ -36,7 +36,7 @@ class CommandProcessor(metaclass=MetaSingleton):
             url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases/tag/v2.0.4"
             text = f"Документация: \n {url_tech} \n" \
                    f"Обновления: \n {url_upd} \n"
-      
+
             await self.bot.api.messages.send(
                 chat_id=ctx.get("chat_id"),
                 message=text,
@@ -1105,23 +1105,30 @@ class InformationProcessor(metaclass=MetaSingleton):
         self.bot = Bot(token=TOKEN)
         self.database = DataBase()
 
-    async def info_permission_proc(self):
+    async def _send_respond(self, text, ctx):
+        await self.bot.api.messages.send(
+            chat_id=ctx.get("chat_id"),
+            message=text,
+            random_id=0
+        )
+
+    async def info_permission_proc(self, context):
         ...
 
-    async def info_setting_proc(self):
+    async def info_setting_proc(self, context):
         ...
 
-    async def info_conversation_proc(self):
+    async def info_conversation_proc(self, context):
         ...
 
-    async def info_kick_proc(self):
+    async def info_kick_proc(self, context):
         ...
 
-    async def info_ban_proc(self):
+    async def info_ban_proc(self, context):
         ...
 
-    async def info_mute_proc(self):
+    async def info_mute_proc(self, context):
         ...
 
-    async def info_warn_proc(self):
+    async def info_warn_proc(self, context):
         ...
