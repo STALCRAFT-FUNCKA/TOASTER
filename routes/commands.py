@@ -71,7 +71,7 @@ async def log(message: Message):
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['drop']),
-    HandleIn(handle_log=False, handle_chat=True)
+    HandleIn(handle_log=True, handle_chat=True)
 )
 async def drop(message: Message):
     context = {
