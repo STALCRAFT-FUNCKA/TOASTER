@@ -23,4 +23,4 @@ class Handler(ABCHandler):
                     "now_time": self.converter.now(),
                 }
 
-                await self.processor.unmute_proc(context, log=True, respond=False)
+                await self.processor.unmute_proc(context, log=True, respond=True)
