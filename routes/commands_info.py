@@ -5,7 +5,6 @@ from typing import Tuple
 from utils import *
 from .rules import *
 
-
 bl = BotLabeler()
 
 info = Info()
