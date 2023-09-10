@@ -78,10 +78,10 @@ class Logger(metaclass=MetaSingleton):
         peers = self._get_log_peers()
         log_data = self.log_data
 
-        for PeerID in peers:
+        for peer_id in peers:
             await self.bot.api.messages.send(
                 group_id=GROUP_ID,
-                peer_id=PeerID,
+                peer_id=peer_id,
                 message=log_data['text'],
                 forward=json.dumps(log_data['forward']),
                 random_id=0
