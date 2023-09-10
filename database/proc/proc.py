@@ -14,17 +14,20 @@ class StdProcessor:
         self.info = Info()
         self.converter = Converter()
 
-    async def _send_respond(self, text, ctx):
+    async def _send_respond(self, text, ctx, highlighter=True):
+        if highlighter:
+            text = "------------------------------------------------------------- \n" + text
+            text = text + "-------------------------------------------------------------"
         await self.bot.api.messages.send(
             chat_id=ctx.get("chat_id"),
             message=text,
             random_id=0
         )
 
-    async def _send_log(self, ctx):
+    async def _send_log(self, ctx, highlighter=True):
         self.logger.compose_log_data(ctx)
         self.logger.compose_log_attachments(ctx)
-        await self.logger.log()
+        await self.logger.log(highlighter=highlighter)
 
     def _get_initiator_lvl(self, context):
         role = self.database.permissions.select(
@@ -52,12 +55,12 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         if is_enrolled:
             k = False
             if respond:
-                text = "Данные беседы обновлены."
+                text = "Данные беседы обновлены.\n"
                 await self._send_respond(text, context)
         else:
             k = True
             if respond:
-                text = "Беседа зарегистрирована."
+                text = "Беседа зарегистрирована.\n"
                 await self._send_respond(text, context)
         if log:
             await self._send_log(context)
@@ -87,10 +90,10 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 peer_type=context.get("peer_type")
             )
             if is_enrolled:
-                text = "Данные беседы обновлены."
+                text = "Данные беседы обновлены.\n"
                 await self._send_respond(text, context)
             else:
-                text = "Беседа назначена в качестве лог-чата."
+                text = "Беседа назначена в качестве лог-чата.\n"
                 await self._send_respond(text, context)
         if log:
             await self._send_log(context)
@@ -110,7 +113,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                text = "Регистрация данной беседы упразднена."
+                text = "Регистрация данной беседы упразднена.\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -121,7 +124,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 
         else:
             if respond:
-                text = "Данная беседа не зарегистрирована."
+                text = "Данная беседа не зарегистрирована.\n"
                 await self._send_respond(text, context)
 
     async def terminate_proc(self, context: dict, collapse=False, log=True, respond=True):
@@ -145,7 +148,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             if not is_kicked:
                 if respond:
                     text = f"@id{context.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
-                            f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                            f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
                     await self._send_respond(text, context)
                 if not logged and log:
                     logged = True
@@ -210,7 +213,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 rsn = f"Причина: {context.get('reason')} \n"
                 text = f"@id{context.get('target_id')} (Пользователь) исключен из беседы.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -252,7 +255,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 text = f"@id{context.get('target_id')} (Пользователь) временно заблокирован.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
                        f"Время снятия блокировки: {self.converter.convert(context.get('target_time'))}\n" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -317,7 +320,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                        f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
                        f"Время снятия заглушения: {self.converter.convert(context.get('target_time'))}\n" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -380,7 +383,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                    f"{rsn if context.get('reason') is not None else ''}" \
                    f"Текущее количество предупреждений: {context.get('target_warns')}/3.\n" \
                    f"Время снятия предупреждений: {self.converter.convert(context.get('target_time'))}\n" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
             await self._send_respond(text, context)
         if log:
             await self._send_log(context)
@@ -452,7 +455,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            text = context.get("copied")
+            text = context.get("copied") + "\n"
             await self._send_respond(text, context)
         if log:
             await self._send_log(context)
@@ -461,7 +464,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            text = "Сообщение(я) удалены."
+            text = "Сообщение(я) удалены.\n"
             await self._send_respond(text, context)
         if log:
             await self._send_log(context)
@@ -621,7 +624,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             )
             for initiator_name, target_name, ban_time, unban_time in bans:
                 text += f"* {target_name} -- {self.converter.convert(ban_time)}\n" \
-                        f"|-Время снятия: {self.converter.convert(unban_time)}\b" \
+                        f"|-Время снятия: {self.converter.convert(unban_time)}\n" \
                         f"\\-Инициатор: {target_name}\n"
 
             await self._send_respond(text, context)
@@ -643,7 +646,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             )
             for initiator_name, target_name, mute_time, unmute_time in mutes:
                 text += f"* {target_name} -- {self.converter.convert(mute_time)}\n" \
-                        f"|-Время снятия: {self.converter.convert(unmute_time)}\b" \
+                        f"|-Время снятия: {self.converter.convert(unmute_time)}\n" \
                         f"\\-Инициатор: {target_name}\n"
 
             await self._send_respond(text, context)
@@ -665,7 +668,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             )
             for initiator_name, target_name, warn_time, unwarn_time, warn_count in warns:
                 text += f"* {target_name} -- {self.converter.convert(warn_time)}\n" \
-                        f"|- Время снятия: {self.converter.convert(unwarn_time)}\b" \
+                        f"|- Время снятия: {self.converter.convert(unwarn_time)}\n" \
                         f"|- Количество предупреждений: {warn_count}\n" \
                         f"\\- Инициатор: {target_name}\n"
 
@@ -682,13 +685,17 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
         await self._send_respond(text, context)
 
     async def ref_reference_proc(self, context):
-        text = "/reference \n" \
+        text = "/reference <command_name>\n" \
                "* Доступные префиксы: ! или / \n" \
               f"* Псевдонимы команды: {ALIASES['reference']} \n"\
               f"* Доступ для группы прав {PERMISSION_ACCESS['reference']} уровня или выше \n" \
                "* Может быть вызвана только в лог-чате\n" \
                "\n" \
-               "Опиcание: Выводит в чат справочную информацию по какой-либо команде."
+               "Опиcание: Выводит в чат справочную информацию по какой-либо команде. \n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <command_name>: all (вывод общей справки) или любая команда, включая ее псевдонимы " \
+               "(вывод информации о конкретной команде) \n"
 
         await self._send_respond(text, context)
 
@@ -699,7 +706,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                f"* Доступ для группы прав {PERMISSION_ACCESS['chat']} уровня или выше \n" \
                "\n" \
                "Описание: Команда помечает беседу, как чат. " \
-               "Теперь в этой беседе будет проходить модерация фильтрами."
+               "Теперь в этой беседе будет проходить модерация фильтрами.\n"
 
         await self._send_respond(text, context)
 
@@ -710,7 +717,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                f"* Доступ для группы прав {PERMISSION_ACCESS['log']} уровня или выше \n" \
                "\n" \
                "Описание: Команда помечает беседу, как лог-чат. " \
-               "Теперь в эту беседу будут приходить логи исполненных команд."
+               "Теперь в эту беседу будут приходить логи исполненных команд.\n"
 
         await self._send_respond(text, context)
 
@@ -720,7 +727,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                f"* Псевдонимы команды: {ALIASES['drop']} \n" \
                f"* Доступ для группы прав {PERMISSION_ACCESS['drop']} уровня или выше \n" \
                "\n" \
-               "Описание: Команда сбрасывает метку чата или лог-чата с беседы."
+               "Описание: Команда сбрасывает метку чата или лог-чата с беседы.\n"
 
         await self._send_respond(text, context)
 
@@ -734,7 +741,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "Описание: Команда устанавливает для пользователя группу прав, равную введенному аргументу.\n" \
                "\n" \
                "Доступные аргументы: \n" \
-               "* <lvl>: 0 (user), 1 (moderator), 2 (administrator)"
+               "* <lvl>: 0 (user), 1 (moderator), 2 (administrator)\n"
 
         await self._send_respond(text, context)
 
@@ -751,7 +758,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "* <value>: True\\False \n" \
                "* <setting>: Allow_Picture, Allow_Video, Allow_Music, Allow_Voice, Allow_Post, Allow_Votes, " \
                "Allow_Files, Allow_Miniapp, Allow_Graffiti, Allow_Sticker, Allow_Reply, Filter_Curse, Slow_Mode, " \
-               "Account_Age, Hard_Mode"
+               "Account_Age, Hard_Mode\n"
 
         await self._send_respond(text, context)
 
@@ -811,7 +818,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "\n" \
                "Доступные аргументы: \n" \
                "* <time>: натуральное число \n" \
-               "* <coefficent>: h (hour), d (day), m (month)"
+               "* <coefficent>: h (hour), d (day), m (month)\n"
 
         await self._send_respond(text, context)
 
@@ -839,7 +846,7 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "\n" \
                "Доступные аргументы: \n" \
                "* <time>: натуральное число \n" \
-               "* <coefficent>: h (hour), d (day), m (month)"
+               "* <coefficent>: h (hour), d (day), m (month)\n"
 
         await self._send_respond(text, context)
 
@@ -911,6 +918,6 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "Описание: Выводит информацию о текущем состоянии указанного списка объектов.\n" \
                "\n" \
                "Доступные аргументы: \n" \
-               "* <list_name>: permission, setting, chat, kick, ban, mute, warn"
+               "* <list_name>: permission, setting, chat, kick, ban, mute, warn\n"
 
         await self._send_respond(text, context)

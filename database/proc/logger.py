@@ -74,10 +74,12 @@ class Logger(metaclass=MetaSingleton):
 
         self.log_data['text'] = "\n".join(log_lines)
 
-    async def log(self):
+    async def log(self, highlighter=False):
         peers = self._get_log_peers()
         log_data = self.log_data
-
+        if highlighter:
+            log_data['text'] = "-------------------------------------------------------------\n" + log_data['text']
+            log_data['text'] = log_data['text'] + "\n -------------------------------------------------------------"
         for peer_id in peers:
             await self.bot.api.messages.send(
                 group_id=GROUP_ID,
