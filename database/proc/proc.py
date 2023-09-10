@@ -1221,3 +1221,237 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                f"Обновления: \n {url_upd} \n"
 
         await self._send_respond(text, context)
+
+    async def ref_reference_proc(self, context):
+        text = "/reference \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['reference']} \n"\
+              f"* Доступ для группы прав {PERMISSION_ACCESS['reference']} уровня или выше \n" \
+               "* Может быть вызвана только в лог-чате\n" \
+               "\n" \
+               "Опиcание: Выводит в чат справочную информацию по какой-либо команде."
+
+        await self._send_respond(text, context)
+
+    async def ref_chat_proc(self, context):
+        text = "/chat \n" \
+               "* Доступные префиксы: ! или / \n" \
+               f"* Псевдонимы команды: {ALIASES['chat']} \n" \
+               f"* Доступ для группы прав {PERMISSION_ACCESS['chat']} уровня или выше \n" \
+               "\n" \
+               "Описание: Команда помечает беседу, как чат. " \
+               "Теперь в этой беседе будет проходить модерация фильтрами."
+
+        await self._send_respond(text, context)
+
+    async def ref_log_proc(self, context):
+        text = "/log \n" \
+               "* Доступные префиксы: ! или / \n" \
+               f"* Псевдонимы команды: {ALIASES['log']} \n" \
+               f"* Доступ для группы прав {PERMISSION_ACCESS['log']} уровня или выше \n" \
+               "\n" \
+               "Описание: Команда помечает беседу, как лог-чат. " \
+               "Теперь в эту беседу будут приходить логи исполненных команд."
+
+        await self._send_respond(text, context)
+
+    async def ref_drop_proc(self, context):
+        text = "/drop \n" \
+               "* Доступные префиксы: ! или / \n" \
+               f"* Псевдонимы команды: {ALIASES['drop']} \n" \
+               f"* Доступ для группы прав {PERMISSION_ACCESS['drop']} уровня или выше \n" \
+               "\n" \
+               "Описание: Команда сбрасывает метку чата или лог-чата с беседы."
+
+        await self._send_respond(text, context)
+
+    async def ref_permission_proc(self, context):
+        text = "/permission <lvl> <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['permission']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['permission']} уровня или выше \n" \
+               "* Может быть вызвана в лог-чате \n" \
+               "\n" \
+               "Описание: Команда устанавливает для пользователя группу прав, равную введенному аргументу.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <lvl>: 0 (user), 1 (moderator), 2 (administrator)"
+
+        await self._send_respond(text, context)
+
+    async def ref_setting_proc(self, context):
+        text = "/permission <setting> <value> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['setting']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['setting']} уровня или выше \n" \
+               "\n" \
+               "Описание: Переключает настройку беседы. Каждая настройка приводит или выводит из действия фильтр, " \
+               "отвечающий за тот или иной контент.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <value>: True\\False \n" \
+               "* <setting>: Allow_Picture, Allow_Video, Allow_Music, Allow_Voice, Allow_Post, Allow_Votes, " \
+               "Allow_Files, Allow_Miniapp, Allow_Graffiti, Allow_Sticker, Allow_Reply, Filter_Curse, Slow_Mode, " \
+               "Account_Age, Hard_Mode"
+
+        await self._send_respond(text, context)
+
+    async def ref_delete_proc(self, context):
+        text = "/delete \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['delete']} \n" \
+              f"* Обработка только совместно с пересланным сообщением" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['delete']} уровня или выше \n" \
+               "* Может быть вызвана в лог-чате \n" \
+               "\n" \
+               "Описание: Удаляет пересланное или группу пересланных сообщений.\n" \
+
+        await self._send_respond(text, context)
+
+    async def ref_copy_proc(self, context):
+        text = "/copy \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['copy']} \n" \
+              f"* Обработка только совместно с пересланным сообщением" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['copy']} уровня или выше \n" \
+               "* Может быть вызвана в лог-чате \n" \
+               "\n" \
+               "Описание: Копирует текст пересланного сообщения и отправляет в беседу от лица бота.\n" \
+
+        await self._send_respond(text, context)
+
+    async def ref_terminate_proc(self, context):
+        text = "/terminate <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['terminate']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['terminate']} уровня или выше \n" \
+               "\n" \
+               "Описание: Исключает пользователя из всех бесед навсегда.\n" \
+
+        await self._send_respond(text, context)
+
+    async def ref_kick_proc(self, context):
+        text = "/kick <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['kick']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['kick']} уровня или выше \n" \
+               "\n" \
+               "Описание: Исключает пользователя из беседы навсегда.\n" \
+
+        await self._send_respond(text, context)
+
+    async def ref_ban_proc(self, context):
+        text = "/ban <time> <coefficent> <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['ban']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['ban']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Блокирует пользователя на некоторый промежуток времени и удаляет из чата. " \
+               "Уведомление об окончании блокировки поступит в лог-чаты.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <time>: натуральное число \n" \
+               "* <coefficent>: h (hour), d (day), m (month)"
+
+        await self._send_respond(text, context)
+
+    async def ref_unban_proc(self, context):
+        text = "/unban <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['unban']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['unban']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Снимает с пользователя блокировку.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_mute_proc(self, context):
+        text = "/mute <time> <coefficent> <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+               f"* Псевдонимы команды: {ALIASES['mute']} \n" \
+               f"* Доступ для группы прав {PERMISSION_ACCESS['mute']} уровня или выше \n" \
+               f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Заглушает пользователя на некоторый промежуток времени. " \
+               "При нарушении заглушения пользователь блокируется на день. " \
+               "Уведомление об окончании заглушения поступит в лог-чаты.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <time>: натуральное число \n" \
+               "* <coefficent>: h (hour), d (day), m (month)"
+
+        await self._send_respond(text, context)
+
+    async def ref_unmute_proc(self, context):
+        text = "/unmute <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['unmute']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['unmute']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Снимает с пользователя заглушение.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_warn_proc(self, context):
+        text = "/warn <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['warn']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['warn']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Выдает пользователю одно предупреждение. " \
+               "По достижении 3-х предупреждений пользователь получит мут на день. " \
+               "Все предупреждения снимаются по истечению 24 часов с момента получения последнего предупреждения. " \
+               "Уведомление о снятии предупреждений поступит в лог-чаты.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_unwarn_proc(self, context):
+        text = "/unwarn <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['unwarn']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['unwarn']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Снимает с пользователя одно предупреждение.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_queue_proc(self, context):
+        text = "/queue <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['queue']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['queue']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Добавляет пользователя в очередь сообщений медленного режима.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_unqueue_proc(self, context):
+        text = "/unqueue <@user|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['unqueue']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['unqueue']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Удаляет пользователя из очереди сообщений медленного режима.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_info_proc(self, context):
+        text = "/info <list_name> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['info']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['info']} уровня или выше \n" \
+              f"* Может быть вызвана только в лог-чате \n" \
+               "\n" \
+               "Описание: Выводит информацию о текущем состоянии указанного списка объектов.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <list_name>: permission, setting, chat, kick, ban, mute, warn"
+
+        await self._send_respond(text, context)
