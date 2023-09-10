@@ -16,8 +16,8 @@ class StdProcessor:
 
     async def _send_respond(self, text, ctx, highlighter=True):
         if highlighter:
-            text = "------------------------------------------------------------- \n" + text
-            text = text + "-------------------------------------------------------------"
+            text = "---------------------------------------------- \n" + text
+            text = text + "----------------------------------------------"
         await self.bot.api.messages.send(
             chat_id=ctx.get("chat_id"),
             message=text,
