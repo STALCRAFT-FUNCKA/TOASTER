@@ -10,7 +10,7 @@ class HandleCommand(ABCRule[BaseMessageMin]):
             self,
             command_aliases: Optional[Tuple[str]] = None,
             prefixes: Optional[Tuple[str]] = None,
-            arg_count=0
+            arg_count=None
     ):
         self.prefixes = prefixes or PREFIXES
         self.command_aliases = command_aliases
@@ -32,9 +32,9 @@ class HandleCommand(ABCRule[BaseMessageMin]):
                         args = argstxt.split(self.sep)
                     else:
                         args = []
-                    if len(args) == self.args_count and all(args):
-                        return {"args": args}
 
+                    if (len(args) == self.args_count or self.args_count is None) and all(args):
+                        return {"args": args}
                     else:
                         return False
 
