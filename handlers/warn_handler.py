@@ -23,4 +23,4 @@ class Handler(ABCHandler):
                     "now_time": self.converter.now(),
                 }
 
-                await self. processor.unwarn_proc(context, log=True, respond=True)
+                await self. processor.unwarn_proc(context, force=True, log=True, respond=True)
