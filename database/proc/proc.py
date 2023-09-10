@@ -1,5 +1,5 @@
 from vkbottle import Bot
-from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS
+from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS, PERMISSION_ACCESS, ALIASES
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton
@@ -14,40 +14,35 @@ class StdProcessor:
         self.info = Info()
         self.converter = Converter()
 
+    async def _send_respond(self, text, ctx):
+        await self.bot.api.messages.send(
+            chat_id=ctx.get("chat_id"),
+            message=text,
+            random_id=0
+        )
 
-class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
-    __debug = False
+    async def _send_log(self, ctx):
+        self.logger.compose_log_data(ctx)
+        self.logger.compose_log_attachments(ctx)
+        await self.logger.log()
 
-    async def chat_proc(self, context, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason"),
-                now_time=ctx.get("now_time")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx, text):
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
+    def _get_initiator_lvl(self, context):
         role = self.database.permissions.select(
             ("target_lvl",),
             peer_id=context.get("peer_id"),
             target_id=context.get("initiator_id")
         )
         if role:
-            role = role[0][0]
+            return role[0][0]
         else:
-            role = 0
-        context["initiator_lvl"] = role
+            return 0
+
+
+class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
+    __debug = False
+
+    async def chat_proc(self, context, log=True, respond=True):
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         is_enrolled = self.database.conversations.select(
             ("peer_id",),
@@ -57,13 +52,15 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         if is_enrolled:
             k = False
             if respond:
-                await send_respond(context, "Данные беседы обновлены.")
+                text = "Данные беседы обновлены."
+                await self._send_respond(text, context)
         else:
             k = True
             if respond:
-                await send_respond(context, "Беседа зарегистрирована.")
+                text = "Беседа зарегистрирована."
+                await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         self.database.conversations.insert(
             peer_id=context.get("peer_id"),
@@ -81,36 +78,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 )
 
     async def log_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx, text):
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
             is_enrolled = self.database.conversations.select(
@@ -119,11 +87,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 peer_type=context.get("peer_type")
             )
             if is_enrolled:
-                await send_respond(context, "Данные беседы обновлены.")
+                text = "Данные беседы обновлены."
+                await self._send_respond(text, context)
             else:
-                await send_respond(context, "Беседа назначена в качестве лог-чата.")
+                text = "Беседа назначена в качестве лог-чата."
+                await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         self.database.conversations.insert(
             peer_id=context.get("peer_id"),
@@ -132,46 +102,18 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         )
 
     async def drop_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx, text):
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_enrolled = self.database.conversations.select(
             ("peer_id",),
             peer_id=context.get("peer_id"),
         )
         if is_enrolled:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context, "Регистрация данной беседы упразднена.")
+                text = "Регистрация данной беседы упразднена."
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
             self.database.conversations.delete(
                 peer_id=context.get("peer_id")
@@ -179,47 +121,11 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 
         else:
             if respond:
-                await send_respond(context, "Данная беседа не зарегистрирована.")
+                text = "Данная беседа не зарегистрирована."
+                await self._send_respond(text, context)
 
     async def terminate_proc(self, context: dict, collapse=False, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                target_name=ctx.get("target_nametag"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            title = f"@id{ctx.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
-                    f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=title,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         logged = False
         peers = self.database.conversations.select(
@@ -237,11 +143,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 target_id=context.get("target_id")
             )
             if not is_kicked:
+                if respond:
+                    text = f"@id{context.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
+                            f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                    await self._send_respond(text, context)
                 if not logged and log:
                     logged = True
-                    await send_log(context)
-                if respond:
-                    await send_respond(context)
+                    await self._send_log(context)
 
                 self.database.kicked.insert(
                     peer_id=context.get("peer_id"),
@@ -267,46 +175,14 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def permission_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                set_role=ctx.get("target_lvl"),
-                now_time=ctx.get("now_time")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"@id{ctx.get('target_id')} (Пользователю) установлена роль {context.get('target_lvl')}" \
-                   f" - {PERMISSION_LVL.get(context.get('target_lvl'))}.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            await send_respond(context)
+            text = f"@id{context.get('target_id')} (Пользователю) установлена роль {context.get('target_lvl')}" \
+                   f" - {PERMISSION_LVL.get(context.get('target_lvl'))}.\n"
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         if context.get("target_lvl") > 0:
             self.database.permissions.insert(
@@ -322,55 +198,22 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def kick_proc(self, context: dict, collapse=False, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                target_name=ctx.get("target_nametag"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            rsn = f"Причина: {ctx.get('reason')} \n"
-            text = f"@id{ctx.get('target_id')} (Пользователь) исключен из беседы.\n" \
-                   f"{rsn if ctx.get('reason') is not None else ''}" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_kicked = self.database.kicked.select(
             ("target_name",),
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id")
         )
         if not is_kicked:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context)
+                rsn = f"Причина: {context.get('reason')} \n"
+                text = f"@id{context.get('target_id')} (Пользователь) исключен из беседы.\n" \
+                       f"{rsn if context.get('reason') is not None else ''}" \
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
             self.database.kicked.insert(
                 peer_id=context.get("peer_id"),
@@ -396,57 +239,23 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def ban_proc(self, context: dict, collapse=False, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                now_time=ctx.get("now_time"),
-                target_time=ctx.get("target_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            rsn = f"Причина: {ctx.get('reason')} \n"
-            text = f"@id{ctx.get('target_id')} (Пользователь) временно заблокирован.\n" \
-                   f"{rsn if ctx.get('reason') is not None else ''}" \
-                   f"Время снятия блокировки: {self.converter.convert(ctx.get('target_time'))}\n" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_banned = self.database.banned.select(
             ("target_name",),
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id")
         )
         if not is_banned:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context)
+                rsn = f"Причина: {context.get('reason')} \n"
+                text = f"@id{context.get('target_id')} (Пользователь) временно заблокирован.\n" \
+                       f"{rsn if context.get('reason') is not None else ''}" \
+                       f"Время снятия блокировки: {self.converter.convert(context.get('target_time'))}\n" \
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
             self.database.banned.insert(
                 peer_id=context.get("peer_id"),
@@ -473,48 +282,20 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def unban_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                now_time=ctx.get("now_time"),
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"@id{ctx.get('target_id')} (Пользователь) разблокирован.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_banned = self.database.banned.select(
             ("target_name",),
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id")
         )
         if is_banned:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context)
+                text = f"@id{context.get('target_id')} (Пользователь) разблокирован.\n"
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
             self.database.banned.delete(
                 peer_id=context.get("peer_id"),
@@ -522,62 +303,25 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def mute_proc(self, context: dict, collapse=False, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                now_time=ctx.get("now_time"),
-                target_time=ctx.get("target_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            rsn = f"Причина: {ctx.get('reason')} \n"
-            text = f"@id{ctx.get('target_id')} (Пользователь) временно заглушен.\n" \
-                   f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
-                   f"{rsn if ctx.get('reason') is not None else ''}" \
-                   f"Время снятия заглушения: {self.converter.convert(ctx.get('target_time'))}\n" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_muted = self.database.muted.select(
             ("target_name",),
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id")
         )
         if not is_muted:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context)
+                rsn = f"Причина: {context.get('reason')} \n"
+                text = f"@id{context.get('target_id')} (Пользователь) временно заглушен.\n" \
+                       f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
+                       f"{rsn if context.get('reason') is not None else ''}" \
+                       f"Время снятия заглушения: {self.converter.convert(context.get('target_time'))}\n" \
+                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
-            # выдаем мут
             self.database.muted.insert(
                 peer_id=context.get("peer_id"),
                 initiator_id=context.get("initiator_id"),
@@ -597,55 +341,19 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def unmute_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                now_time=ctx.get("now_time"),
-                target_time=ctx.get("target_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"@id{ctx.get('target_id')} (Пользователь) разглушен.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_muted = self.database.muted.select(
             ("target_name",),
             peer_id=context.get("peer_id"),
             target_id=context.get("target_id")
         )
         if is_muted:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             if respond:
-                await send_respond(context)
+                text = f"@id{context.get('target_id')} (Пользователь) разглушен.\n"
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
             self.database.muted.delete(
                 peer_id=context.get("peer_id"),
@@ -653,52 +361,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def warn_proc(self, context: dict, collapse=False, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                target_warns=ctx.get("target_warns"),
-                now_time=ctx.get("now_time"),
-                target_time=ctx.get("target_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            rsn = f"Причина: {ctx.get('reason')} \n"
-            text = f"@id{ctx.get('target_id')} (Пользователь) получил предупреждение.\n" \
-                   f"{rsn if ctx.get('reason') is not None else ''}" \
-                   f"Текущее количество предупреждений: {ctx.get('target_warns')}/3.\n" \
-                   f"Время снятия предупреждений: {self.converter.convert(ctx.get('target_time'))}\n" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-            # выводим дельту времени
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         warns = self.database.warned.select(
             ("warn_count",),
@@ -712,9 +375,15 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         context["target_warns"] = warns + 1
 
         if respond:
-            await send_respond(context)
+            rsn = f"Причина: {context.get('reason')} \n"
+            text = f"@id{context.get('target_id')} (Пользователь) получил предупреждение.\n" \
+                   f"{rsn if context.get('reason') is not None else ''}" \
+                   f"Текущее количество предупреждений: {context.get('target_warns')}/3.\n" \
+                   f"Время снятия предупреждений: {self.converter.convert(context.get('target_time'))}\n" \
+                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору)."
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         if context.get("target_warns") == 1:
             self.database.warned.insert(
@@ -747,44 +416,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def unwarn_proc(self, context: dict, force=False, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_lvl"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                target_name=ctx.get("target_nametag"),
-                target_warns=ctx.get("target_warns"),
-                now_time=ctx.get("now_time")
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"С @id{ctx.get('target_id')} (пользователя) снято предупреждение.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         warns = self.database.warned.select(
             ("warn_count",),
@@ -798,9 +430,10 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         context["target_warns"] = warns - 1
 
         if respond:
-            await send_respond(context)
+            text = f"С @id{context.get('target_id')} (пользователя) снято предупреждение.\n"
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         # инкриминируем предупреждение
         if context.get("target_warns") != 0 and not force:
@@ -816,90 +449,22 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
     async def copy_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_role"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time"),
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = ctx.get("copied")
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            await send_respond(context)
+            text = context.get("copied")
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
     async def delete_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_role"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time"),
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = "Сообщение(я) удалены."
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            await send_respond(context)
+            text = "Сообщение(я) удалены."
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         try:
             await self.bot.api.messages.delete(
@@ -914,46 +479,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             return
 
     async def setting_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            # формируем лог
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_role"),
-                peer_name=ctx.get("peer_name"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                setting_name=ctx.get("setting_name"),
-                setting_status=ctx.get("setting_status"),
-                now_time=ctx.get("now_time"),
-            )
-
-            # отправляем лог
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"Настройка {ctx.get('setting_name')} для этой беседы изменена на {ctx.get('setting_status')}\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
         is_setting = self.database.settings.select(
             ("setting_name",),
             peer_id=context.get("peer_id"),
             setting_name=context.get("setting_name")
         )
         if is_setting:
-            role = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=context.get("peer_id"),
-                target_id=context.get("initiator_id")
-            )
-            if role:
-                role = role[0][0]
-            else:
-                role = 0
-            context["initiator_lvl"] = role
+            context["initiator_lvl"] = self._get_initiator_lvl(context)
 
             self.database.settings.update(
                 {"setting_status": context.get("setting_status")},
@@ -962,50 +494,20 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             )
 
             if respond:
-                await send_respond(context)
+                text = f"Настройка {context.get('setting_name')} для этой беседы изменена на " \
+                       f"{context.get('setting_status')}\n"
+                await self._send_respond(text, context)
             if log:
-                await send_log(context)
+                await self._send_log(context)
 
     async def queue_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_role"),
-                peer_name=ctx.get("peer_name"),
-                target_name=ctx.get("target_nametag"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time"),
-            )
-            self.logger.compose_log_attachments(
-                peer_id=ctx.get("peer_id"),
-                cmids=ctx.get("cmids")
-            )
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"@id{ctx.get('target_id')} (Пользователь) добавлен в очередь.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            await send_respond(context)
+            text = f"@id{context.get('target_id')} (Пользователь) добавлен в очередь.\n"
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         self.database.queue.insert(
             peer_id=context.get("peer_id"),
@@ -1016,42 +518,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         )
 
     async def unqueue_proc(self, context: dict, log=True, respond=True):
-        async def send_log(ctx):
-            self.logger.compose_log_data(
-                initiator_name=ctx.get("initiator_nametag"),
-                initiator_role=ctx.get("initiator_role"),
-                peer_name=ctx.get("peer_name"),
-                target_name=ctx.get("target_nametag"),
-                command_name=ctx.get("command_name"),
-                reason=ctx.get("reason", None),
-                now_time=ctx.get("now_time"),
-            )
-
-            await self.logger.log()
-
-        async def send_respond(ctx):
-            text = f"@id{ctx.get('target_id')} (Пользователь) удален из очереди.\n"
-            await self.bot.api.messages.send(
-                chat_id=ctx.get("chat_id"),
-                message=text,
-                random_id=0
-            )
-
-        role = self.database.permissions.select(
-            ("target_lvl",),
-            peer_id=context.get("peer_id"),
-            target_id=context.get("initiator_id")
-        )
-        if role:
-            role = role[0][0]
-        else:
-            role = 0
-        context["initiator_lvl"] = role
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            await send_respond(context)
+            text = f"@id{context.get('target_id')} (Пользователь) удален из очереди.\n"
+            await self._send_respond(text, context)
         if log:
-            await send_log(context)
+            await self._send_log(context)
 
         self.database.queue.delete(
             peer_id=context.get("peer_id"),
@@ -1060,13 +533,6 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 
 
 class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
-    async def _send_respond(self, text, ctx):
-        await self.bot.api.messages.send(
-            chat_id=ctx.get("chat_id"),
-            message=text,
-            random_id=0
-        )
-
     async def info_permission_proc(self, context):
         conversations = self.database.conversations.select(
             ("peer_id",),
@@ -1207,13 +673,6 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
 
 class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
-    async def _send_respond(self, text, ctx):
-        await self.bot.api.messages.send(
-            chat_id=ctx.get("chat_id"),
-            message=text,
-            random_id=0
-        )
-
     async def ref_all_proc(self, context):
         url_tech = "https://github.com/STALCRAFT-FUNCKA/TOASTER/blob/release/README.md"
         url_upd = "https://github.com/STALCRAFT-FUNCKA/TOASTER/releases"
