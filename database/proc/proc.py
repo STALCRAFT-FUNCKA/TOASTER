@@ -14,7 +14,7 @@ class StdProcessor:
         self.info = Info()
         self.converter = Converter()
 
-    async def _send_respond(self, text, ctx, highlighter=True):
+    async def _send_respond(self, text, ctx, highlighter=False):
         if highlighter:
             text = "---------------------------------------------- \n" + text
             text = text + "----------------------------------------------"
@@ -24,7 +24,7 @@ class StdProcessor:
             random_id=0
         )
 
-    async def _send_log(self, ctx, highlighter=True):
+    async def _send_log(self, ctx, highlighter=False):
         self.logger.compose_log_data(ctx)
         self.logger.compose_log_attachments(ctx)
         await self.logger.log(highlighter=highlighter)
