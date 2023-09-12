@@ -21,71 +21,40 @@ processor = CommandProcessor()
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['chat'], PREFIXES, 0),
+    HandleCommand(ALIASES['mark'], PREFIXES, 1),
     CollapseCommand(),
     AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['chat']),
+    CheckPermission(access_to=PERMISSION_ACCESS['mark']),
     HandleIn(handle_log=False, handle_chat=True)
 )
-async def chat(message: Message):
+async def mark(message: Message, args: Tuple):
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
-        "peer_type": "CHAT",
+        "peer_type": None,
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "chat",
+        "command_name": None,
         "now_time": converter.now(),
     }
 
-    await processor.chat_proc(context, log=True, respond=True)
+    if args[0] == "chat":
+        context["peer_type"] = "CHAT"
+        context["command_name"] = "mark chat"
+        await processor.chat_proc(context, log=True, respond=True)
 
+    if args[0] == "log":
+        context["peer_type"] = "LOG"
+        context["command_name"] = "mark log"
+        await processor.log_proc(context, log=True, respond=True)
 
-@bl.chat_message(
-    HandleCommand(ALIASES['log'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['log']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def log(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "peer_type": "LOG",
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "log",
-        "now_time": converter.now(),
-    }
+    if args[0] == "drop":
+        context["command_name"] = "mark drop"
+        await processor.drop_proc(context, log=True, respond=True)
 
-    await processor.log_proc(context, log=True, respond=True)
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['drop'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['drop']),
-    HandleIn(handle_log=True, handle_chat=True)
-)
-async def drop(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "drop",
-        "now_time": converter.now(),
-    }
-
-    await processor.drop_proc(context, log=True, respond=True)
 
 """
 ------------------------------------------------------------------------------------------------------------------------
