@@ -41,10 +41,10 @@ class HandleCommand(ABCRule[BaseMessageMin]):
         return False
 
 
-class AnswerCommand(ABCRule[BaseMessageMin]):
-    def __init__(self, use_reply: bool = False, use_fwd: bool = False):
-        self.use_reply = use_reply
-        self.use_fwd = use_fwd
+class AllowAnswer(ABCRule[BaseMessageMin]):
+    def __init__(self, allow_reply: bool = False, allow_fwd: bool = False):
+        self.use_reply = allow_reply
+        self.use_fwd = allow_fwd
 
         self.bot = Bot(token=TOKEN)
 
