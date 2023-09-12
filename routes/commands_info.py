@@ -16,7 +16,7 @@ ref_processor = ReferenceProcessor()
 @bl.chat_message(
     HandleCommand(ALIASES['reference'], PREFIXES, 1),
     CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
+    AllowAnswer(allow_reply=False, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['reference']),
     HandleIn(handle_log=True, handle_chat=False)
 )
@@ -56,7 +56,7 @@ async def reference(message: Message, args: Tuple):
 @bl.chat_message(
     HandleCommand(ALIASES['info'], PREFIXES, 1),
     CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
+    AllowAnswer(allow_reply=False, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['info']),
     HandleIn(handle_log=True, handle_chat=False)
 )
