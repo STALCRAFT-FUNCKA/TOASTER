@@ -1,7 +1,7 @@
 from .custom_rules import (
     HandleCommand,
     CollapseCommand,
-    AnswerCommand,
+    AllowAnswer,
     CheckPermission,
     IgnorePermission,
     IgnoreMention,
@@ -12,7 +12,7 @@ from .custom_rules import (
 __all__ = (
     "HandleCommand",
     "CollapseCommand",
-    "AnswerCommand",
+    "AllowAnswer",
     "CheckPermission",
     "IgnorePermission",
     "IgnoreMention",
