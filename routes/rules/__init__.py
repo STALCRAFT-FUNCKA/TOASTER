@@ -4,7 +4,6 @@ from .custom_rules import (
     AllowAnswer,
     CheckPermission,
     IgnorePermission,
-    IgnoreMention,
     HandleIn,
     OnlyEnrolled
 )
@@ -15,7 +14,6 @@ __all__ = (
     "AllowAnswer",
     "CheckPermission",
     "IgnorePermission",
-    "IgnoreMention",
     "HandleIn",
     "OnlyEnrolled"
 )
