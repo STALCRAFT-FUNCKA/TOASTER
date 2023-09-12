@@ -88,9 +88,7 @@ PERMISSION_LVL = {
 """
 PERMISSION_ACCESS = {
     "reference": 0,
-    "chat": 2,
-    "drop": 2,
-    "log": 2,
+    "mark": 2,
     "permission": 2,
     "terminate": 2,
     "kick": 1,
@@ -145,9 +143,7 @@ ALIASES = {
     'delete': ('delete', 'del', 'удалить'),
     'copy': ('copy', 'копировать'),
     # ----------------------------------
-    'chat': ('chat', 'чат'),
-    'log': ('log', 'лог'),
-    'drop': ('drop', 'уронить'),
+    'mark': ('mark', 'метка'),
     # ----------------------------------
     'permission': ('permission', 'perm', 'права'),
     # ----------------------------------
