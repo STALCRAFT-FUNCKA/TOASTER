@@ -455,10 +455,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         context["initiator_lvl"] = self._get_initiator_lvl(context)
 
         if respond:
-            text = context.get("copied") + "\n"
+            text = "Сообщение скопировано"
             await self._send_respond(text, context)
         if log:
             await self._send_log(context)
+
+        text = context.get("copied") + "\n"
+        await self._send_respond(text, context)
 
     async def delete_proc(self, context: dict, log=True, respond=True):
         context["initiator_lvl"] = self._get_initiator_lvl(context)

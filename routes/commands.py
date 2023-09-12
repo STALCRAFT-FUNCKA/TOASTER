@@ -737,7 +737,7 @@ async def copy(message: Message):
         "copied": message.reply_message.text
     }
 
-    await processor.copy_proc(context, log=True, respond=True)
+    await processor.copy_proc(context, log=True, respond=False)
 
 
 """
