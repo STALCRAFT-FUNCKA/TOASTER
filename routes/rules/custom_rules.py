@@ -115,95 +115,61 @@ class CheckPermission(ABCRule[BaseMessageMin]):
 
 
 class IgnorePermission(ABCRule[BaseMessageMin]):
-
-    def __init__(self, ignore_from: int = 0, mode: str = "Target"):
+    def __init__(self, ignore_from: int = 0, mode: str = "TARGET"):
         self.ignore_from = ignore_from
         self.mode = mode
 
+        self.bot = Bot(token=TOKEN)
         self.database = DataBase()
+
+    def __check_permission(self, peer_id, target_id):
+        if target_id == STUFF_ADMIN_ID:
+            return False
+
+        lvl = self.database.permissions.select(
+            ("target_lvl",),
+            peer_id=peer_id,
+            target_id=target_id
+        )
+        lvl = lvl[0][0] if lvl else 0
+        if lvl < self.ignore_from:
+            return True
+
+    def __check_forward(self, message: BaseMessageMin):
+        checked = []
+        for msg in message.fwd_messages:
+            peer_id = message.peer_id
+            target_id = msg.from_id
+            checked.append(self.__check_permission(peer_id, target_id))
+
+        return all(checked)
+
+    async def __check_mention(self, message: BaseMessageMin):
+        peer_id = message.peer_id
+        text = message.text
+        screen_name = text[text.find("[") + 1:text.find("|")].replace("id", "")
+        target_info = await self.bot.api.users.get(screen_name)
+        if target_info:
+            target_id = target_info[0].id
+            return self.__check_permission(peer_id, target_id)
+
+        return False
 
     async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
         peer_id = message.peer_id
 
         if self.mode == "TARGET":
             if message.reply_message:
-                target_id = message.reply_message.from_id
-
-                if target_id == STUFF_ADMIN_ID:
-                    return False
-
-                lvl = self.database.permissions.select(
-                    ("target_lvl",),
-                    peer_id=peer_id,
-                    target_id=target_id
-                )
-                lvl = lvl[0][0] if lvl else 0
-                if lvl < self.ignore_from:
-                    return True
+                return self.__check_permission(peer_id, message.reply_message.from_id)
 
             elif message.fwd_messages:
-                for msg in message.fwd_messages:
-                    target_id = msg.from_id
+                return self.__check_forward(message)
 
-                    if target_id == STUFF_ADMIN_ID:
-                        return False
-
-                    lvl = self.database.permissions.select(
-                        ("target_lvl",),
-                        peer_id=peer_id,
-                        target_id=target_id
-                    )
-                    lvl = lvl[0][0] if lvl else 0
-                    if lvl >= self.ignore_from:
-                        return False
-
-                return True
+            else:
+                return await self.__check_mention(message)
 
         elif self.mode == "SELF":
-            initiator_id = message.from_id
-
-            if initiator_id == STUFF_ADMIN_ID:
-                return False
-
-            lvl = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=peer_id,
-                target_id=initiator_id
-            )
-            lvl = lvl[0][0] if lvl else 0
-            if lvl < self.ignore_from:
-                return True
-
-        return False
-
-
-class IgnoreMention(ABCRule[BaseMessageMin]):
-    def __init__(self, ignore_from: int = 0):
-        self.ignore_from = ignore_from
-
-        self.bot = Bot(token=TOKEN)
-        self.database = DataBase()
-
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        peer_id = message.peer_id
-
-        text = message.text
-        screen_name = text[text.find("[") + 1:text.find("|")].replace("id", "")
-        uid = await self.bot.api.users.get(screen_name)
-        if uid:
-            target_id = uid[0].id
-
-            if target_id == STUFF_ADMIN_ID:
-                return True
-
-            lvl = self.database.permissions.select(
-                ("target_lvl",),
-                peer_id=peer_id,
-                target_id=target_id
-            )
-            lvl = lvl[0][0] if lvl else 0
-            if lvl < self.ignore_from:
-                return True
+            return self.__check_permission(peer_id, message.from_id)
 
         return False
 
