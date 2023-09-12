@@ -1,14 +1,17 @@
-from handlers.abc import ABCHandler
+from routes.handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
     async def check(self):
-        expired = self.database.banned.select(
+        overflow = self.database.warned.select(
             ("peer_id", "target_id"),
-            unban_time__le=self.converter.now()
+            warn_count__ge=3
         )
-        if expired:
-            for peer_id, target_id in expired:
+        if overflow:
+            for peer_id, target_id in overflow:
+                time = 1
+                coefficent = "d"
+
                 context = {
                     "peer_id": peer_id,
                     "peer_name": await self.info.peer_name(peer_id),
@@ -19,8 +22,10 @@ class Handler(ABCHandler):
                     "target_id": target_id,
                     "target_name": await self.info.user_name(target_id, tag=False),
                     "target_nametag": await self.info.user_name(target_id, tag=True),
-                    "command_name": "unban",
+                    "command_name": "mute",
                     "now_time": self.converter.now(),
+                    "target_time": self.converter.now() + self.converter.delta(time, coefficent),
                 }
 
-                await self.processor.unban_proc(context, log=True, respond=False)
+                await self.processor.unwarn_proc(context, force=True, log=False, respond=False)
+                await self.processor.mute_proc(context, log=True, respond=True)

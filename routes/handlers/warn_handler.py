@@ -1,11 +1,11 @@
-from handlers.abc import ABCHandler
+from routes.handlers.abc import ABCHandler
 
 
 class Handler(ABCHandler):
     async def check(self):
-        expired = self.database.muted.select(
+        expired = self.database.warned.select(
             ("peer_id", "target_id"),
-            unmute_time__le=self.converter.now()
+            unwarn_time__le=self.converter.now()
         )
         if expired:
             for peer_id, target_id in expired:
@@ -19,8 +19,8 @@ class Handler(ABCHandler):
                     "target_id": target_id,
                     "target_name": await self.info.user_name(target_id, tag=False),
                     "target_nametag": await self.info.user_name(target_id, tag=True),
-                    "command_name": "unmute",
+                    "command_name": "unwarn",
                     "now_time": self.converter.now(),
                 }
 
-                await self.processor.unmute_proc(context, log=True, respond=True)
+                await self. processor.unwarn_proc(context, force=True, log=True, respond=True)
