@@ -717,40 +717,20 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "Опиcание: Выводит в чат справочную информацию по какой-либо команде. \n" \
                "\n" \
                "Доступные аргументы: \n" \
-               "* <command_name>: all (вывод общей справки) или любая команда, включая ее псевдонимы " \
-               "(вывод информации о конкретной команде) \n"
+               "* <command_name>: all (вывод общей справки) или любая команда, включая ее псевдонимы \n"
 
         await self._send_respond(text, context)
 
-    async def ref_chat_proc(self, context):
-        text = "/chat \n" \
+    async def ref_mark_proc(self, context):
+        text = "/mark <arg> \n" \
                "* Доступные префиксы: ! или / \n" \
-               f"* Псевдонимы команды: {ALIASES['chat']} \n" \
-               f"* Доступ для группы прав {PERMISSION_ACCESS['chat']} уровня или выше \n" \
+               f"* Псевдонимы команды: {ALIASES['mark']} \n" \
+               f"* Доступ для группы прав {PERMISSION_ACCESS['mark']} уровня или выше \n" \
                "\n" \
-               "Описание: Команда помечает беседу, как чат. " \
-               "Теперь в этой беседе будет проходить модерация фильтрами.\n"
-
-        await self._send_respond(text, context)
-
-    async def ref_log_proc(self, context):
-        text = "/log \n" \
-               "* Доступные префиксы: ! или / \n" \
-               f"* Псевдонимы команды: {ALIASES['log']} \n" \
-               f"* Доступ для группы прав {PERMISSION_ACCESS['log']} уровня или выше \n" \
+               "Описание: Команда помечает беседу лог-чатом или чатом. Так же метку чата можно сбросить. \n" \
                "\n" \
-               "Описание: Команда помечает беседу, как лог-чат. " \
-               "Теперь в эту беседу будут приходить логи исполненных команд.\n"
-
-        await self._send_respond(text, context)
-
-    async def ref_drop_proc(self, context):
-        text = "/drop \n" \
-               "* Доступные префиксы: ! или / \n" \
-               f"* Псевдонимы команды: {ALIASES['drop']} \n" \
-               f"* Доступ для группы прав {PERMISSION_ACCESS['drop']} уровня или выше \n" \
-               "\n" \
-               "Описание: Команда сбрасывает метку чата или лог-чата с беседы.\n"
+               "Доступные аргументы: \n" \
+               "* <arg>: log, chat, drop \n"
 
         await self._send_respond(text, context)
 
@@ -941,6 +921,6 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "Описание: Выводит информацию о текущем состоянии указанного списка объектов.\n" \
                "\n" \
                "Доступные аргументы: \n" \
-               "* <list_name>: permission, setting, chat, kick, ban, mute, warn\n"
+               "* <list_name>: permission, setting, mark, kick, ban, mute, warn\n"
 
         await self._send_respond(text, context)
