@@ -683,9 +683,9 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Заглушенные пользователи: \n"
+            text = f"{peer_name} | Предупрежденные пользователи: \n"
 
-            warns = self.database.muted.select(
+            warns = self.database.warned.select(
                 ("initiator_name", "target_name", "warn_time", "unwarn_time", "warn_count"),
                 peer_id=peer_id
             )
