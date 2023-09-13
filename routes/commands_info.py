@@ -30,9 +30,7 @@ async def reference(message: Message, args: Tuple):
     args_check = [
         (("all",), ref_processor.ref_all_proc(context)),
         (ALIASES['reference'], ref_processor.ref_reference_proc(context)),
-        (ALIASES['chat'], ref_processor.ref_chat_proc(context)),
-        (ALIASES['log'], ref_processor.ref_log_proc(context)),
-        (ALIASES['drop'], ref_processor.ref_drop_proc(context)),
+        (ALIASES['mark'], ref_processor.ref_mark_proc(context)),
         (ALIASES['setting'], ref_processor.ref_setting_proc(context)),
         (ALIASES['delete'], ref_processor.ref_delete_proc(context)),
         (ALIASES['copy'], ref_processor.ref_copy_proc(context)),
@@ -70,7 +68,7 @@ async def info(message: Message, args: Tuple):
     args_check = [
         (ALIASES['permission'], info_processor.info_permission_proc(context)),
         (ALIASES['setting'], info_processor.info_setting_proc(context)),
-        (ALIASES['chat'], info_processor.info_chat_proc(context)),
+        (ALIASES['mark'], info_processor.info_chat_proc(context)),
         (ALIASES['kick'], info_processor.info_kick_proc(context)),
         (ALIASES['ban'], info_processor.info_ban_proc(context)),
         (ALIASES['mute'], info_processor.info_mute_proc(context)),
