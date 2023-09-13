@@ -90,18 +90,22 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
     async def log_proc(self, context: dict, log=True, respond=True):
         context["initiator_lvl"] = self._get_initiator_lvl(context)
 
-        if respond:
-            is_enrolled = self.database.conversations.select(
-                ("peer_id",),
-                peer_id=context.get("peer_id"),
-                peer_type=context.get("peer_type")
-            )
-            if is_enrolled:
+        is_enrolled = self.database.conversations.select(
+            ("peer_id",),
+            peer_id=context.get("peer_id"),
+            peer_type=context.get("peer_type")
+        )
+        if is_enrolled:
+            k = False
+            if respond:
                 text = "Данные беседы обновлены.\n"
                 await self._send_respond(text, context)
-            else:
+        else:
+            k = True
+            if respond:
                 text = "Беседа назначена в качестве лог-чата.\n"
                 await self._send_respond(text, context)
+
         if log:
             await self._send_log(context)
 
