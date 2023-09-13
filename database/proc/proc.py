@@ -449,7 +449,8 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         if warns:
             warns = warns[0][0]
         else:
-            warns = 0
+            return
+
         context["target_warns"] = warns - 1
 
         if respond:
@@ -561,8 +562,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
     async def info_permission_proc(self, context):
         conversations = self.database.conversations.select(
-            ("peer_id",),
-            peer_type="CHAT"
+            ("peer_id",)
         )
         conversations = [peer_id[0] for peer_id in conversations]
 
@@ -599,7 +599,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
             await self._send_respond(text, context)
 
-    async def info_chat_proc(self, context):
+    async def info_mark_proc(self, context):
         conversations = self.database.conversations.select(
             ("peer_name", "peer_type")
         )
@@ -626,7 +626,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             )
             for initiator_name, target_name, kick_time in kicks:
                 text += f"* {target_name} -- {self.converter.convert(kick_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -648,7 +648,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for initiator_name, target_name, ban_time, unban_time in bans:
                 text += f"* {target_name} -- {self.converter.convert(ban_time)}\n" \
                         f"|-Время снятия: {self.converter.convert(unban_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -670,7 +670,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for initiator_name, target_name, mute_time, unmute_time in mutes:
                 text += f"* {target_name} -- {self.converter.convert(mute_time)}\n" \
                         f"|-Время снятия: {self.converter.convert(unmute_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -683,9 +683,9 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Заглушенные пользователи: \n"
+            text = f"{peer_name} | Предупрежденные пользователи: \n"
 
-            warns = self.database.muted.select(
+            warns = self.database.warned.select(
                 ("initiator_name", "target_name", "warn_time", "unwarn_time", "warn_count"),
                 peer_id=peer_id
             )
@@ -693,7 +693,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                 text += f"* {target_name} -- {self.converter.convert(warn_time)}\n" \
                         f"|- Время снятия: {self.converter.convert(unwarn_time)}\n" \
                         f"|- Количество предупреждений: {warn_count}\n" \
-                        f"\\- Инициатор: {target_name}\n"
+                        f"\\- Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
