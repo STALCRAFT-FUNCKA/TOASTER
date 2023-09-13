@@ -599,7 +599,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
             await self._send_respond(text, context)
 
-    async def info_chat_proc(self, context):
+    async def info_mark_proc(self, context):
         conversations = self.database.conversations.select(
             ("peer_name", "peer_type")
         )
