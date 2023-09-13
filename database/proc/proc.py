@@ -924,5 +924,3 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "* <list_name>: permission, setting, mark, kick, ban, mute, warn\n"
 
         await self._send_respond(text, context)
-
-print('test')
