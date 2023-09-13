@@ -3,7 +3,6 @@ from database import sql_tables
 from singltone import MetaSingleton
 
 
-# ---------------------- Connection ----------------------- #
 class Connection:
     filename = "database.db"
 
@@ -28,13 +27,13 @@ class Connection:
                 print("Ошибка при подключении к SQLite", error)
 
 
-# ------------------------ Tables ------------------------- #
 class BaseTable:
     _ops = {
         '__le': '<=',
         '__lt': '<',
         '__ge': '>=',
-        '__gt': '>'
+        '__gt': '>',
+        '__nt': '!='
     }
 
     def _get_ratio(self, rows: dict) -> list:
@@ -53,13 +52,21 @@ class BaseTable:
         self.cur = cursor
 
     def select(self, fields: tuple, **rows):
+        if not fields:
+            return None
+
         summary_fields = ', '.join(fields)
-        summary_rows = ' AND '.join(self._get_ratio(rows))
-        query = f"SELECT {summary_fields} FROM {self.table_name} WHERE {summary_rows}"
+        query = f"SELECT {summary_fields} FROM {self.table_name}"
+        if rows:
+            summary_rows = ' AND '.join(self._get_ratio(rows))
+            query += f" WHERE {summary_rows}"
         self.cur.execute(query)
         return self.cur.fetchall()
 
     def insert(self, **rows):
+        if not rows:
+            return
+
         summary_keys = ', '.join([key for key in rows.keys()])
         summary_values = ', '.join([f"'{value}'" for value in rows.values()])
         query = f"INSERT INTO {self.table_name} ({summary_keys}) VALUES ({summary_values})"
@@ -67,20 +74,25 @@ class BaseTable:
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
+        if not new_data:
+            return
+
         summary_fields = ', '.join([f"{key} = '{value}'" for key, value in new_data.items()])
-        summary_rows = ' AND '.join(self._get_ratio(rows))
-        query = f"UPDATE {self.table_name} SET {summary_fields} WHERE {summary_rows}"
+        query = f"UPDATE {self.table_name} SET {summary_fields}"
+        if rows:
+            summary_rows = ' AND '.join(self._get_ratio(rows))
+            query += f" WHERE {summary_rows}"
         self.cur.execute(query)
         self.con.commit()
 
     def delete(self, **rows):
-        summary_rows = ' AND '.join(self._get_ratio(rows))
-        query = f"DELETE FROM {self.table_name} WHERE {summary_rows}"
+        query = f"DELETE FROM {self.table_name}"
+        if rows:
+            summary_rows = ' AND '.join(self._get_ratio(rows))
+            query += f" WHERE {summary_rows}"
         self.cur.execute(query)
         self.con.commit()
 
-
-# ----------------------- MetaBase ------------------------ #
 
 class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable

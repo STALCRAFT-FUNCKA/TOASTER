@@ -1,7 +1,7 @@
 from vkbottle.bot import BotLabeler, Message
-from config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
+from usr_config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
 from database.orm import DataBase
-from database.proc import Processor
+from database.proc import CommandProcessor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 from urlextract import URLExtract
@@ -11,7 +11,7 @@ bl = BotLabeler()
 info = Info()
 converter = Converter()
 database = DataBase()
-processor = Processor()
+processor = CommandProcessor()
 
 
 @bl.chat_message(

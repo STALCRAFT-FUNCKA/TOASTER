@@ -1,6 +1,6 @@
 from vkbottle.bot import BotLabeler, Message
 from database.orm import DataBase
-from database.proc import Processor
+from database.proc import CommandProcessor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
@@ -9,7 +9,7 @@ bl = BotLabeler()
 info = Info()
 database = DataBase()
 converter = Converter()
-processor = Processor()
+processor = CommandProcessor()
 
 
 @bl.chat_message(

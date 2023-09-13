@@ -1,6 +1,7 @@
-from config import ALIASES, PREFIXES, PERMISSION_LVL, PERMISSION_ACCESS, QUEUE_TIME
+from src_config import PERMISSION_LVL, PERMISSION_ACCESS
+from usr_config import ALIASES, PREFIXES, QUEUE_TIME
 from vkbottle.bot import BotLabeler, Message
-from database.proc import Processor
+from database.proc import CommandProcessor
 from typing import Tuple
 from utils import *
 from .rules import *
@@ -10,35 +11,14 @@ bl = BotLabeler()
 
 info = Info()
 converter = Converter()
-processor = Processor()
-
-"""
-------------------------------------------------------------------------------------------------------------------------
-Команда вывода справочной информации.
-"""
+processor = CommandProcessor()
 
 
-@bl.chat_message(
-    HandleCommand(ALIASES['reference'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['reference']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def reference(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "reference",
-        "now_time": converter.now()
-    }
-
-    await processor.reference_proc(context, log=False, respond=True)
-
+async def get_cuid(arg):
+    screen_name = arg.replace("@", "")
+    screen_name = screen_name[1:screen_name.find("|")].replace("id", "")
+    uid = await info.user_id(screen_name=screen_name)
+    return uid
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -48,71 +28,40 @@ async def reference(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['chat'], PREFIXES, 0),
+    HandleCommand(ALIASES['mark'], PREFIXES, 1),
     CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['chat']),
+    AllowAnswer(allow_reply=False, allow_fwd=False),
+    CheckPermission(access_to=PERMISSION_ACCESS['mark']),
     HandleIn(handle_log=False, handle_chat=True)
 )
-async def chat(message: Message):
+async def mark(message: Message, args: Tuple):
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
-        "peer_type": "CHAT",
+        "peer_type": None,
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "chat",
+        "command_name": None,
         "now_time": converter.now(),
     }
 
-    await processor.chat_proc(context, log=True, respond=True)
+    if args[0] == "chat":
+        context["peer_type"] = "CHAT"
+        context["command_name"] = "mark chat"
+        await processor.chat_proc(context, log=True, respond=True)
 
+    if args[0] == "log":
+        context["peer_type"] = "LOG"
+        context["command_name"] = "mark log"
+        await processor.log_proc(context, log=True, respond=True)
 
-@bl.chat_message(
-    HandleCommand(ALIASES['log'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['log']),
-    HandleIn(handle_log=True, handle_chat=False)
-)
-async def log(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "peer_type": "LOG",
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "log",
-        "now_time": converter.now(),
-    }
+    if args[0] == "drop":
+        context["command_name"] = "mark drop"
+        await processor.drop_proc(context, log=True, respond=True)
 
-    await processor.log_proc(context, log=True, respond=True)
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['drop'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['drop']),
-    HandleIn(handle_log=False, handle_chat=True)
-)
-async def drop(message: Message):
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "command_name": "drop",
-        "now_time": converter.now(),
-    }
-
-    await processor.drop_proc(context, log=True, respond=True)
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -121,14 +70,16 @@ async def drop(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['permission'], PREFIXES, 1),
+    HandleCommand(ALIASES['permission'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['permission']),
     HandleIn(handle_log=True, handle_chat=True),
     OnlyEnrolled()
 )
 async def permission(message: Message, args: Tuple[str]):
+    if not args or message.fwd_messages:
+        return
+
     try:
         lvl = int(args[0])
         if lvl not in PERMISSION_LVL.keys():
@@ -144,13 +95,31 @@ async def permission(message: Message, args: Tuple[str]):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "target_lvl": lvl,
         "command_name": "permission",
         "now_time": converter.now(),
     }
+
+    if len(args) == 1 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+
+    elif len(args) == 2 and not message.reply_message:
+        cuid = await get_cuid(args[1])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
 
     await processor.permission_proc(context, log=True, respond=False)
 
@@ -163,30 +132,54 @@ async def permission(message: Message, args: Tuple[str]):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['terminate'], PREFIXES, 0),
+    HandleCommand(ALIASES['terminate'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['terminate']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def terminate(message: Message):
+async def terminate(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     context = {
         "peer_name": "Все беседы",
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "terminate",
         "now_time": converter.now(),
-        "cmids": [message.reply_message.conversation_message_id]
+        "cmids": None
     }
 
-    await processor.terminate_proc(context, collapse=True, log=True, respond=True)
+    collapse = False
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+        collapse = True
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.terminate_proc(context, collapse=collapse, log=True, respond=True)
 
 
 """
@@ -197,15 +190,17 @@ async def terminate(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['kick'], PREFIXES, 0),
+    HandleCommand(ALIASES['kick'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['kick']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def kick(message: Message):
+async def kick(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -213,15 +208,37 @@ async def kick(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "kick",
         "now_time": converter.now(),
-        "cmids": [message.reply_message.conversation_message_id]
+        "cmids": None
     }
 
-    await processor.kick_proc(context, collapse=True, log=True, respond=True)
+    collapse = False
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+        collapse = True
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.kick_proc(context, collapse=collapse, log=True, respond=True)
 
 
 """
@@ -232,15 +249,17 @@ async def kick(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['ban'], PREFIXES, 2),
+    HandleCommand(ALIASES['ban'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['ban']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def ban(message: Message, args: Tuple[str]):
+async def ban(message: Message, args: Tuple):
+    if not args or message.fwd_messages:
+        return
+
     try:
         time = int(args[0])
         coefficent = args[1]
@@ -249,7 +268,6 @@ async def ban(message: Message, args: Tuple[str]):
         time = 1
         coefficent = "h"
 
-    # получаем все необходимые данные
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -257,27 +275,51 @@ async def ban(message: Message, args: Tuple[str]):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "ban",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.reply_message.conversation_message_id]
+        "cmids": None
     }
 
-    await processor.ban_proc(context, collapse=True, log=True, respond=True)
+    collapse = False
+
+    if len(args) == 2 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+        collapse = True
+
+    elif len(args) == 3 and not message.reply_message:
+        cuid = await get_cuid(args[2])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.ban_proc(context, collapse=collapse, log=True, respond=True)
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unban'], PREFIXES, 0),
+    HandleCommand(ALIASES['unban'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['unban']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def unban(message: Message):
+async def unban(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -285,12 +327,30 @@ async def unban(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "unban",
         "now_time": converter.now(),
     }
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
 
     await processor.unban_proc(context, log=True, respond=False)
 
@@ -302,15 +362,17 @@ async def unban(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['mute'], PREFIXES, 2),
+    HandleCommand(ALIASES['mute'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['mute']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def mute(message: Message, args: Tuple[str]):
+async def mute(message: Message, args: Tuple):
+    if not args or message.fwd_messages:
+        return
+
     try:
         time = int(args[0])
         coefficent = args[1]
@@ -326,28 +388,52 @@ async def mute(message: Message, args: Tuple[str]):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "mute",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.reply_message.conversation_message_id]
+        "cmids": None
     }
 
-    await processor.mute_proc(context, collapse=True, log=True, respond=True)
+    collapse = False
+
+    if len(args) == 2 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+        collapse = True
+
+    elif len(args) == 3 and not message.reply_message:
+        cuid = await get_cuid(args[2])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.mute_proc(context, collapse=collapse, log=True, respond=True)
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unmute'], PREFIXES, 0),
+    HandleCommand(ALIASES['unmute'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['unmute']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def unmute(message: Message):
+async def unmute(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -355,12 +441,30 @@ async def unmute(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "unmute",
         "now_time": converter.now(),
     }
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
 
     await processor.unmute_proc(context, log=True, respond=False)
 
@@ -373,15 +477,17 @@ async def unmute(message: Message):
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['warn'], PREFIXES, 0),
+    HandleCommand(ALIASES['warn'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['warn']),
     IgnorePermission(ignore_from=1, mode="TARGET"),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def warn(message: Message):
+async def warn(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     time = 1
     coefficent = "d"
 
@@ -392,27 +498,51 @@ async def warn(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "warn",
         "now_time": converter.now(),
         "target_time": converter.now() + converter.delta(time, coefficent),
-        "cmids": [message.reply_message.conversation_message_id]
+        "cmids": None
     }
 
-    await processor.warn_proc(context, collapse=True, log=True, respond=True)
+    collapse = False
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+        collapse = True
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.warn_proc(context, collapse=collapse, log=True, respond=True)
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['unwarn'], PREFIXES, 0),
+    HandleCommand(ALIASES['unwarn'], PREFIXES),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['unwarn']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def unwarn(message: Message):
+async def unwarn(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await info.peer_name(message.peer_id),
@@ -420,14 +550,130 @@ async def unwarn(message: Message):
         "initiator_id": message.from_id,
         "initiator_name": await info.user_name(message.from_id, tag=False),
         "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
         "command_name": "unwarn",
         "now_time": converter.now(),
     }
 
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
     await processor.unwarn_proc(context, log=True, respond=True)
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['queue'], PREFIXES),
+    CollapseCommand(),
+    CheckPermission(access_to=PERMISSION_ACCESS['queue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def queue(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
+    delta = QUEUE_TIME
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
+        "command_name": "queue",
+        "now_time": converter.now(),
+        "target_time": converter.now() + delta,
+        "cmids": None
+    }
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+        context["cmids"] = [message.reply_message.conversation_message_id]
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.queue_proc(context, log=True, respond=False)
+
+
+@bl.chat_message(
+    HandleCommand(ALIASES['unqueue'], PREFIXES),
+    CollapseCommand(),
+    CheckPermission(access_to=PERMISSION_ACCESS['unqueue']),
+    HandleIn(handle_log=False, handle_chat=True),
+    OnlyEnrolled()
+)
+async def unqueue(message: Message, args: Tuple):
+    if message.fwd_messages:
+        return
+
+    context = {
+        "peer_id": message.peer_id,
+        "peer_name": await info.peer_name(message.peer_id),
+        "chat_id": message.chat_id,
+        "initiator_id": message.from_id,
+        "initiator_name": await info.user_name(message.from_id, tag=False),
+        "initiator_nametag": await info.user_name(message.from_id, tag=True),
+        "target_id": None,
+        "target_name": None,
+        "target_nametag": None,
+        "command_name": "unqueue",
+        "now_time": converter.now(),
+    }
+
+    if len(args) == 0 and message.reply_message:
+        context["target_id"] = message.reply_message.from_id
+        context["target_name"] = await info.user_name(message.reply_message.from_id, tag=False)
+        context["target_nametag"] = await info.user_name(message.reply_message.from_id, tag=True)
+
+    elif len(args) == 1 and not message.reply_message:
+        cuid = await get_cuid(args[0])
+        if cuid is None:
+            print("Command aborted: Wrong mention")
+            return
+
+        context["target_id"] = cuid
+        context["target_name"] = await info.user_name(cuid, tag=False)
+        context["target_nametag"] = await info.user_name(cuid, tag=True)
+
+    else:
+        return
+
+    await processor.unqueue_proc(context, log=True, respond=False)
+
 
 """
 ------------------------------------------------------------------------------------------------------------------------
@@ -438,7 +684,7 @@ async def unwarn(message: Message):
 @bl.chat_message(
     HandleCommand(ALIASES['delete'], PREFIXES, 0),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=True),
+    AllowAnswer(allow_reply=True, allow_fwd=True),
     CheckPermission(access_to=PERMISSION_ACCESS['delete']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -473,7 +719,7 @@ async def delete(message: Message):
 @bl.chat_message(
     HandleCommand(ALIASES['copy'], PREFIXES, 0),
     CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
+    AllowAnswer(allow_reply=True, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['copy']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -492,7 +738,7 @@ async def copy(message: Message):
         "copied": message.reply_message.text
     }
 
-    await processor.copy_proc(context, log=True, respond=True)
+    await processor.copy_proc(context, log=True, respond=False)
 
 
 """
@@ -504,7 +750,7 @@ async def copy(message: Message):
 @bl.chat_message(
     HandleCommand(ALIASES['setting'], PREFIXES, 2),
     CollapseCommand(),
-    AnswerCommand(use_reply=False, use_fwd=False),
+    AllowAnswer(allow_reply=False, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['setting']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
@@ -527,66 +773,3 @@ async def setting(message: Message, args: Tuple):
     }
 
     await processor.setting_proc(context, log=True, respond=False)
-
-
-"""
-------------------------------------------------------------------------------------------------------------------------
-Команда изменяет значение настроек в беседе. 
-"""
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['queue'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['queue']),
-    HandleIn(handle_log=False, handle_chat=True),
-    OnlyEnrolled()
-)
-async def queue(message: Message):
-    delta = QUEUE_TIME
-
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
-        "command_name": "queue",
-        "now_time": converter.now(),
-        "target_time": converter.now() + delta,
-        "cmids": [message.reply_message.conversation_message_id]
-    }
-
-    await processor.queue_proc(context, log=True, respond=False)
-
-
-@bl.chat_message(
-    HandleCommand(ALIASES['unqueue'], PREFIXES, 0),
-    CollapseCommand(),
-    AnswerCommand(use_reply=True, use_fwd=False),
-    CheckPermission(access_to=PERMISSION_ACCESS['unqueue']),
-    HandleIn(handle_log=False, handle_chat=True),
-    OnlyEnrolled()
-)
-async def unqueue(message: Message):
-
-    context = {
-        "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
-        "chat_id": message.chat_id,
-        "initiator_id": message.from_id,
-        "initiator_name": await info.user_name(message.from_id, tag=False),
-        "initiator_nametag": await info.user_name(message.from_id, tag=True),
-        "target_id": message.reply_message.from_id,
-        "target_name": await info.user_name(message.reply_message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.reply_message.from_id, tag=True),
-        "command_name": "unqueue",
-        "now_time": converter.now(),
-    }
-
-    await processor.unqueue_proc(context, log=True, respond=False)

@@ -1,6 +1,6 @@
 from vkbottle.bot import Bot
 from singltone import MetaSingleton
-from config import GROUP_ID, TOKEN
+from usr_config import GROUP_ID, TOKEN
 from utils.converter import Converter
 
 

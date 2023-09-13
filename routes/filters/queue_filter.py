@@ -1,8 +1,7 @@
 from vkbottle.bot import BotLabeler, Message
-
-from config import QUEUE_TIME
+from usr_config import QUEUE_TIME
 from database.orm import DataBase
-from database.proc import Processor
+from database.proc import CommandProcessor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 from utils import *
 
@@ -12,7 +11,7 @@ bl = BotLabeler()
 info = Info()
 converter = Converter()
 database = DataBase()
-processor = Processor()
+processor = CommandProcessor()
 
 
 @bl.chat_message(

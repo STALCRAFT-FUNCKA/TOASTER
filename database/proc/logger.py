@@ -1,6 +1,6 @@
 import json
-from typing import Optional
-from config import GROUP_ID, TOKEN, PERMISSION_LVL
+from src_config import PERMISSION_LVL
+from usr_config import GROUP_ID, TOKEN
 from vkbottle.bot import Bot
 from database.orm import DataBase
 from singltone import MetaSingleton
@@ -30,73 +30,60 @@ class Logger(metaclass=MetaSingleton):
 
         self._std_log_data()
 
-    def compose_log_attachments(self, peer_id=None, cmids: Optional[list] = None):
-        forward = {
-            'peer_id': peer_id,
-            'conversation_message_ids': cmids
-        }
+    def compose_log_attachments(self, context):
+        if context.get('cmids') is not None:
+            forward = {
+                'peer_id': context.get('peer_id'),
+                'conversation_message_ids': context.get('cmids')
+            }
 
-        self.log_data['forward'] = forward
+            self.log_data['forward'] = forward
 
-    def compose_log_data(
-            self,
-            initiator_name=None,
-            initiator_role=None,
-            reason=None,
-            peer_name=None,
-            command_name=None,
-            setting_name=None,
-            setting_status=None,
-            set_role=None,
-            target_name=None,
-            target_role=None,
-            target_warns: int = None,
-            now_time: int = None,
-            target_time: int = None
-
-    ):
+    def compose_log_data(self, context):
         log_lines = []
 
-        if initiator_name is not None:
-            log_lines.append(f"Инициатор: {initiator_name}")
-        if initiator_role is not None:
-            role_name = PERMISSION_LVL.get(initiator_role, "Неизвестная роль")
-            log_lines.append(f"Роль: {initiator_role} - {role_name}")
-        if peer_name is not None:
-            log_lines.append(f"Источник: {peer_name}")
-        if command_name is not None:
-            log_lines.append(f"Команда: /{command_name}")
-        if setting_name is not None:
-            log_lines.append(f"Настройка: {setting_name}")
-        if setting_status is not None:
-            log_lines.append(f"Значение: {setting_status}")
-        if reason is not None:
-            log_lines.append(f"Причина: {reason}")
-        if set_role is not None:
-            role_name = PERMISSION_LVL.get(set_role, "Неизвестная роль")
-            log_lines.append(f"Установленная роль: {set_role} - {role_name}")
-        if target_name is not None:
-            log_lines.append(f"Цель: {target_name}")
-        if target_role is not None:
-            role_name = PERMISSION_LVL.get(target_role, "Неизвестная роль")
-            log_lines.append(f"Роль цели: {target_role} - {role_name}")
-        if target_warns is not None:
-            log_lines.append(f"Предупреждения: {target_warns}/3")
-        if now_time is not None:
-            log_lines.append(f"Время (МСК): {self.converter.convert(now_time)}")
-        if target_time is not None:
-            log_lines.append(f"Время cнятия (МСК): {self.converter.convert(target_time)}")
+        if context.get('initiator_nametag') is not None:
+            log_lines.append(f"Инициатор: {context.get('initiator_nametag')}")
+        if context.get('initiator_lvl') is not None:
+            role_name = PERMISSION_LVL.get(context.get('initiator_lvl'), "Неизвестная роль")
+            log_lines.append(f"Роль: {context.get('initiator_lvl')} - {role_name}")
+        if context.get('peer_name') is not None:
+            log_lines.append(f"Источник: {context.get('peer_name')}")
+        if context.get('command_name') is not None:
+            log_lines.append(f"Команда: /{context.get('command_name') }")
+        if context.get('setting_name') is not None:
+            log_lines.append(f"Настройка: {context.get('setting_name')}")
+        if context.get('setting_status') is not None:
+            log_lines.append(f"Значение: {context.get('setting_status')}")
+        if context.get('reason') is not None:
+            log_lines.append(f"Причина: {context.get('reason')}")
+        if context.get('set_role') is not None:
+            role_name = PERMISSION_LVL.get(context.get('set_role'), "Неизвестная роль")
+            log_lines.append(f"Установленная роль: {context.get('set_role')} - {role_name}")
+        if context.get('target_nametag') is not None:
+            log_lines.append(f"Цель: {context.get('target_nametag')}")
+        if context.get('target_role') is not None:
+            role_name = PERMISSION_LVL.get(context.get('target_role'), "Неизвестная роль")
+            log_lines.append(f"Роль цели: {context.get('target_role')} - {role_name}")
+        if context.get('target_warns') is not None:
+            log_lines.append(f"Предупреждения: {context.get('target_warns')}/3")
+        if context.get('now_time') is not None:
+            log_lines.append(f"Время (МСК): {self.converter.convert(context.get('now_time') )}")
+        if context.get('target_time') is not None:
+            log_lines.append(f"Время cнятия (МСК): {self.converter.convert(context.get('target_time') )}")
 
         self.log_data['text'] = "\n".join(log_lines)
 
-    async def log(self):
+    async def log(self, highlighter=False):
         peers = self._get_log_peers()
         log_data = self.log_data
-
-        for PeerID in peers:
+        if highlighter:
+            log_data['text'] = "----------------------------------------------\n" + log_data['text']
+            log_data['text'] = log_data['text'] + "\n ----------------------------------------------"
+        for peer_id in peers:
             await self.bot.api.messages.send(
                 group_id=GROUP_ID,
-                peer_id=PeerID,
+                peer_id=peer_id,
                 message=log_data['text'],
                 forward=json.dumps(log_data['forward']),
                 random_id=0
