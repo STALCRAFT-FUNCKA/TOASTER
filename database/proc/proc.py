@@ -449,7 +449,8 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         if warns:
             warns = warns[0][0]
         else:
-            warns = 0
+            return
+
         context["target_warns"] = warns - 1
 
         if respond:
