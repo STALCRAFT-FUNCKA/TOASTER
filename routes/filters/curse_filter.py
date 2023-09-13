@@ -1,5 +1,5 @@
 from vkbottle.bot import BotLabeler, Message
-from config import CURSE_WORDS
+from usr_config import CURSE_WORDS
 from database.orm import DataBase
 from database.proc import CommandProcessor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

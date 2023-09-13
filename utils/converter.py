@@ -1,7 +1,7 @@
 import datetime
 import time
 from singltone import MetaSingleton
-from config import TIME_COEFFICIENT
+from src_config import TIME_COEFFICIENT
 
 
 class Converter(metaclass=MetaSingleton):

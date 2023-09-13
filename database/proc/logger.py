@@ -1,6 +1,6 @@
 import json
-from typing import Optional
-from config import GROUP_ID, TOKEN, PERMISSION_LVL
+from src_config import PERMISSION_LVL
+from usr_config import GROUP_ID, TOKEN
 from vkbottle.bot import Bot
 from database.orm import DataBase
 from singltone import MetaSingleton

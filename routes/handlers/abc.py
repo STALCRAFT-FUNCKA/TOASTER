@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from vkbottle import Bot
-from config import TOKEN
+from usr_config import TOKEN
 from database.orm import DataBase
 from database.proc import CommandProcessor
 from utils import Info

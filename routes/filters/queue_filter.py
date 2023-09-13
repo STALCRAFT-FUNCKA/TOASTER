@@ -1,6 +1,5 @@
 from vkbottle.bot import BotLabeler, Message
-
-from config import QUEUE_TIME
+from usr_config import QUEUE_TIME
 from database.orm import DataBase
 from database.proc import CommandProcessor
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

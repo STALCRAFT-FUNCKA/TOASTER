@@ -1,4 +1,5 @@
-from config import ALIASES, PREFIXES, PERMISSION_ACCESS
+from src_config import PERMISSION_ACCESS
+from usr_config import ALIASES, PREFIXES
 from vkbottle.bot import BotLabeler, Message
 from database.proc import InformationProcessor, ReferenceProcessor
 from typing import Tuple

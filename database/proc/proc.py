@@ -1,5 +1,6 @@
 from vkbottle import Bot
-from config import TOKEN, STUFF_ADMIN_ID, PERMISSION_LVL, GROUP_ID, SETTINGS, PERMISSION_ACCESS, ALIASES
+from src_config import PERMISSION_LVL, SETTINGS, PERMISSION_ACCESS
+from usr_config import TOKEN, STUFF_ADMIN_ID, GROUP_ID, ALIASES
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton

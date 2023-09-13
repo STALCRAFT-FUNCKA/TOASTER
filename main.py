@@ -1,5 +1,5 @@
 from vkbottle.bot import Bot
-from config import TOKEN
+from usr_config import TOKEN
 
 from routes.handlers import handlers
 from routes import labelers

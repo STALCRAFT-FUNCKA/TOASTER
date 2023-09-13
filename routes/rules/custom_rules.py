@@ -1,7 +1,7 @@
 from typing import Optional, Union, Tuple
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
-from config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
+from usr_config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
 from database.orm import DataBase
 
 
