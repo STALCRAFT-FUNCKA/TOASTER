@@ -80,6 +80,13 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                     setting_status=status
                 )
 
+            self.database.permissions.insert(
+                peer_id=context.get("peer_id"),
+                target_id=0,
+                target_name="Система",
+                target_lvl=2
+            )
+
     async def log_proc(self, context: dict, log=True, respond=True):
         context["initiator_lvl"] = self._get_initiator_lvl(context)
 
@@ -103,6 +110,14 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             peer_name=context.get("peer_name"),
             peer_type=context.get("peer_type")
         )
+
+        if k:
+            self.database.permissions.insert(
+                peer_id=context.get("peer_id"),
+                target_id=0,
+                target_name="Система",
+                target_lvl=2
+            )
 
     async def drop_proc(self, context: dict, log=True, respond=True):
         is_enrolled = self.database.conversations.select(
