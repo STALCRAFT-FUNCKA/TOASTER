@@ -626,7 +626,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             )
             for initiator_name, target_name, kick_time in kicks:
                 text += f"* {target_name} -- {self.converter.convert(kick_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -648,7 +648,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for initiator_name, target_name, ban_time, unban_time in bans:
                 text += f"* {target_name} -- {self.converter.convert(ban_time)}\n" \
                         f"|-Время снятия: {self.converter.convert(unban_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -670,7 +670,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for initiator_name, target_name, mute_time, unmute_time in mutes:
                 text += f"* {target_name} -- {self.converter.convert(mute_time)}\n" \
                         f"|-Время снятия: {self.converter.convert(unmute_time)}\n" \
-                        f"\\-Инициатор: {target_name}\n"
+                        f"\\-Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
@@ -693,7 +693,7 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                 text += f"* {target_name} -- {self.converter.convert(warn_time)}\n" \
                         f"|- Время снятия: {self.converter.convert(unwarn_time)}\n" \
                         f"|- Количество предупреждений: {warn_count}\n" \
-                        f"\\- Инициатор: {target_name}\n"
+                        f"\\- Инициатор: {initiator_name}\n"
 
             await self._send_respond(text, context)
 
