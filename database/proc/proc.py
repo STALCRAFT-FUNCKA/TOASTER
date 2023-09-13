@@ -562,8 +562,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
     async def info_permission_proc(self, context):
         conversations = self.database.conversations.select(
-            ("peer_id",),
-            peer_type="CHAT"
+            ("peer_id",)
         )
         conversations = [peer_id[0] for peer_id in conversations]
 
