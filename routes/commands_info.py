@@ -68,7 +68,7 @@ async def info(message: Message, args: Tuple):
     args_check = [
         (ALIASES['permission'], info_processor.info_permission_proc(context)),
         (ALIASES['setting'], info_processor.info_setting_proc(context)),
-        (ALIASES['mark'], info_processor.info_chat_proc(context)),
+        (ALIASES['mark'], info_processor.info_mark_proc(context)),
         (ALIASES['kick'], info_processor.info_kick_proc(context)),
         (ALIASES['ban'], info_processor.info_ban_proc(context)),
         (ALIASES['mute'], info_processor.info_mute_proc(context)),
