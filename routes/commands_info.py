@@ -66,15 +66,15 @@ async def info(message: Message, args: Tuple):
     }
 
     args_check = [
-        (ALIASES['permission'], info_processor.info_permission_proc(context)),
-        (ALIASES['setting'], info_processor.info_setting_proc(context)),
-        (ALIASES['mark'], info_processor.info_mark_proc(context)),
-        (ALIASES['kick'], info_processor.info_kick_proc(context)),
-        (ALIASES['ban'], info_processor.info_ban_proc(context)),
-        (ALIASES['mute'], info_processor.info_mute_proc(context)),
-        (ALIASES['warn'], info_processor.info_warn_proc(context)),
+        (ALIASES['permission'], info_processor.info_permission_proc),
+        (ALIASES['setting'], info_processor.info_setting_proc),
+        (ALIASES['mark'], info_processor.info_mark_proc),
+        (ALIASES['kick'], info_processor.info_kick_proc),
+        (ALIASES['ban'], info_processor.info_ban_proc),
+        (ALIASES['mute'], info_processor.info_mute_proc),
+        (ALIASES['warn'], info_processor.info_warn_proc),
     ]
 
     for name, proc in args_check:
         if args[0] in name:
-            await proc
+            await proc(context)
