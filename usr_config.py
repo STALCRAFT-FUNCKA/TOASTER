@@ -54,7 +54,7 @@ QUEUE_TIME = 30 * 60  # 30 minutes
 Данная настройка отвечает за доступ к командам определенного уровня пользователей.
 """
 PERMISSION_ACCESS = {
-    "reference": 0,
+    "reference": 1,
     "mark": 2,
     "permission": 2,
     "terminate": 2,
