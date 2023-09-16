@@ -80,12 +80,12 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
                 delete_for_all=True
             )
             message.deleted = True
-            return True
 
         except Exception as error:
             print("Rule aborted command completion:", error)
             message.deleted = False
-            return False
+
+        return True
 
 
 class CheckPermission(ABCRule[BaseMessageMin]):

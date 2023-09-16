@@ -10,7 +10,7 @@ class Connection:
         for table in sql_tables.tables:
             self.cursor.execute(table)
 
-    def __init__(self, allow_debug_text=True, database_path="./{0}"):
+    def __init__(self, allow_debug_text=True, database_path="../{0}"):
         try:
             self.connection = sqlite3.connect(database_path.format(self.filename))
             self.cursor = self.connection.cursor()
@@ -51,11 +51,11 @@ class BaseTable:
         self.con = connection
         self.cur = cursor
 
-    def select(self, fields: tuple, **rows):
-        if not fields:
-            return None
-
-        summary_fields = ', '.join(fields)
+    def select(self, fields: tuple = None, **rows):
+        if fields:
+            summary_fields = ', '.join(fields)
+        else:
+            summary_fields = '*'
         query = f"SELECT {summary_fields} FROM {self.table_name}"
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
@@ -96,7 +96,7 @@ class BaseTable:
 
 class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable
-    _database_path = "database/{0}"
+    _database_path = "../TOASTER/database/{0}"
     _tunnel = Connection(database_path=_database_path)
 
     @property
