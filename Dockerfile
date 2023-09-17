@@ -1,6 +1,8 @@
 FROM python
 
-WORKDIR /root/TOASTER
+LABEL author="Oidaho" email="oidahomain@gmail.com" version="2.1.2"
+
+WORKDIR /app
 
 COPY . .
 
