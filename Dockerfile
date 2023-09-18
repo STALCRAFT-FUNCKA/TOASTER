@@ -4,8 +4,8 @@ FROM python:3.10
 # Information
 LABEL author="Oidaho" email="oidahomain@gmail.com" version="2.1.2"
 
-# env variables
-ENV TOASTER_TOKER = $TOASTER_TOKER
+# env variables for usr_config
+ENV TOASTER_TOKEN = $TOASTER_TOKEN
 ENV TOASTER_GROUPID = $TOASTER_GROUPID
 ENV TOASTER_STUFFADMID = $TOASTER_STUFFADMID
 
