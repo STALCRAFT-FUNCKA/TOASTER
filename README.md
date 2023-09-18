@@ -108,7 +108,10 @@ cd TOASTER
 Как только вы успешно попадете в директорию - нам понадобится создать образ. Для этого пропишем следующую команду:
 
 ```bash
-docker build . -t toaster_img 
+docker build . -t toaster_img \
+--build-arg TOKEN=$TOASTER_TOKEN \
+--build-arg GROUPID=$TOASTER_GROUPID \
+--build-arg STUFFADMID=$TOASTER_STUFFADMID
 ```
 Дожидаемся окончания загрузки и все! Теперь мы имеем опорный образ с именем "toaster", от которого мы сделаем контейнер Docker'a. Убедимся, что мы действительно создали образ:
 
