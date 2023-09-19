@@ -451,7 +451,10 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         else:
             return
 
-        context["target_warns"] = warns - 1
+        if not force:
+            context["target_warns"] = warns - 1
+        else:
+            context["target_warns"] = 0
 
         if respond:
             text = f"С @id{context.get('target_id')} (пользователя) снято предупреждение.\n"
