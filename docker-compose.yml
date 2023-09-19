@@ -1,24 +1,15 @@
-version: "3"
+version: "2.21.0"
 
 services:
 
     bot:
         build: bot/
 
-        command: ["pyton", "./bot/main.py"]
+        command: ["pyton", "main.py"]
 
         depends_on:
             - database
 
-        environment:
-            TOASTER_TOKEN: 0
-            TOASTER_GROUPID: 0
-            TOASTER_STAFFADMID: 0
-
-            SQL_HOST: 0
-            SQL_PORT: 0
-            SQL_USER: 0
-            SQL_PASSWORD: 0
 
     database:
         image: "mysql"
