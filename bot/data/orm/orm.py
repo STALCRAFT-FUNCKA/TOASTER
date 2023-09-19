@@ -1,30 +1,38 @@
-import sqlite3
+import os
+from MySQLdb import _mysql
 from bot.data.core import tables
-from bot.singltone import MetaSingleton
 
 
 class Connection:
-    filename = "data.db"
+    def _fill_schema(self):
+        self.connection.query('CREATE DATABASE IF NOT EXISTS toaster')
+        self.connection.commit()
 
-    def _fill_std_form(self):
+    def _fill_tables(self):
+        self.connection.query('USE toaster')
         for table in tables:
-            self.cursor.execute(table)
+            self.connection.query(table)
 
-    def __init__(self, allow_debug_text=True, database_path="../{0}"):
+        self.connection.commit()
+
+    def __init__(self, allow_debug_text=True):
         try:
-            self.connection = sqlite3.connect(database_path.format(self.filename))
-            self.cursor = self.connection.cursor()
+            self.connection = _mysql.connect(
+                host=os.getenv("SQL_HOST"),
+                port=os.getenv("SQL_PORT"),
+                user=os.getenv("SQL_USER"),
+                password=os.getenv("SQL_PASSWORD")
+            )
+
             if allow_debug_text:
-                print("База данных успешно подключена к SQLite")
+                print("Произведено подключение к MySQL Server.")
 
-            self._fill_std_form()
+            self._fill_schema()
+            self._fill_tables()
 
-            self.cursor.execute('''PRAGMA foreign_keys=ON''')
-            self.connection.commit()
-
-        except sqlite3.Error as error:
+        except Exception as error:
             if allow_debug_text:
-                print("Ошибка при подключении к SQLite", error)
+                print("Ошибка при подключении к MySQL Server", error)
 
 
 class BaseTable:
@@ -41,70 +49,89 @@ class BaseTable:
         for key, value in rows.items():
             op = key[-4:-1]+key[-1]
             op = self._ops.get(op, '=')
+
             if op != '=':
                 key = key[0:-4]
+
             summary.append(f"{key} {op} '{value}'")
+
         return summary
 
-    def __init__(self, table_name, cursor, connection):
+    def __init__(self, table_name, connection):
         self.table_name = table_name
         self.con = connection
-        self.cur = cursor
 
     def select(self, fields: tuple = None, **rows):
         if fields:
             summary_fields = ', '.join(fields)
         else:
             summary_fields = '*'
+
         query = f"SELECT {summary_fields} FROM {self.table_name}"
+
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        self.cur.execute(query)
-        return self.cur.fetchall()
 
-    def insert(self, **rows):
+        self.con.query('USE toaster')
+        self.con.query(query)
+        return self.con.store_result().fetch_row()
+
+    def insert(self, on_duplicate=None, **rows):
         if not rows:
             return
 
         summary_keys = ', '.join([key for key in rows.keys()])
         summary_values = ', '.join([f"'{value}'" for value in rows.values()])
         query = f"INSERT INTO {self.table_name} ({summary_keys}) VALUES ({summary_values})"
-        self.cur.execute(query)
+
+        if on_duplicate == "ignore":
+            query += " ON DUPLICATE KEY UPDATE id=id"
+
+        if on_duplicate == "update":
+            query += f""" ON DUPLICATE KEY UPDATE """ \
+                     f"""{', '.join([f"{key}='{value}'" for key, value in rows.items()])}"""
+
+        self.con.query('USE toaster')
+        self.con.query(query)
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
         if not new_data:
             return
 
-        summary_fields = ', '.join([f"{key} = '{value}'" for key, value in new_data.items()])
+        summary_fields = ', '.join([f"{key}='{value}'" for key, value in new_data.items()])
         query = f"UPDATE {self.table_name} SET {summary_fields}"
+
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        self.cur.execute(query)
+
+        self.con.query('USE toaster')
+        self.con.query(query)
         self.con.commit()
 
     def delete(self, **rows):
         query = f"DELETE FROM {self.table_name}"
+
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        self.cur.execute(query)
+
+        self.con.query('USE toaster')
+        self.con.query(query)
         self.con.commit()
 
 
-class DataBase(metaclass=MetaSingleton):
+class DataBase:
     _base_table = BaseTable
-    _database_path = "./data/{0}"
-    _tunnel = Connection(database_path=_database_path)
+    _tunnel = Connection()
 
     @property
     def conversations(self):
         return self._base_table(
             table_name="conversations",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -112,7 +139,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="settings",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -120,7 +146,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="permissions",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -128,7 +153,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="kicked",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -136,7 +160,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="banned",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -144,7 +167,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="warned",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -152,7 +174,6 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="muted",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
 
     @property
@@ -160,5 +181,4 @@ class DataBase(metaclass=MetaSingleton):
         return self._base_table(
             table_name="queue",
             connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
         )
