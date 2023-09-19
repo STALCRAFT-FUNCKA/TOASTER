@@ -27,5 +27,5 @@ class Handler(ABCHandler):
                     "target_time": self.converter.now() + self.converter.delta(time, coefficent),
                 }
 
-                await self.processor.unwarn_proc(context, force=True, log=False, respond=False)
                 await self.processor.mute_proc(context, log=True, respond=True)
+                await self.processor.unwarn_proc(context, force=True, log=False, respond=False)
