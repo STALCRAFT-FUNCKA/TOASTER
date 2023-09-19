@@ -96,7 +96,7 @@ class BaseTable:
 
 class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable
-    _database_path = "../TOASTER/database/{0}"
+    _database_path = "./database/{0}"
     _tunnel = Connection(database_path=_database_path)
 
     @property
@@ -162,8 +162,3 @@ class DataBase(metaclass=MetaSingleton):
             connection=self._tunnel.connection,
             cursor=self._tunnel.cursor
         )
-
-
-if __name__ == "__main__":
-    database = DataBase()
-
