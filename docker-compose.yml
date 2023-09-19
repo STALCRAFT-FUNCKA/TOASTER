@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+
+    bot:
+        build: bot-application/
+
+        command: ["pyton", "./bot-application/main.py"]
+
+        depends_on:
+            - database
+
+    database:
+        image: "mysql"
+
+        ports:
+            - "3306:3306"
