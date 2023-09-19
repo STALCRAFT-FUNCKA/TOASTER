@@ -1,7 +1,7 @@
 from typing import Optional, Union, Tuple
 from vkbottle import ABCRule, Bot
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
-from usr_config import GROUP_ID, TOKEN, STUFF_ADMIN_ID, PREFIXES
+from usr_config import GROUP_ID, TOKEN, STAFF_ADMIN_ID, PREFIXES
 from database.orm import DataBase
 
 
@@ -99,7 +99,7 @@ class CheckPermission(ABCRule[BaseMessageMin]):
         peer_id = message.peer_id
         initiator_id = message.from_id
 
-        if initiator_id == STUFF_ADMIN_ID:
+        if initiator_id == STAFF_ADMIN_ID:
             return True
 
         lvl = self.database.permissions.select(
@@ -123,7 +123,7 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
         self.database = DataBase()
 
     def __check_permission(self, peer_id, target_id):
-        if target_id == STUFF_ADMIN_ID:
+        if target_id == STAFF_ADMIN_ID:
             return False
 
         lvl = self.database.permissions.select(

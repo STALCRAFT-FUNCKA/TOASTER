@@ -1,6 +1,6 @@
 from vkbottle import Bot
 from src_config import PERMISSION_LVL, SETTINGS, PERMISSION_ACCESS
-from usr_config import TOKEN, STUFF_ADMIN_ID, GROUP_ID, ALIASES
+from usr_config import TOKEN, STAFF_ADMIN_ID, GROUP_ID, ALIASES
 from database.orm import DataBase
 from database.proc.logger import Logger
 from singltone import MetaSingleton
@@ -168,7 +168,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             if not is_kicked:
                 if respond:
                     text = f"@id{context.get('target_id')} (Пользователь) исключен из всех бесед навсегда.\n" \
-                            f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
+                            f"По вопросам обращаться к @id{STAFF_ADMIN_ID} (Администратору).\n"
                     await self._send_respond(text, context)
                 if not logged and log:
                     logged = True
@@ -233,7 +233,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 rsn = f"Причина: {context.get('reason')} \n"
                 text = f"@id{context.get('target_id')} (Пользователь) исключен из беседы.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
+                       f"По вопросам обращаться к @id{STAFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -275,7 +275,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 text = f"@id{context.get('target_id')} (Пользователь) временно заблокирован.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
                        f"Время снятия блокировки: {self.converter.convert(context.get('target_time'))}\n" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
+                       f"По вопросам обращаться к @id{STAFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -340,7 +340,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                        f"Повторная попытка отправить сообщение в чат приведёт к блокировке.\n" \
                        f"{rsn if context.get('reason') is not None else ''}" \
                        f"Время снятия заглушения: {self.converter.convert(context.get('target_time'))}\n" \
-                       f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
+                       f"По вопросам обращаться к @id{STAFF_ADMIN_ID} (Администратору).\n"
                 await self._send_respond(text, context)
             if log:
                 await self._send_log(context)
@@ -403,7 +403,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                    f"{rsn if context.get('reason') is not None else ''}" \
                    f"Текущее количество предупреждений: {context.get('target_warns')}/3.\n" \
                    f"Время снятия предупреждений: {self.converter.convert(context.get('target_time'))}\n" \
-                   f"По вопросам обращаться к @id{STUFF_ADMIN_ID} (Администратору).\n"
+                   f"По вопросам обращаться к @id{STAFF_ADMIN_ID} (Администратору).\n"
             await self._send_respond(text, context)
         if log:
             await self._send_log(context)
