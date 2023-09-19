@@ -110,8 +110,8 @@ cd TOASTER
 ```bash
 docker build . -t toaster_img \
 --build-arg TOKEN=$TOASTER_TOKEN \
---build-arg GROUPID=$TOASTER_GROUPID \
---build-arg STUFFADMID=$TOASTER_STUFFADMID
+--build-arg ID=$TOASTER_GROUPID \
+--build-arg ADM=$TOASTER_STUFFADMID
 ```
 Дожидаемся окончания загрузки и все! Теперь мы имеем опорный образ с именем "toaster", от которого мы сделаем контейнер Docker'a. Убедимся, что мы действительно создали образ:
 
@@ -122,7 +122,7 @@ docker images
 Если в списке есть образ с именем "toaster", то вы все еще на верном пути. Далее запустим контейнер:
 
 ```bash
-docker run --name toaster_cont -d toaster_img
+docker run --detach --name toaster_cont toaster_img
 ```
 И опять же проверим, все ли прошло гладко:
 
