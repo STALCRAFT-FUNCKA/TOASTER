@@ -9,7 +9,7 @@ from toaster_app.config import (
     ALIASES
 )
 from toaster_app.data import DataBase
-from logger import Logger
+from .logger import Logger
 from toaster_app.singltone import MetaSingleton
 from toaster_app.utils import Converter, Informer
 
@@ -922,10 +922,10 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
         await self._send_respond(text, context)
 
     async def ref_info_proc(self, context):
-        text = "/information <list_name> \n" \
+        text = "/info <list_name> \n" \
                "* Доступные префиксы: ! или / \n" \
-              f"* Псевдонимы команды: {ALIASES['information']} \n" \
-              f"* Доступ для группы прав {PERMISSION_ACCESS['information']} уровня или выше \n" \
+              f"* Псевдонимы команды: {ALIASES['info']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['info']} уровня или выше \n" \
               f"* Может быть вызвана только в лог-чате \n" \
                "\n" \
                "Описание: Выводит информацию о текущем состоянии указанного списка объектов.\n" \

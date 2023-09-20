@@ -108,7 +108,7 @@ ALIASES = {
     'queue': ('queue', 'очередь'),
     'unqueue': ('unqueue', 'разочередить'),
     # ----------------------------------
-    'information': ('information', 'информация')
+    'info': ('info', 'информация')
 }
 
 """
