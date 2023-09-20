@@ -3,7 +3,7 @@ version: "2.21.0"
 services:
 
     bot:
-        build: bot/
+        build: app/
 
         command: ["pyton", "main.py"]
 
