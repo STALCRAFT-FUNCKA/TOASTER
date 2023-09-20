@@ -2,7 +2,7 @@ import json
 from app.src_config import PERMISSION_LVL
 from app.usr_config import GROUP_ID, TOKEN
 from vkbottle.bot import Bot
-from app.data import DataBase
+from .orm import DataBase
 from app.singltone import MetaSingleton
 from app.utils import Converter
 

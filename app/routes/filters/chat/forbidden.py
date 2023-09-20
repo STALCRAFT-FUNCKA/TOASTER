@@ -1,4 +1,4 @@
-from app.routes.filters.core import *
+from ..core import *
 from vkbottle.bot import Message
 from vkbottle_types.objects import MessagesMessageAttachmentType as AttachmentType
 from app.routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

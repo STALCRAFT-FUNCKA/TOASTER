@@ -1,6 +1,6 @@
 import os
 from MySQLdb import _mysql
-from app.data.core import tables
+from .core import tables
 
 
 class Connection:

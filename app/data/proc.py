@@ -1,8 +1,8 @@
 from vkbottle import Bot
 from app.src_config import PERMISSION_LVL, SETTINGS, PERMISSION_ACCESS
 from app.usr_config import TOKEN, STAFF_ADMIN_ID, GROUP_ID, ALIASES
-from app.data import DataBase
-from app.data.proc.logger import Logger
+from .orm import DataBase
+from .logger import Logger
 from app.singltone import MetaSingleton
 from app.utils import Converter, Informer
 

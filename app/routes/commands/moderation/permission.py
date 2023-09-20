@@ -1,4 +1,4 @@
-from app.routes.commands.core import *
+from ..core import *
 from app.src_config import PERMISSION_LVL, PERMISSION_ACCESS
 from app.usr_config import ALIASES, PREFIXES
 from vkbottle.bot import Message

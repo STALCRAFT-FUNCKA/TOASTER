@@ -1,4 +1,4 @@
-from app.routes.filters.core import *
+from ..core import *
 import datetime
 import requests
 from bs4 import BeautifulSoup

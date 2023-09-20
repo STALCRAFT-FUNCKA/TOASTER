@@ -1,4 +1,4 @@
-from app.routes.filters.core import *
+from ..core import *
 from vkbottle.bot import Message
 from app.usr_config import QUEUE_TIME
 from app.routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

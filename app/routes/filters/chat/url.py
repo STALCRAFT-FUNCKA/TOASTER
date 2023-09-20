@@ -1,4 +1,4 @@
-from app.routes.filters.core import *
+from ..core import *
 from vkbottle.bot import Message
 from app.usr_config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
 from app.routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

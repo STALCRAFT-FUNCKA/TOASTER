@@ -1,4 +1,4 @@
-from app.routes.filters.core import *
+from ..core import *
 from vkbottle.bot import BotLabeler, Message
 from app.data import DataBase
 from app.data import CommandProcessor

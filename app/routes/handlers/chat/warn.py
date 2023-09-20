@@ -1,4 +1,4 @@
-from app.routes.handlers.core import ABCHandler
+from ..core import ABCHandler
 
 
 class Handler(ABCHandler):
