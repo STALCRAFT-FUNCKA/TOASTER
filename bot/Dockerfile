@@ -26,6 +26,6 @@ ENV SQL_PASSWORD $PASSWORD
 
 COPY . .
 
-RUN pip install -r ../requirements.txt --no-cache-dir
+RUN pip install -r /TOASTER/requirements.txt --no-cache-dir
 
 CMD ["python", "main.py"]
