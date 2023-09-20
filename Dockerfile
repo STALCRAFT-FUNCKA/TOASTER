@@ -24,8 +24,8 @@ ENV SQL_PORT $PORT
 ENV SQL_USER $USER
 ENV SQL_PASSWORD $PASSWORD
 
-COPY toaster_app /app/toaster_app
+COPY ./toaster_app /app/toaster_app
 
-RUN pip install -r toaster_app/requirements.txt --no-cache-dir
+RUN pip install -r ./toaster_app/requirements.txt --no-cache-dir
 
-CMD ["python", "toaster_app/main.py"]
+CMD ["python", "./toaster_app/main.py"]
