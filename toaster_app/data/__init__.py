@@ -1,4 +1,4 @@
-from orm import DataBase
+from .orm import DataBase
 
 __all__ = (
     "DataBase"

@@ -1,5 +1,5 @@
-from usr_config import *
-from src_config import *
+from .usr_config import *
+from .src_config import *
 
 __all__ = (
     # user config variables

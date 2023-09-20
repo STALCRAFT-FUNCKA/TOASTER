@@ -1,4 +1,4 @@
-from custom_rules import (
+from .custom_rules import (
     HandleCommand,
     CollapseCommand,
     AllowAnswer,

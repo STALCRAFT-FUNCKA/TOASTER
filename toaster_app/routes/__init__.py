@@ -1,6 +1,6 @@
-from commands import *
-from filters import *
-from handlers import *
+from .commands import *
+from .filters import *
+from .handlers import *
 
 labelers = [
 
