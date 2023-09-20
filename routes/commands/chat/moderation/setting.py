@@ -1,3 +1,4 @@
+from routes.commands.core import *
 from config import PERMISSION_ACCESS, ALIASES, PREFIXES
 from vkbottle.bot import Message, BotLabeler
 from typing import Tuple
@@ -28,7 +29,7 @@ async def setting(message: Message, args: Tuple):
         "initiator_nametag": await informer.user_name(message.from_id, tag=True),
         "command_name": "setting",
         "setting_name": setting_name,
-        "setting_status": setting_status,
+        "setting_status": 1 if setting_status else 0,
         "now_time": converter.now()
     }
 

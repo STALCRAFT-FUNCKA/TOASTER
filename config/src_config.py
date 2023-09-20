@@ -58,28 +58,28 @@ PERMISSION_ACCESS = {
 }
 
 """
-При изменении настроек беседы достаточно изменить нужное значение на True or False.
+При изменении настроек беседы достаточно изменить нужное значение на True (1) or False (0).
 Значение слева от знака ":" трогать не рекомендуется. Если же, вы нарочно не хотите что-то сломать.
 Значение не должно быть пустым.
 Данная настройка определяет по стандарту запрещенные вещи/сущности в беседе.
 """
 SETTINGS = {
-    'Allow_Picture': True,
-    'Allow_Video': True,
-    'Allow_Music': True,
-    'Allow_Links': True,
-    'Allow_Voice': True,
-    'Allow_Post': True,
-    'Allow_Votes': True,
-    'Allow_Files': True,
-    'Allow_Miniapp': True,
-    'Allow_Graffiti': True,
-    'Allow_Sticker': True,
-    'Allow_Reply': True,
-    'Filter_Curse': False,
-    'Slow_Mode': False,
-    'Account_Age': False,
-    'Hard_Mode': False
+    'Allow_Picture': 1,
+    'Allow_Video': 1,
+    'Allow_Music': 1,
+    'Allow_Links': 1,
+    'Allow_Voice': 1,
+    'Allow_Post': 1,
+    'Allow_Votes': 1,
+    'Allow_Files': 1,
+    'Allow_Miniapp': 1,
+    'Allow_Graffiti': 1,
+    'Allow_Sticker': 1,
+    'Allow_Reply': 1,
+    'Filter_Curse': 0,
+    'Slow_Mode': 0,
+    'Account_Age': 0,
+    'Hard_Mode': 0
 }
 
 

@@ -1,3 +1,4 @@
+from routes.filters.core import *
 from vkbottle.bot import Message, BotLabeler
 from config import CURSE_WORDS
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

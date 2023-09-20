@@ -1,3 +1,4 @@
+from routes.filters.core import *
 from vkbottle.bot import Message, BotLabeler
 from config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
 from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled

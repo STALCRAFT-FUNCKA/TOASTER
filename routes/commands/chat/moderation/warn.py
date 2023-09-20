@@ -1,3 +1,4 @@
+from routes.commands.core import *
 from config import PERMISSION_ACCESS, ALIASES, PREFIXES
 from vkbottle.bot import Message, BotLabeler
 from typing import Tuple

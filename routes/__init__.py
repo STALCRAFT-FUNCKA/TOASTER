@@ -12,16 +12,16 @@ labelers = [
 
     info_command,
     reference_command,
+    mark_command,
+    permission_command,
+    setting_command,
+    kick_command,
     ban_command,
+    mute_command,
+    warn_command,
+    queue_command,
     copy_command,
     delete_command,
-    kick_command,
-    mark_command,
-    mute_command,
-    permission_command,
-    queue_command,
-    setting_command,
-    warn_command
 ]
 
 handlers = [

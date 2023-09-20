@@ -74,6 +74,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             await self._send_log(context)
 
         self.database.conversations.insert(
+            on_duplicate="update",
             peer_id=context.get("peer_id"),
             peer_name=context.get("peer_name"),
             peer_type="CHAT"
@@ -118,6 +119,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             await self._send_log(context)
 
         self.database.conversations.insert(
+            on_duplicate="update",
             peer_id=context.get("peer_id"),
             peer_name=context.get("peer_name"),
             peer_type=context.get("peer_type")
@@ -216,6 +218,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
 
         if context.get("target_lvl") > 0:
             self.database.permissions.insert(
+                on_duplicate="update",
                 peer_id=context.get("peer_id"),
                 target_id=context.get("target_id"),
                 target_name=context.get("target_name"),
