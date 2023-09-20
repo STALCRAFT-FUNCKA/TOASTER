@@ -4,7 +4,7 @@ FROM python:3.10
 # Information
 LABEL author="Oidaho" email="oidahomain@gmail.com"
 
-WORKDIR /TOASTER
+WORKDIR /app
 
 ARG TOKEN
 ARG ID
