@@ -28,4 +28,4 @@ COPY toaster_app /app/toaster_app
 
 RUN pip install -r toaster_app/requirements.txt --no-cache-dir
 
-CMD ["python", "main.py"]
+CMD ["python", "/toaster_app/main.py"]
