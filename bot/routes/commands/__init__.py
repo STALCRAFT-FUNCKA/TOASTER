@@ -1,1 +1,1 @@
-from core import bl as commands_labeler
+from .core import bl as commands_labeler

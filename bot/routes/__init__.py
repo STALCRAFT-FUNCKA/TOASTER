@@ -1,6 +1,6 @@
-from commands import commands_labeler
-from filters import filters_labeler
-from handlers import *
+from .commands import commands_labeler
+from .filters import filters_labeler
+from .handlers import *
 
 labelers = [
     filters_labeler,

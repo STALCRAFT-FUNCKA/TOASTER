@@ -1,8 +1,6 @@
 from vkbottle.bot import Bot
 from usr_config import TOKEN
-
-from routes import handlers
-from routes import labelers
+from routes import handlers, labelers
 
 bot = Bot(token=TOKEN)
 

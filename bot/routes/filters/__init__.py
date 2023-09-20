@@ -1,1 +1,1 @@
-from core import bl as filters_labeler
+from .core import bl as filters_labeler
