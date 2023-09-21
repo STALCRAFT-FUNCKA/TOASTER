@@ -63,7 +63,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
         if is_enrolled:
             k = False
             if respond:
-                text = "Данные беседы обновлены.\n" + str(is_enrolled)
+                text = "Данные беседы обновлены.\n"
                 await self._send_respond(text, context)
         else:
             k = True
