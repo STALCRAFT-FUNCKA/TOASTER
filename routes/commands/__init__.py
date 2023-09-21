@@ -12,6 +12,7 @@ from .chat.fun.roll import bl as roll_command
 from .chat.fun.copy import bl as copy_command
 from .chat.fun.delete import bl as delete_command
 from .chat.fun.say import bl as say_command
+from .chat.fun.hate_soloma import bl as hate_soloma_command
 
 __all__ = (
     "info_command",
@@ -27,5 +28,6 @@ __all__ = (
     "setting_command",
     "warn_command",
     "roll_command",
-    "say_command"
+    "say_command",
+    "hate_soloma_command"
 )

@@ -23,7 +23,8 @@ labelers = [
     copy_command,
     delete_command,
     roll_command,
-    say_command
+    say_command,
+    hate_soloma_command,
 ]
 
 handlers = [
