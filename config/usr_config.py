@@ -72,8 +72,9 @@ PERMISSION_ACCESS = {
     "queue": 1,
     "unqueue": 1,
     "info": 1,
-    "say":2,
-    "roll": 0
+    "say": 2,
+    "roll": 0,
+    "hate_soloma": 1
 }
 
 """
@@ -113,7 +114,8 @@ ALIASES = {
     'info': ('info', 'информация'),
     # ----------------------------------
     'roll': ('roll', 'прокрутка'),
-    'say': ('say', 'сказать')
+    'say': ('say', 'сказать'),
+    'hate_soloma': ('hate_soloma', 'зачмырить_солому')
 }
 
 """
