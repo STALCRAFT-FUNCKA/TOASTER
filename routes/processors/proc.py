@@ -937,3 +937,23 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
                "* <list_name>: permission, setting, mark, kick, ban, mute, warn\n"
 
         await self._send_respond(text, context)
+
+
+class FunProcessor(StdProcessor, metaclass=MetaSingleton):
+    async def fun_roll_proc(self, context, log=True, respond=True):
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
+
+        if respond:
+            text = f"Кости кинуты!\n"
+            await self._send_respond(text, context)
+        if log:
+            await self._send_log(context)
+
+        result_text = (f"@id{context.get('initiator_id')} (Пользователь) выбивает число "
+                       f"({context.get('down_border')}-{context.get('up_border')}): {context.get('result')}")
+
+        await self.bot.api.messages.send(
+            chat_id=context.get("chat_id"),
+            message=result_text,
+            random_id=0
+        )

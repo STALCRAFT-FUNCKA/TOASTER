@@ -8,6 +8,7 @@ converter = Converter()
 com_processor = CommandProcessor()
 info_processor = InformationProcessor()
 ref_processor = ReferenceProcessor()
+fun_processor = FunProcessor()
 
 
 async def get_cuid(arg):

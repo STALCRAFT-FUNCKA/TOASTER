@@ -1,7 +1,8 @@
-from .proc import CommandProcessor, InformationProcessor, ReferenceProcessor
+from .proc import CommandProcessor, InformationProcessor, ReferenceProcessor, FunProcessor
 
 __all__ = (
     "CommandProcessor",
     "InformationProcessor",
-    "ReferenceProcessor"
+    "ReferenceProcessor",
+    "FunProcessor"
 )
