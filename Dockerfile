@@ -24,6 +24,8 @@ ENV SQL_PORT $PORT
 ENV SQL_USER $USER
 ENV SQL_PASSWORD $PASSWORD
 
+COPY requirements.txt /toaster
+
 RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . .
