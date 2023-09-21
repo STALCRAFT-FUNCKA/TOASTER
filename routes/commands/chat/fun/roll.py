@@ -16,7 +16,7 @@ bl = BotLabeler()
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def ban(message: Message, args: Tuple):
+async def roll(message: Message, args: Tuple):
     context = {
         "peer_id": message.peer_id,
         "peer_name": await informer.peer_name(message.peer_id),
@@ -30,12 +30,6 @@ async def ban(message: Message, args: Tuple):
         "up_border": None,
         "result": None
     }
-    try:
-        down_border = int(args[0])
-        up_border = int(args[1])
-    except Exception as error:
-        print("Command aborted: ", error)
-        return
 
     random.seed()
     if len(args) == 0:
@@ -44,16 +38,25 @@ async def ban(message: Message, args: Tuple):
         result = random.randint(0, 100)
         context["result"] = result
 
-    if len(args) == 1:
-        context["down_border"] = down_border
-        context["up_border"] = 100
-        result = random.randint(down_border, 100)
-        context["result"] = result
+    else:
+        try:
+            if len(args) == 1:
+                down_border = int(args[0])
+                context["down_border"] = down_border
+                context["up_border"] = 100
+                result = random.randint(down_border, 100)
+                context["result"] = result
 
-    if len(args) == 2:
-        context["down_border"] = down_border
-        context["up_border"] = up_border
-        result = random.randint(down_border, up_border)
-        context["result"] = result
+            if len(args) == 2:
+                down_border = int(args[0])
+                up_border = int(args[1])
+                context["down_border"] = down_border
+                context["up_border"] = up_border
+                result = random.randint(down_border, up_border)
+                context["result"] = result
+
+        except Exception as error:
+            print("Command aborted: ", error)
+            return
 
     await fun_processor.fun_roll_proc(context, log=False, respond=False)
