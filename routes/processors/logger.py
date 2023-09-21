@@ -70,6 +70,8 @@ class Logger(metaclass=MetaSingleton):
             log_lines.append(f"Время (МСК): {self.converter.convert(context.get('now_time') )}")
         if context.get('target_time') is not None:
             log_lines.append(f"Время cнятия (МСК): {self.converter.convert(context.get('target_time') )}")
+        if context.get('say_text') is not None:
+            log_lines.append(f"Текст: {context.get('say_text')}")
 
         self.log_data['text'] = "\n".join(log_lines)
 

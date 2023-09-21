@@ -26,7 +26,6 @@ async def say(message: Message, args: Tuple):
         "initiator_nametag": await informer.user_name(message.from_id, tag=True),
         "command_name": "say",
         "now_time": converter.now(),
-        "cmids": [message.conversation_message_id],
         "say_text": None
     }
 
