@@ -25,5 +25,6 @@ __all__ = (
     "queue_command",
     "setting_command",
     "warn_command",
-    "roll_command"
+    "roll_command",
+    "say_command"
 )
