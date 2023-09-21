@@ -22,7 +22,7 @@ async def mute_filter(message: Message):
         return
 
     time = 1
-    coefficent = "d"
+    coefficient = "d"
 
     context = {
         "peer_id": message.peer_id,
@@ -36,7 +36,7 @@ async def mute_filter(message: Message):
         "target_nametag": await info.user_name(message.from_id, tag=True),
         "command_name": "ban",
         "now_time": converter.now(),
-        "target_time": converter.now() + converter.delta(time, coefficent),
+        "target_time": converter.now() + converter.delta(time, coefficient),
         "cmids": [message.conversation_message_id]
     }
 

@@ -27,14 +27,13 @@ async def queue(message: Message):
         peer_id=message.peer_id,
         setting_name='Slow_Mode'
     )
-    check = check[0][0] if check else False
-    check = True if check == "True" else False
+    check = check[0][0]
     if not check:
         return
 
     reason = "Нарушение задержки"
     time = 1
-    coefficent = "d"
+    coefficient = "d"
 
     context = {
         "peer_id": message.peer_id,
@@ -49,7 +48,7 @@ async def queue(message: Message):
         "command_name": "warn",
         "reason": reason,
         "now_time": converter.now(),
-        "target_time": converter.now() + converter.delta(time, coefficent),
+        "target_time": converter.now() + converter.delta(time, coefficient),
         "cmids": [message.conversation_message_id]
     }
 

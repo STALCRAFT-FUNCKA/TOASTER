@@ -45,8 +45,7 @@ async def forbidden_filter(message: Message):
                     peer_id=message.peer_id,
                     setting_name=setting
                 )
-                check = check[0][0] if check else False
-                check = True if check == "True" else False
+                check = check[0][0]
                 if not check:
                     for attachment in message.attachments:
                         if attachment.type == attachment_type:
@@ -58,8 +57,7 @@ async def forbidden_filter(message: Message):
             peer_id=message.peer_id,
             setting_name='Allow_Reply'
         )
-        check = check[0][0] if check else False
-        check = True if check == "True" else False
+        check = check[0][0]
         if not check:
             if message.reply_message:
                 if message.from_id != message.reply_message.from_id:

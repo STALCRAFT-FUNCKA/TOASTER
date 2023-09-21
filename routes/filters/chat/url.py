@@ -28,8 +28,7 @@ async def url_filter(message: Message):
             peer_id=message.peer_id,
             setting_name='Hard_Mode'
         )
-        hard_mode = hard_mode[0][0] if hard_mode else False
-        hard_mode = True if hard_mode == "True" else False
+        hard_mode = hard_mode[0][0]
         for domain, url in content:
             if hard_mode:
                 if domain in ALLOWED_DOMAIN or url in ALLOWED_URL:
