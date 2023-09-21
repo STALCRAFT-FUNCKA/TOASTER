@@ -58,7 +58,7 @@ class Logger(metaclass=MetaSingleton):
             log_lines.append(f"Причина: {context.get('reason')}")
         if context.get('target_lvl') is not None:
             role_name = PERMISSION_LVL.get(context.get('target_lvl'), "Неизвестная роль")
-            log_lines.append(f"Установленная роль: {context.get('set_role')} - {role_name}")
+            log_lines.append(f"Установленная роль: {context.get('target_lvl')} - {role_name}")
         if context.get('target_nametag') is not None:
             log_lines.append(f"Цель: {context.get('target_nametag')}")
         if context.get('target_role') is not None:
