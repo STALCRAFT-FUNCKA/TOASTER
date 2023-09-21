@@ -949,7 +949,7 @@ class FunProcessor(StdProcessor, metaclass=MetaSingleton):
         if log:
             await self._send_log(context)
 
-        result_text = (f"@id{context.get('initiator_id')} (Пользователь) выбивает число "
+        result_text = (f"{context.get('initiator_nametag')} выбивает число "
                        f"({context.get('down_border')}-{context.get('up_border')}): {context.get('result')}")
 
         await self.bot.api.messages.send(
