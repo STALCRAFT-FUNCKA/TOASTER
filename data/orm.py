@@ -4,6 +4,11 @@ from .core import tables
 
 
 class Connection:
+    @staticmethod
+    def _decode_result(result):
+        if result:
+            ...
+
     def _fill_schema(self):
         self.connection.query('CREATE DATABASE IF NOT EXISTS toaster')
         self.connection.commit()
@@ -75,7 +80,9 @@ class BaseTable:
 
         self.con.query('USE toaster')
         self.con.query(query)
-        return self.con.store_result().fetch_row()
+        result = self.con.store_result().fetch_row()
+        print(result)
+        return result
 
     def insert(self, on_duplicate=None, **rows):
         if not rows:
