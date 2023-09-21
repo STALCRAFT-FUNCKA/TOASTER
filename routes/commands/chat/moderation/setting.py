@@ -18,7 +18,11 @@ bl = BotLabeler()
 )
 async def setting(message: Message, args: Tuple):
     setting_name = args[0]
-    setting_status = args[1]
+    try:
+        setting_status = int(args[1])
+    except Exception as error:
+        print("Wrong status:", error)
+        setting_status = 0
 
     context = {
         "peer_id": message.peer_id,
