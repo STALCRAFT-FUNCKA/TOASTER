@@ -4,8 +4,6 @@ FROM python:3.10
 # Information
 LABEL author="Oidaho" email="oidahomain@gmail.com"
 
-WORKDIR /toaster
-
 ARG TOKEN
 ARG ID
 ARG ADM
@@ -24,10 +22,10 @@ ENV SQL_PORT $PORT
 ENV SQL_USER $USER
 ENV SQL_PASSWORD $PASSWORD
 
-COPY requirements.txt .
+COPY requirements.txt /toaster
 
-RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install -r /toaster/requirements.txt --no-cache-dir
 
-COPY . .
+COPY . /toaster
 
 CMD ["python", "main.py"]
