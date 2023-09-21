@@ -113,4 +113,4 @@ async def unmute(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.unmute_proc(context, log=True, respond=False)
+    await com_processor.unmute_proc(context, log=True, respond=True)

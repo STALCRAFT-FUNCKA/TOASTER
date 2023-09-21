@@ -102,4 +102,4 @@ async def unqueue(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.unqueue_proc(context, log=True, respond=False)
+    await com_processor.unqueue_proc(context, log=True, respond=True)
