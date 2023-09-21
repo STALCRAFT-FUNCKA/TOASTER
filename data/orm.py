@@ -1,33 +1,29 @@
 import os
-from MySQLdb import _mysql
+import MySQLdb
 from .core import tables
 
 
 class Connection:
-    @staticmethod
-    def _decode_result(result):
-        if result:
-            ...
-
     def _fill_schema(self):
-        self.connection.query('CREATE DATABASE IF NOT EXISTS toaster')
+        self.cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
         self.connection.commit()
 
     def _fill_tables(self):
-        self.connection.query('USE toaster')
+        self.cursor.execute('USE toaster')
         for table in tables:
-            self.connection.query(table)
+            self.cursor.execute(table)
 
         self.connection.commit()
 
     def __init__(self, allow_debug_text=True):
         try:
-            self.connection = _mysql.connect(
+            self.connection = MySQLdb.connect(
                 host=os.getenv("SQL_HOST"),
                 port=int(os.getenv("SQL_PORT")),
                 user=os.getenv("SQL_USER"),
                 password=os.getenv("SQL_PASSWORD")
             )
+            self.cursor = self.connection.cursor()
 
             if allow_debug_text:
                 print("Произведено подключение к MySQL Server.")
@@ -62,9 +58,10 @@ class BaseTable:
 
         return summary
 
-    def __init__(self, table_name, connection):
+    def __init__(self, table_name, connection, cursor):
         self.table_name = table_name
         self.con = connection
+        self.cur = cursor
 
     def select(self, fields: tuple = None, **rows):
         if fields:
@@ -78,9 +75,9 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.con.query('USE toaster')
-        self.con.query(query)
-        result = self.con.store_result().fetch_row()
+        self.cur.execute('USE toaster')
+        self.cur.execute(query)
+        result = self.cur.fetchall()
         return result
 
     def insert(self, on_duplicate=None, **rows):
@@ -98,8 +95,8 @@ class BaseTable:
             query += f""" ON DUPLICATE KEY UPDATE """ \
                      f"""{', '.join([f"{key}='{value}'" for key, value in rows.items()])}"""
 
-        self.con.query('USE toaster')
-        self.con.query(query)
+        self.cur.execute('USE toaster')
+        self.cur.execute(query)
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
@@ -113,8 +110,8 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.con.query('USE toaster')
-        self.con.query(query)
+        self.cur.execute('USE toaster')
+        self.cur.execute(query)
         self.con.commit()
 
     def delete(self, **rows):
@@ -124,8 +121,8 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.con.query('USE toaster')
-        self.con.query(query)
+        self.cur.execute('USE toaster')
+        self.cur.execute(query)
         self.con.commit()
 
 
@@ -138,6 +135,7 @@ class DataBase:
         return self._base_table(
             table_name="conversations",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -145,6 +143,7 @@ class DataBase:
         return self._base_table(
             table_name="settings",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -152,6 +151,7 @@ class DataBase:
         return self._base_table(
             table_name="permissions",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -159,6 +159,7 @@ class DataBase:
         return self._base_table(
             table_name="kicked",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -166,6 +167,7 @@ class DataBase:
         return self._base_table(
             table_name="banned",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -173,6 +175,7 @@ class DataBase:
         return self._base_table(
             table_name="warned",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -180,6 +183,7 @@ class DataBase:
         return self._base_table(
             table_name="muted",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -187,4 +191,5 @@ class DataBase:
         return self._base_table(
             table_name="queue",
             connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
