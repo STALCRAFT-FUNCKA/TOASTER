@@ -24,8 +24,8 @@ ENV SQL_PORT $PORT
 ENV SQL_USER $USER
 ENV SQL_PASSWORD $PASSWORD
 
-COPY . .
-
 RUN pip install -r requirements.txt --no-cache-dir
+
+COPY . .
 
 CMD ["python", "main.py"]
