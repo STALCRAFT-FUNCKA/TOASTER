@@ -81,7 +81,6 @@ class BaseTable:
         self.con.query('USE toaster')
         self.con.query(query)
         result = self.con.store_result().fetch_row()
-        print(result)
         return result
 
     def insert(self, on_duplicate=None, **rows):
