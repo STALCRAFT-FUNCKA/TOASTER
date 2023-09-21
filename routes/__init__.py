@@ -22,6 +22,7 @@ labelers = [
     queue_command,
     copy_command,
     delete_command,
+    roll_command
 ]
 
 handlers = [

@@ -10,6 +10,7 @@ from .chat.moderation.permission import bl as permission_command
 from .chat.moderation.queue import bl as queue_command
 from .chat.moderation.setting import bl as setting_command
 from .chat.moderation.warn import bl as warn_command
+from .chat.fun.roll import bl as roll_command
 
 __all__ = (
     "info_command",
@@ -23,5 +24,6 @@ __all__ = (
     "permission_command",
     "queue_command",
     "setting_command",
-    "warn_command"
+    "warn_command",
+    "roll_command"
 )
