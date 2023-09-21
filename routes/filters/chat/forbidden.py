@@ -46,6 +46,7 @@ async def forbidden_filter(message: Message):
                     setting_name=setting
                 )
                 check = check[0][0]
+                check = True if check == 1 else False
                 if not check:
                     for attachment in message.attachments:
                         if attachment.type == attachment_type:
@@ -58,6 +59,7 @@ async def forbidden_filter(message: Message):
             setting_name='Allow_Reply'
         )
         check = check[0][0]
+        check = True if check == 1 else False
         if not check:
             if message.reply_message:
                 if message.from_id != message.reply_message.from_id:

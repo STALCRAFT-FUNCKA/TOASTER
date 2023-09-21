@@ -29,6 +29,7 @@ async def url_filter(message: Message):
             setting_name='Hard_Mode'
         )
         hard_mode = hard_mode[0][0]
+        hard_mode = True if hard_mode == 1 else False
         for domain, url in content:
             if hard_mode:
                 if domain in ALLOWED_DOMAIN or url in ALLOWED_URL:

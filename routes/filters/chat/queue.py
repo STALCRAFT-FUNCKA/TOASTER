@@ -27,7 +27,7 @@ async def queue(message: Message):
         peer_id=message.peer_id,
         setting_name='Slow_Mode'
     )
-    check = check[0][0]
+    check = True if check == 1 else False
     if not check:
         return
 

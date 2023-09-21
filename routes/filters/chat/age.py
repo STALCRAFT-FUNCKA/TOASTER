@@ -30,6 +30,7 @@ async def age_filter(message: Message):
         setting_name="Account_Age"
     )
     check = check[0][0]
+    check = True if check == 1 else False
     if not check:
         return
 

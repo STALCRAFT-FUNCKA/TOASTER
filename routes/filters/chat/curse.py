@@ -20,6 +20,7 @@ async def curse_filter(message: Message):
         setting_name="Filter_Curse"
     )
     check = check[0][0]
+    check = True if check == 1 else False
     if not check:
         return True
 
