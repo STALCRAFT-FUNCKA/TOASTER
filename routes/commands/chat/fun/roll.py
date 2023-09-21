@@ -26,7 +26,6 @@ async def ban(message: Message, args: Tuple):
         "initiator_nametag": await informer.user_name(message.from_id, tag=True),
         "command_name": "roll",
         "now_time": converter.now(),
-        "cmids": [message.reply_message.conversation_message_id],
         "down_border": None,
         "up_border": None,
         "result": None
