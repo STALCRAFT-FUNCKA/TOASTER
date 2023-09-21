@@ -33,23 +33,30 @@ async def roll(message: Message, args: Tuple):
 
     random.seed()
     if len(args) == 0:
-        context["down_border"] = 0
-        context["up_border"] = 100
-        result = random.randint(0, 100)
+        down_border = 0
+        up_border = 100
+        context["down_border"] = down_border
+        context["up_border"] = up_border
+        result = random.randint(down_border, up_border)
         context["result"] = result
 
     else:
         try:
             if len(args) == 1:
                 down_border = int(args[0])
+                up_border = 100
+                if down_border > up_border:
+                    down_border, up_border = up_border, down_border
                 context["down_border"] = down_border
-                context["up_border"] = 100
-                result = random.randint(down_border, 100)
+                context["up_border"] = up_border
+                result = random.randint(down_border, up_border)
                 context["result"] = result
 
             if len(args) == 2:
                 down_border = int(args[0])
                 up_border = int(args[1])
+                if down_border > up_border:
+                    down_border, up_border = up_border, down_border
                 context["down_border"] = down_border
                 context["up_border"] = up_border
                 result = random.randint(down_border, up_border)
