@@ -25,4 +25,5 @@ __all__ = (
     "PERMISSION_ACCESS",
     "PERMISSION_LVL",
     "SETTINGS",
+    "EMOJI_NUMBERS"
 )

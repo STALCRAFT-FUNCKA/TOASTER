@@ -1,6 +1,6 @@
 import random
 from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
+from config import PERMISSION_ACCESS, ALIASES, PREFIXES, EMOJI_NUMBERS
 from vkbottle.bot import Message, BotLabeler
 from typing import Tuple
 from routes.rules import *
@@ -65,5 +65,10 @@ async def roll(message: Message, args: Tuple):
         except Exception as error:
             print("Command aborted: ", error)
             return
+
+    emoji_result = ''
+    for num in str(context["result"]):
+        emoji_result += EMOJI_NUMBERS[int(num)]
+    context["result"] = emoji_result
 
     await fun_processor.fun_roll_proc(context, log=False, respond=False)
