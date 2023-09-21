@@ -1,10 +1,10 @@
 from vkbottle.bot import Bot
 from singltone import MetaSingleton
-from usr_config import GROUP_ID, TOKEN
-from utils.converter import Converter
+from config import GROUP_ID, TOKEN
+from utils import Converter
 
 
-class Info(metaclass=MetaSingleton):
+class Informer(metaclass=MetaSingleton):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
 

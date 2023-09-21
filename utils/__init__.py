@@ -1,7 +1,7 @@
 from .converter import Converter
-from .informer import Info
+from .informer import Informer
 
 __all__ = (
     "Converter",
-    "Info"
+    "Informer"
 )

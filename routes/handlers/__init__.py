@@ -1,15 +1,13 @@
-from . import (
-    ban_handler,
-    mute_handler,
-    warn_handler,
-    queue_handler,
-    warnoverflow_handler
-)
+from .chat.ban import Handler as BanHandler
+from .chat.mute import Handler as MuteHandler
+from .chat.warn import Handler as WarnHandler
+from .chat.queue import Handler as QueueHandler
+from .chat.warn_overflow import Handler as WarnOverflowHandler
 
-handlers = [
-    ban_handler.Handler(),
-    mute_handler.Handler(),
-    warn_handler.Handler(),
-    queue_handler.Handler(),
-    warnoverflow_handler.Handler()
-]
+__all__ = (
+    "BanHandler",
+    "MuteHandler",
+    "WarnHandler",
+    "QueueHandler",
+    "WarnOverflowHandler"
+)

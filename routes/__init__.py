@@ -1,17 +1,34 @@
-from . import (commands, commands_info)
+from .commands import *
 from .filters import *
+from .handlers import *
 
-# !Сначала фильтры!, потом блок команд
 labelers = [
-    queue_filter.bl,            # Фильтры, зависящие от мута
-    forbidden_filter.bl,
-    curse_filter.bl,
-    age_filter.bl,
+    queue_filter,
+    forbidden_filter,
+    curse_filter,
+    age_filter,
+    mute_filter,
+    url_filter,
 
-    mute_filter.bl,             # Фильтры мута
+    info_command,
+    reference_command,
+    mark_command,
+    permission_command,
+    setting_command,
+    kick_command,
+    ban_command,
+    mute_command,
+    warn_command,
+    queue_command,
+    copy_command,
+    delete_command,
+    roll_command
+]
 
-    url_filter.bl,              # Фильтры, не зависящие от мута
-
-    commands.bl,                # Блок команд
-    commands_info.bl,
+handlers = [
+    MuteHandler(),
+    BanHandler(),
+    WarnHandler(),
+    WarnOverflowHandler(),
+    QueueHandler()
 ]
