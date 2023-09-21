@@ -75,13 +75,6 @@ class Logger(metaclass=MetaSingleton):
 
     async def log(self, highlighter=False):
         peers = self._get_log_peers()
-        print("-------------------------")
-        print("-------------------------")
-        print("-------------------------")
-        print(peers)
-        print("-------------------------")
-        print("-------------------------")
-        print("-------------------------")
         log_data = self.log_data
         if highlighter:
             log_data['text'] = "----------------------------------------------\n" + log_data['text']

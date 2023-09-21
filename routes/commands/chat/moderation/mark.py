@@ -32,7 +32,7 @@ async def mark(message: Message, args: Tuple):
     if args[0] == "chat":
         context["peer_type"] = "CHAT"
         context["command_name"] = "mark chat"
-        await com_processor.chat_proc(context, log=True, respond=True)
+        await com_processor.chat_proc(context, log=False, respond=True)
 
     if args[0] == "log":
         context["peer_type"] = "LOG"
