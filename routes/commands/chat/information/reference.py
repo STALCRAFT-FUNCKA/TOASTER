@@ -9,7 +9,7 @@ bl = BotLabeler()
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['reference'], PREFIXES, 1),
+    HandleCommand(ALIASES['reference'], PREFIXES),
     CollapseCommand(),
     AllowAnswer(allow_reply=False, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['reference']),
@@ -42,6 +42,7 @@ async def reference(message: Message, args: Tuple):
     if not args:
         await ref_processor.ref_all_proc(context)
 
-    for name, proc in args_check:
-        if args[0] in name:
-            await proc(context)
+    if len(args) == 1:
+        for name, proc in args_check:
+            if args[0] in name:
+                await proc(context)
