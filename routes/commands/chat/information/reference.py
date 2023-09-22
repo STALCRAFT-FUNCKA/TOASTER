@@ -22,25 +22,26 @@ async def reference(message: Message, args: Tuple):
     }
 
     args_check = [
-        (("all",), ref_processor.ref_all_proc(context)),
-        (ALIASES['reference'], ref_processor.ref_reference_proc(context)),
-        (ALIASES['mark'], ref_processor.ref_mark_proc(context)),
-        (ALIASES['setting'], ref_processor.ref_setting_proc(context)),
-        (ALIASES['delete'], ref_processor.ref_delete_proc(context)),
-        (ALIASES['copy'], ref_processor.ref_copy_proc(context)),
-        (ALIASES['terminate'], ref_processor.ref_terminate_proc(context)),
-        (ALIASES['kick'], ref_processor.ref_kick_proc(context)),
-        (ALIASES['ban'], ref_processor.ref_ban_proc(context)),
-        (ALIASES['unban'], ref_processor.ref_unban_proc(context)),
-        (ALIASES['mute'], ref_processor.ref_mute_proc(context)),
-        (ALIASES['unmute'], ref_processor.ref_unmute_proc(context)),
-        (ALIASES['warn'], ref_processor.ref_warn_proc(context)),
-        (ALIASES['unwarn'], ref_processor.ref_unwarn_proc(context)),
-        (ALIASES['queue'], ref_processor.ref_queue_proc(context)),
-        (ALIASES['unqueue'], ref_processor.ref_unqueue_proc(context)),
-        (ALIASES['information'], ref_processor.ref_info_proc(context))
+        (ALIASES['reference'], ref_processor.ref_reference_proc),
+        (ALIASES['mark'], ref_processor.ref_mark_proc),
+        (ALIASES['setting'], ref_processor.ref_setting_proc),
+        (ALIASES['delete'], ref_processor.ref_delete_proc),
+        (ALIASES['copy'], ref_processor.ref_copy_proc),
+        (ALIASES['terminate'], ref_processor.ref_terminate_proc),
+        (ALIASES['kick'], ref_processor.ref_kick_proc),
+        (ALIASES['ban'], ref_processor.ref_ban_proc),
+        (ALIASES['unban'], ref_processor.ref_unban_proc),
+        (ALIASES['mute'], ref_processor.ref_mute_proc),
+        (ALIASES['unmute'], ref_processor.ref_unmute_proc),
+        (ALIASES['warn'], ref_processor.ref_warn_proc),
+        (ALIASES['unwarn'], ref_processor.ref_unwarn_proc),
+        (ALIASES['queue'], ref_processor.ref_queue_proc),
+        (ALIASES['unqueue'], ref_processor.ref_unqueue_proc),
+        (ALIASES['info'], ref_processor.ref_info_proc)
     ]
+    if not args:
+        await ref_processor.ref_all_proc(context)
 
     for name, proc in args_check:
         if args[0] in name:
-            await proc
+            await proc(context)
