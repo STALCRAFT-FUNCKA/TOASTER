@@ -13,7 +13,7 @@ bl = BotLabeler()
     OnlyEnrolled(send_respond=False),
     blocking=False
 )
-async def queue(message: Message):
+async def queue_filter(message: Message):
     is_muted = database.muted.select(
         ("target_name",),
         peer_id=message.peer_id,
