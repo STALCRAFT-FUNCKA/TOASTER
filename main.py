@@ -20,3 +20,5 @@ if __name__ == "__main__":
     load(labelers)
 
     bot.run_forever()
+
+# TODO: Обновить список команд в README.md
