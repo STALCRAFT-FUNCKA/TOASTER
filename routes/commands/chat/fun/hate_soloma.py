@@ -8,13 +8,13 @@ bl = BotLabeler()
 
 
 @bl.chat_message(
-    HandleCommand(ALIASES['hate_soloma'], PREFIXES),
+    HandleCommand(ALIASES['hate_soloma'], PREFIXES, 0),
     CollapseCommand(),
     CheckPermission(access_to=PERMISSION_ACCESS['hate_soloma']),
     HandleIn(handle_log=False, handle_chat=True),
     OnlyEnrolled()
 )
-async def hate_soloma(message: Message, args: Tuple):
+async def hate_soloma(message: Message):
     context = {
         "peer_id": message.peer_id,
         "peer_name": await informer.peer_name(message.peer_id),
@@ -26,4 +26,4 @@ async def hate_soloma(message: Message, args: Tuple):
         "now_time": converter.now(),
     }
 
-# Сделать чото
+    await fun_processor.fun_hate_soloma_proc(context, log=True, respond=False)

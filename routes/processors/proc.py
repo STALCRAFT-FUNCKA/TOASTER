@@ -972,3 +972,20 @@ class FunProcessor(StdProcessor, metaclass=MetaSingleton):
             message=context.get("say_text"),
             random_id=0
         )
+
+    async def fun_hate_soloma_proc(self, context, log=True, respond=True):
+        context["initiator_lvl"] = self._get_initiator_lvl(context)
+
+        if respond:
+            text = f"Солома зачмырён.\n"
+            await self._send_respond(text, context)
+        if log:
+            await self._send_log(context)
+
+        text = f"СОЛОМА ТЫ ТАКОЙ ЛОХ!!!"
+
+        await self.bot.api.messages.send(
+            chat_id=context.get("chat_id"),
+            message=text,
+            random_id=0
+        )
