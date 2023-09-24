@@ -37,7 +37,9 @@ async def reference(message: Message, args: Tuple):
         (ALIASES['unwarn'], ref_processor.ref_unwarn_proc),
         (ALIASES['queue'], ref_processor.ref_queue_proc),
         (ALIASES['unqueue'], ref_processor.ref_unqueue_proc),
-        (ALIASES['info'], ref_processor.ref_info_proc)
+        (ALIASES['info'], ref_processor.ref_info_proc),
+        (ALIASES['roll'], ref_processor.ref_roll_proc),
+        (ALIASES['say'], ref_processor.ref_say_proc)
     ]
     if not args:
         await ref_processor.ref_all_proc(context)
