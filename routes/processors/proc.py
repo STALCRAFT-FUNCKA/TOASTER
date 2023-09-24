@@ -938,6 +938,36 @@ class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
 
         await self._send_respond(text, context)
 
+    async def ref_roll_proc(self, context):
+        text = "/roll <inf|optional> <sup|optional> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['roll']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['roll']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Прокручивает рулетку и выдает случайное число 0-100. " \
+               "Есть возможность самостоятельно задать нижний\\верхний предел числа.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <inf|optional>`: Нижний предел числа.\n" \
+               "* <inf|optional>`: Верхний предел числа.\n"
+
+        await self._send_respond(text, context)
+
+    async def ref_say_proc(self, context):
+        text = "/say** <text> \n" \
+               "* Доступные префиксы: ! или / \n" \
+              f"* Псевдонимы команды: {ALIASES['say']} \n" \
+              f"* Доступ для группы прав {PERMISSION_ACCESS['say']} уровня или выше \n" \
+              f"* Может быть вызвана только в чате \n" \
+               "\n" \
+               "Описание: Отправляет сообщение от лица бота с указанным текстом.\n" \
+               "\n" \
+               "Доступные аргументы: \n" \
+               "* <text>: Текст сообщения. Любой текст, с учетом пробелов и спец. символов\n"
+
+        await self._send_respond(text, context)
+
 
 class FunProcessor(StdProcessor, metaclass=MetaSingleton):
     async def fun_roll_proc(self, context, log=True, respond=True):
