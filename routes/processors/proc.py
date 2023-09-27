@@ -591,7 +591,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for name, role in users:
                 text += f"* {name} -- {role}:{PERMISSION_LVL[role]}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
     async def info_setting_proc(self, context):
         conversations = self.database.conversations.select(
@@ -625,7 +626,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
         for cname, ctype in conversations:
             text += f"* {cname} -- {ctype} \n"
 
-        await self._send_respond(text, context)
+        if text != title:
+            await self._send_respond(text, context)
 
     async def info_kick_proc(self, context):
         conversations = self.database.conversations.select(
@@ -647,7 +649,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                 text += f"* {target_name} -- {self.converter.convert(kick_time)}\n" \
                         f"\\-Инициатор: {initiator_name}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
     async def info_ban_proc(self, context):
         conversations = self.database.conversations.select(
@@ -670,7 +673,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                         f"|-Время снятия: {self.converter.convert(unban_time)}\n" \
                         f"\\-Инициатор: {initiator_name}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
     async def info_mute_proc(self, context):
         conversations = self.database.conversations.select(
@@ -693,7 +697,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                         f"|-Время снятия: {self.converter.convert(unmute_time)}\n" \
                         f"\\-Инициатор: {initiator_name}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
     async def info_warn_proc(self, context):
         conversations = self.database.conversations.select(
@@ -717,7 +722,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
                         f"|- Количество предупреждений: {warn_count}\n" \
                         f"\\- Инициатор: {initiator_name}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
 
 class ReferenceProcessor(StdProcessor, metaclass=MetaSingleton):
