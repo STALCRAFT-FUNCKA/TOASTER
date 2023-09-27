@@ -581,7 +581,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Роли: \n"
+            title = f"{peer_name} | Роли: \n"
+            text = title
 
             users = self.database.permissions.select(
                 ("target_name", "target_lvl"),
@@ -601,7 +602,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Настройки: \n"
+            title = f"{peer_name} | Настройки: \n"
+            text = title
 
             settings = self.database.settings.select(
                 ("setting_name", "setting_status"),
@@ -610,13 +612,16 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
             for name, status in settings:
                 text += f"* {name} -- {status}\n"
 
-            await self._send_respond(text, context)
+            if text != title:
+                await self._send_respond(text, context)
 
     async def info_mark_proc(self, context):
         conversations = self.database.conversations.select(
             ("peer_name", "peer_type")
         )
-        text = "Зарегистрированные беседы: \n"
+        title = "Зарегистрированные беседы: \n"
+        text = title
+
         for cname, ctype in conversations:
             text += f"* {cname} -- {ctype} \n"
 
@@ -631,7 +636,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Исключенные пользователи: \n"
+            title = f"{peer_name} | Исключенные пользователи: \n"
+            text = title
 
             kicks = self.database.kicked.select(
                 ("initiator_name", "target_name", "kick_time"),
@@ -652,7 +658,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Заблокированные пользователи: \n"
+            title = f"{peer_name} | Заблокированные пользователи: \n"
+            text = title
 
             bans = self.database.banned.select(
                 ("initiator_name", "target_name", "ban_time", "unban_time"),
@@ -674,7 +681,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Заглушенные пользователи: \n"
+            title = f"{peer_name} | Заглушенные пользователи: \n"
+            text = title
 
             mutes = self.database.muted.select(
                 ("initiator_name", "target_name", "mute_time", "unmute_time"),
@@ -696,7 +704,8 @@ class InformationProcessor(StdProcessor, metaclass=MetaSingleton):
 
         for peer_id in conversations:
             peer_name = await self.info.peer_name(peer_id)
-            text = f"{peer_name} | Предупрежденные пользователи: \n"
+            title = f"{peer_name} | Предупрежденные пользователи: \n"
+            text = title
 
             warns = self.database.warned.select(
                 ("initiator_name", "target_name", "warn_time", "unwarn_time", "warn_count"),
