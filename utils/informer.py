@@ -1,5 +1,3 @@
-from enum import Flag
-from typing import Self
 from vkbottle.bot import Bot
 from singltone import MetaSingleton
 from config import GROUP_ID, TOKEN
@@ -28,7 +26,7 @@ class Informer(metaclass=MetaSingleton):
         return full_name
 
     async def user_pm(self, user_id):
-        info = self.bot.api.users.get(
+        info = await self.bot.api.users.get(
                 user_id, 
                 fields=["can_write_private_message"]
             )
