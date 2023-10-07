@@ -9,6 +9,7 @@ labelers = [
     age_filter,
     mute_filter,
     url_filter,
+    pm_filter,
 
     info_command,
     reference_command,
