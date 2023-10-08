@@ -80,15 +80,15 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
             peer_type="CHAT"
         )
 
+        for name, status in SETTINGS.items():
+            self.database.settings.insert(
+                on_duplicate="ignore",
+                peer_id=context.get("peer_id"),
+                setting_name=name,
+                setting_status=status
+            )
+                
         if k:
-            for name, status in SETTINGS.items():
-                print(name, status)
-                self.database.settings.insert(
-                    peer_id=context.get("peer_id"),
-                    setting_name=name,
-                    setting_status=status
-                )
-
             self.database.permissions.insert(
                 peer_id=context.get("peer_id"),
                 target_id=0,
