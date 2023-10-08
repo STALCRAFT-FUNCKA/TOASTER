@@ -45,6 +45,5 @@ async def pm_filter(message: Message):
     }
     
     pm_opened = await info.user_pm(context.get("target_id"))
-    print(pm_opened)
-    if pm_opened:
+    if not pm_opened:
         await processor.warn_proc(context, collapse=True, log=True, respond=True)
