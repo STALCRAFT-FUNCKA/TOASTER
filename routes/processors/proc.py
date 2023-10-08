@@ -87,7 +87,7 @@ class CommandProcessor(StdProcessor, metaclass=MetaSingleton):
                 setting_name=name,
                 setting_status=status
             )
-                
+
         if k:
             self.database.permissions.insert(
                 peer_id=context.get("peer_id"),
