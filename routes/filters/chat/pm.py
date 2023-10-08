@@ -44,5 +44,7 @@ async def pm_filter(message: Message):
         "cmids": [message.conversation_message_id]
     }
     
-    if await info.user_pm(context.get("target_id")):
+    pm_opened = await info.user_pm(context.get("target_id"))
+    print(pm_opened)
+    if pm_opened:
         await processor.warn_proc(context, collapse=True, log=True, respond=True)
