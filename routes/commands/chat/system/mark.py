@@ -13,7 +13,7 @@ bl = BotLabeler()
     CollapseCommand(),
     AllowAnswer(allow_reply=False, allow_fwd=False),
     CheckPermission(access_to=PERMISSION_ACCESS['mark']),
-    HandleIn(handle_log=False, handle_chat=True)
+    HandleIn(handle_log=True, handle_chat=True)
 )
 async def mark(message: Message, args: Tuple):
 
