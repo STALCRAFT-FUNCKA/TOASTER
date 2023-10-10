@@ -45,7 +45,7 @@ class Connection:
 
             self._fill_schema()
             self._fill_tables()
- 
+
         except MySQLdb.Error as error:
             if allow_debug_text:
                 print("Ошибка при подключении к MySQL Server", error)
@@ -116,10 +116,10 @@ class BaseTable:
             3) __ge -> >= \n
             4) __gt -> >  \n
             5) __nt -> != \n
-        
+
         Example rows:
             id__lt=10 -> id<10
-            
+
         Args:
             fields (tuple, optional): Fields for which it is necessary to obtain data
             in the database. Defaults to None.
@@ -137,7 +137,7 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
         result = self.cur.fetchall()
@@ -169,7 +169,7 @@ class BaseTable:
                             [f"{key}='{value}'" for key, value in rows.items()]
                         )}
                      """
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
         self.con.commit()
@@ -186,7 +186,7 @@ class BaseTable:
             3) __ge -> >= \n
             4) __gt -> >  \n
             5) __nt -> != \n
-        
+
         Example rows:
             id__lt=10 -> id<10
 
@@ -203,7 +203,7 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
         self.con.commit()
@@ -220,7 +220,7 @@ class BaseTable:
             3) __ge -> >= \n
             4) __gt -> >  \n
             5) __nt -> != \n
-        
+
         Example rows:
             id__lt=10 -> id<10
         """
@@ -229,7 +229,7 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
         self.con.commit()

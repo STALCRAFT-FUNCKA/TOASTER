@@ -41,12 +41,12 @@ bl = BotLabeler()
 async def setting(message: Message, args: Tuple):
     """
     This function describes the logic behind the /setting command.
-    
+
     Args:
         message (Message): vkbottle message object.
         args (Tuple): tuple of command arguments.
     """
-    
+
     setting_name = args[0]
     try:
         setting_status = int(args[1])
