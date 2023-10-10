@@ -17,35 +17,35 @@ class Connection:
         """
         Creates a database named "toaster" if one does not exist.
         """
-        self.cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
-        self.connection.commit()
+        self._cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
+        self._connection.commit()
 
     def _fill_tables(self):
         """
         Populates the database with a standard table structure.
         """
-        self.cursor.execute('USE toaster')
+        self._cursor.execute('USE toaster')
         for table in tables:
-            self.cursor.execute(table)
+            self._cursor.execute(table)
 
-        self.connection.commit()
+        self._connection.commit()
 
     def __init__(self, allow_debug_text=True):
         try:
-            self.connection = MySQLdb.connect(
+            self._connection = MySQLdb.connect(
                 host=os.getenv("SQL_HOST"),
                 port=int(os.getenv("SQL_PORT")),
                 user=os.getenv("SQL_USER"),
                 password=os.getenv("SQL_PASSWORD")
             )
-            self.cursor = self.connection.cursor()
+            self._cursor = self._connection.cursor()
 
             if allow_debug_text:
                 print("Произведено подключение к MySQL Server.")
 
             self._fill_schema()
             self._fill_tables()
-
+ 
         except Exception as error:
             if allow_debug_text:
                 print("Ошибка при подключении к MySQL Server", error)
@@ -54,13 +54,13 @@ class Connection:
         """
         Returns database cursor object.
         """
-        return self.cursor
+        return self._cursor
 
     def get_connection(self):
         """
         Returns database connection object.
         """
-        return self.connection
+        return self._connection
 
 
 class BaseTable:
@@ -253,8 +253,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="conversations",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -265,8 +265,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="settings",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -277,8 +277,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="permissions",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -289,8 +289,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="kicked",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -301,8 +301,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="banned",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -313,8 +313,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="warned",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -325,8 +325,8 @@ class DataBase:
         """
         return self._base_table(
             table_name="muted",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
 
     @property
@@ -337,6 +337,6 @@ class DataBase:
         """
         return self._base_table(
             table_name="queue",
-            connection=self._tunnel.connection,
-            cursor=self._tunnel.cursor
+            connection=self._tunnel.get_connection(),
+            cursor=self._tunnel.get_cursor()
         )
