@@ -141,9 +141,10 @@ class BaseTable:
 
         debug(f"Query executed: {query}")
         
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         result = self.cur.fetchall()
+        debug(f"Select result: {result}")
         return result
 
     def insert(self, on_duplicate=None, **rows):
@@ -175,8 +176,8 @@ class BaseTable:
 
         debug(f"Query executed: {query}")
         
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
@@ -211,8 +212,8 @@ class BaseTable:
 
         debug(f"Query executed: {query}")
         
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def delete(self, **rows):
@@ -239,8 +240,8 @@ class BaseTable:
 
         debug(f"Query executed: {query}")
         
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
 
