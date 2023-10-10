@@ -7,6 +7,7 @@ class Handler(ABCHandler):
             ("peer_id", "target_id"),
             next_time__le=self.converter.now()
         )
+        self.debug(f"expired: {expired}")
         if expired:
             for peer_id, target_id in expired:
                 context = {
@@ -23,4 +24,6 @@ class Handler(ABCHandler):
                     "now_time": self.converter.now(),
                 }
 
-                await self.processor.unqueue_proc(context, log=False, respond=False)
+                self.debug(f"making unqueue proc")
+                
+                await self.processor.unqueue_proc(context, log=False, respond=True)

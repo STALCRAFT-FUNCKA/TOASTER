@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from logging import debug
 from vkbottle import Bot
 from routes.processors import CommandProcessor
 from config import TOKEN
@@ -13,6 +14,7 @@ class ABCHandler(ABC):
         self.processor = CommandProcessor()
         self.converter = Converter()
         self.informer = Informer()
+        self.debug = debug
 
     @abstractmethod
     async def check(self):
