@@ -46,7 +46,7 @@ class Connection:
             self._fill_schema()
             self._fill_tables()
  
-        except Exception as error:
+        except MySQLdb.Error as error:
             if allow_debug_text:
                 print("Ошибка при подключении к MySQL Server", error)
 
