@@ -75,8 +75,8 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         result = self.cur.fetchall()
         return result
 
@@ -95,8 +95,8 @@ class BaseTable:
             query += f""" ON DUPLICATE KEY UPDATE """ \
                      f"""{', '.join([f"{key}='{value}'" for key, value in rows.items()])}"""
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
@@ -110,8 +110,8 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def delete(self, **rows):
@@ -121,8 +121,8 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
 
