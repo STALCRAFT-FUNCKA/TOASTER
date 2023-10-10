@@ -4,7 +4,6 @@ an object relational model for interacting with it.
 """
 
 import os
-from logging import debug
 import MySQLdb
 from .core import tables
 
@@ -138,13 +137,10 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-
-        debug(f"Query executed: {query}")
         
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
         result = self.cur.fetchall()
-        debug(f"Select result: {result}")
         return result
 
     def insert(self, on_duplicate=None, **rows):
@@ -173,8 +169,6 @@ class BaseTable:
                             [f"{key}='{value}'" for key, value in rows.items()]
                         )}
                      """
-
-        debug(f"Query executed: {query}")
         
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
@@ -209,8 +203,6 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-
-        debug(f"Query executed: {query}")
         
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
@@ -237,8 +229,6 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-
-        debug(f"Query executed: {query}")
         
         self.cur.execute('USE toaster;')
         self.cur.execute(query + ";")
