@@ -4,6 +4,7 @@ an object relational model for interacting with it.
 """
 
 import os
+from logging import debug
 import MySQLdb
 from .core import tables
 
@@ -138,9 +139,12 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        debug(f"Query executed: {query}")
+        
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         result = self.cur.fetchall()
+        debug(f"Select result: {result}")
         return result
 
     def insert(self, on_duplicate=None, **rows):
@@ -170,8 +174,10 @@ class BaseTable:
                         )}
                      """
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        debug(f"Query executed: {query}")
+        
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
@@ -204,8 +210,10 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        debug(f"Query executed: {query}")
+        
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
     def delete(self, **rows):
@@ -230,8 +238,10 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
-        self.cur.execute('USE toaster')
-        self.cur.execute(query)
+        debug(f"Query executed: {query}")
+        
+        self.cur.execute('USE toaster;')
+        self.cur.execute(query + ";")
         self.con.commit()
 
 

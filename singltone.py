@@ -1,4 +1,14 @@
+"""
+File with singletone meta-class.
+"""
+
 class MetaSingleton(type):
+    """
+    Meta-class implementing the singleton pattern.
+
+    Returns:
+        cls: Class object instance.
+    """
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
