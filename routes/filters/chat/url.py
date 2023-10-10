@@ -1,8 +1,30 @@
-from routes.filters.core import *
-from vkbottle.bot import Message, BotLabeler
-from config import ALLOWED_URL, ALLOWED_DOMAIN, CRITICAL_URL, CRITICAL_DOMAIN
-from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
+"""
+File with bot url filter bot.
+"""
+
 from urlextract import URLExtract
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.rules import (
+    IgnorePermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from routes.filters.core import (
+    database,
+    informer,
+    converter,
+    com_processor
+)
+from config import (
+    ALLOWED_URL,
+    ALLOWED_DOMAIN,
+    CRITICAL_URL,
+    CRITICAL_DOMAIN
+)
+
 
 
 bl = BotLabeler()
@@ -15,6 +37,13 @@ bl = BotLabeler()
     blocking=False
 )
 async def url_filter(message: Message):
+    """
+    This function describes the logic behind the url filter.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     extractor = URLExtract()
     urls = extractor.find_urls(message.text)
     urls = [url.split("//")[-1] for url in urls]
@@ -29,7 +58,6 @@ async def url_filter(message: Message):
             setting_name='Hard_Mode'
         )
         hard_mode = hard_mode[0][0]
-        hard_mode = True if hard_mode == 1 else False
         for domain, url in content:
             if hard_mode:
                 if domain in ALLOWED_DOMAIN or url in ALLOWED_URL:
@@ -45,14 +73,14 @@ async def url_filter(message: Message):
 
             context = {
                 "peer_id": message.peer_id,
-                "peer_name": await info.peer_name(message.peer_id),
+                "peer_name": await informer.peer_name(message.peer_id),
                 "chat_id": message.chat_id,
                 "initiator_id": 0,
                 "initiator_name": "Система",
                 "initiator_nametag": "Система",
                 "target_id": message.from_id,
-                "target_name": await info.user_name(message.from_id, tag=False),
-                "target_nametag": await info.user_name(message.from_id, tag=True),
+                "target_name": await informer.user_name(message.from_id, tag=False),
+                "target_nametag": await informer.user_name(message.from_id, tag=True),
                 "command_name": "warn",
                 "reason": reason,
                 "now_time": converter.now(),
@@ -60,7 +88,7 @@ async def url_filter(message: Message):
                 "cmids": [message.conversation_message_id]
             }
 
-            await processor.warn_proc(context, collapse=True, log=True, respond=True)
+            await com_processor.warn_proc(context, collapse=True)
 
         elif reason is not None:
             time = 1
@@ -68,19 +96,19 @@ async def url_filter(message: Message):
 
             context = {
                 "peer_id": message.peer_id,
-                "peer_name": await info.peer_name(message.peer_id),
+                "peer_name": await informer.peer_name(message.peer_id),
                 "chat_id": message.chat_id,
                 "initiator_id": 0,
                 "initiator_name": "Система",
                 "initiator_nametag": "Система",
                 "target_id": message.from_id,
-                "target_name": await info.user_name(message.from_id, tag=False),
-                "target_nametag": await info.user_name(message.from_id, tag=True),
+                "target_name": await informer.user_name(message.from_id, tag=False),
+                "target_nametag": await informer.user_name(message.from_id, tag=True),
                 "command_name": "mute",
                 "now_time": converter.now(),
                 "target_time": converter.now() + converter.delta(time, coefficient),
                 "cmids": [message.conversation_message_id]
             }
 
-            await processor.unwarn_proc(context, log=False, respond=False)
-            await processor.mute_proc(context, collapse=True, log=True, respond=True)
+            await com_processor.unwarn_proc(context, log=False, respond=False)
+            await com_processor.mute_proc(context, collapse=True)

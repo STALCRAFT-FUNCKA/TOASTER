@@ -1,7 +1,23 @@
-from routes.filters.core import *
-from vkbottle.bot import Message, BotLabeler
+"""
+File with bot queue filter bot.
+"""
+
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.rules import (
+    IgnorePermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from routes.filters.core import (
+    database,
+    informer,
+    converter,
+    com_processor
+)
 from config import QUEUE_TIME
-from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
 
 
 bl = BotLabeler()
@@ -14,6 +30,13 @@ bl = BotLabeler()
     blocking=False
 )
 async def queue_filter(message: Message):
+    """
+    This function describes the logic behind the queue filter.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     is_muted = database.muted.select(
         ("target_name",),
         peer_id=message.peer_id,
@@ -28,7 +51,6 @@ async def queue_filter(message: Message):
         setting_name='Slow_Mode'
     )
     check = check[0][0]
-    check = True if check == 1 else False
     if not check:
         return
 
@@ -38,14 +60,14 @@ async def queue_filter(message: Message):
 
     context = {
         "peer_id": message.peer_id,
-        "peer_name": await info.peer_name(message.peer_id),
+        "peer_name": await informer.peer_name(message.peer_id),
         "chat_id": message.chat_id,
         "initiator_id": 0,
         "initiator_name": "Система",
         "initiator_nametag": "Система",
         "target_id": message.from_id,
-        "target_name": await info.user_name(message.from_id, tag=False),
-        "target_nametag": await info.user_name(message.from_id, tag=True),
+        "target_name": await informer.user_name(message.from_id, tag=False),
+        "target_nametag": await informer.user_name(message.from_id, tag=True),
         "command_name": "warn",
         "reason": reason,
         "now_time": converter.now(),
@@ -59,7 +81,7 @@ async def queue_filter(message: Message):
         target_id=message.from_id
     )
     if in_queue:
-        await processor.warn_proc(context, collapse=True, log=True, respond=True)
+        await com_processor.warn_proc(context, collapse=True)
     else:
         context["target_time"] = converter.now() + QUEUE_TIME
-        await processor.queue_proc(context, log=False, respond=False)
+        await com_processor.queue_proc(context, log=False, respond=False)

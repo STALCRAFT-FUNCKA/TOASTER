@@ -1,3 +1,7 @@
+"""
+File initializing the local filtres module.
+"""
+
 from .chat.age import bl as age_filter
 from .chat.curse import bl as curse_filter
 from .chat.forbidden import bl as forbidden_filter
@@ -15,4 +19,3 @@ __all__ = (
     "url_filter",
     "pm_filter"
 )
-
