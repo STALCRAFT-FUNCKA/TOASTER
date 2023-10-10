@@ -1,9 +1,31 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES, QUEUE_TIME
-from vkbottle.bot import Message, BotLabeler
-from typing import Tuple
-from routes.rules import *
+"""
+File with /queue and /unqueue bot command.
+"""
 
+from typing import Tuple
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor,
+    get_cuid
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES,
+    QUEUE_TIME
+)
 
 bl = BotLabeler()
 
@@ -16,6 +38,14 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def queue(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /queue command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if message.fwd_messages:
         return
 
@@ -39,8 +69,12 @@ async def queue(message: Message, args: Tuple):
 
     if len(args) == 0 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
         context["cmids"] = [message.reply_message.conversation_message_id]
 
     elif len(args) == 1 and not message.reply_message:
@@ -56,7 +90,7 @@ async def queue(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.queue_proc(context, log=True, respond=False)
+    await com_processor.queue_proc(context, respond=False)
 
 
 @bl.chat_message(
@@ -67,6 +101,14 @@ async def queue(message: Message, args: Tuple):
     OnlyEnrolled()
 )
 async def unqueue(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /unqueue command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if message.fwd_messages:
         return
 
@@ -86,8 +128,12 @@ async def unqueue(message: Message, args: Tuple):
 
     if len(args) == 0 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
 
     elif len(args) == 1 and not message.reply_message:
         cuid = await get_cuid(args[0])
@@ -102,4 +148,4 @@ async def unqueue(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.unqueue_proc(context, log=True, respond=True)
+    await com_processor.unqueue_proc(context)

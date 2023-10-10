@@ -1,9 +1,31 @@
+"""
+File with /roll bot command.
+"""
+
 import random
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES, EMOJI_NUMBERS
-from vkbottle.bot import Message, BotLabeler
 from typing import Tuple
-from routes.rules import *
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    fun_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES,
+    EMOJI_NUMBERS
+)
 
 
 bl = BotLabeler()
@@ -17,6 +39,14 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def roll(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /roll command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await informer.peer_name(message.peer_id),
@@ -62,8 +92,7 @@ async def roll(message: Message, args: Tuple):
                 result = random.randint(down_border, up_border)
                 context["result"] = result
 
-        except Exception as error:
-            print("Command aborted: ", error)
+        except TypeError:
             return
 
     emoji_result = ''

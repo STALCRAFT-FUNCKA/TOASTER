@@ -1,9 +1,31 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from typing import Tuple
-from routes.rules import *
+"""
+File with /mute bot command.
+"""
 
+from typing import Tuple
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor,
+    get_cuid
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled,
+    IgnorePermission
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES,
+)
 
 bl = BotLabeler()
 
@@ -17,14 +39,21 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def mute(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /mute command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if not args or message.fwd_messages:
         return
 
     try:
         time = int(args[0])
         coefficient = args[1]
-    except Exception as error:
-        print("Wrong args format. Setting default punish time: ", error)
+    except TypeError:
         time = 1
         coefficient = "h"
 
@@ -48,8 +77,12 @@ async def mute(message: Message, args: Tuple):
 
     if len(args) == 2 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
         context["cmids"] = [message.reply_message.conversation_message_id]
         collapse = True
 
@@ -66,7 +99,7 @@ async def mute(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.mute_proc(context, collapse=collapse, log=True, respond=True)
+    await com_processor.mute_proc(context, collapse=collapse)
 
 
 @bl.chat_message(
@@ -78,6 +111,14 @@ async def mute(message: Message, args: Tuple):
     OnlyEnrolled()
 )
 async def unmute(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /unmute command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if message.fwd_messages:
         return
 
@@ -97,8 +138,12 @@ async def unmute(message: Message, args: Tuple):
 
     if len(args) == 0 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
 
     elif len(args) == 1 and not message.reply_message:
         cuid = await get_cuid(args[0])
@@ -113,4 +158,4 @@ async def unmute(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.unmute_proc(context, log=True, respond=True)
+    await com_processor.unmute_proc(context)

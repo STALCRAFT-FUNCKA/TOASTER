@@ -1,8 +1,29 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from routes.rules import *
+"""
+File with /delete bot command.
+"""
 
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    AllowAnswer,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 bl = BotLabeler()
 
@@ -16,6 +37,13 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def delete(message: Message):
+    """
+    This function describes the logic behind the /delete command.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     if message.reply_message is not None:
         cmids = [message.reply_message.conversation_message_id]
     else:
@@ -33,4 +61,5 @@ async def delete(message: Message):
         "cmids": cmids,
     }
 
-    await com_processor.delete_proc(context, log=True, respond=False)
+    await com_processor.delete_proc(context, respond=False)
+    

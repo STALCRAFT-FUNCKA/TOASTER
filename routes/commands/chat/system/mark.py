@@ -1,8 +1,30 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
+"""
+File with /mark bot command.
+"""
+
 from typing import Tuple
-from routes.rules import *
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    AllowAnswer,
+    CheckPermission,
+    HandleIn
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
+
 
 
 bl = BotLabeler()
@@ -16,6 +38,13 @@ bl = BotLabeler()
     HandleIn(handle_log=True, handle_chat=True)
 )
 async def mark(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /mark command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
 
     context = {
         "peer_id": message.peer_id,
@@ -32,13 +61,13 @@ async def mark(message: Message, args: Tuple):
     if args[0] == "chat":
         context["peer_type"] = "CHAT"
         context["command_name"] = "mark chat"
-        await com_processor.chat_proc(context, log=True, respond=True)
+        await com_processor.chat_proc(context)
 
     if args[0] == "log":
         context["peer_type"] = "LOG"
         context["command_name"] = "mark log"
-        await com_processor.log_proc(context, log=True, respond=True)
+        await com_processor.log_proc(context)
 
     if args[0] == "drop":
         context["command_name"] = "mark drop"
-        await com_processor.drop_proc(context, log=True, respond=True)
+        await com_processor.drop_proc(context)

@@ -1,9 +1,31 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from typing import Tuple
-from routes.rules import *
+"""
+File with /kick and /terminate bot command.
+"""
 
+from typing import Tuple
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor,
+    get_cuid
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    IgnorePermission,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 bl = BotLabeler()
 
@@ -17,6 +39,14 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def terminate(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /terminate command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if message.fwd_messages:
         return
 
@@ -38,8 +68,12 @@ async def terminate(message: Message, args: Tuple):
 
     if len(args) == 0 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
         context["cmids"] = [message.reply_message.conversation_message_id]
         collapse = True
 
@@ -56,7 +90,7 @@ async def terminate(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.terminate_proc(context, collapse=collapse, log=True, respond=True)
+    await com_processor.terminate_proc(context, collapse=collapse)
 
 
 @bl.chat_message(
@@ -68,6 +102,14 @@ async def terminate(message: Message, args: Tuple):
     OnlyEnrolled()
 )
 async def kick(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /terminate command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if message.fwd_messages:
         return
 
@@ -90,8 +132,12 @@ async def kick(message: Message, args: Tuple):
 
     if len(args) == 0 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
         context["cmids"] = [message.reply_message.conversation_message_id]
         collapse = True
 
@@ -108,4 +154,4 @@ async def kick(message: Message, args: Tuple):
     else:
         return
 
-    await com_processor.kick_proc(context, collapse=collapse, log=True, respond=True)
+    await com_processor.kick_proc(context, collapse=collapse)
