@@ -139,7 +139,7 @@ class BaseTable:
             query += f" WHERE {summary_rows}"
 
         query += ";"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         result = self.cur.fetchall()
@@ -173,7 +173,7 @@ class BaseTable:
                      """
 
         query += ";"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
@@ -209,7 +209,7 @@ class BaseTable:
             query += f" WHERE {summary_rows}"
 
         query += ";"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
@@ -235,9 +235,9 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-            
+
         query += ";"
-        
+
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
