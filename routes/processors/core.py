@@ -30,10 +30,10 @@ class StdProcessor:
             random_id=0
         )
 
-    async def _send_log(self, ctx, highlighter=False):
+    async def _send_log(self, ctx):
         self.logger.compose_log_data(ctx)
         self.logger.compose_log_attachments(ctx)
-        await self.logger.log(highlighter=highlighter)
+        await self.logger.log()
 
     def _get_initiator_lvl(self, context):
         role = self.database.permissions.select(
