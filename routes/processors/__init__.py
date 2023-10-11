@@ -2,12 +2,10 @@
 Initialization file for the local processors module
 """
 
-from .proc import (
-    CommandProcessor,
-    InformationProcessor,
-    ReferenceProcessor,
-    FunProcessor
-)
+from .command import CommandProcessor
+from .reference import ReferenceProcessor
+from .information import InformationProcessor
+from .fun import FunProcessor
 
 __all__ = (
     "CommandProcessor",
