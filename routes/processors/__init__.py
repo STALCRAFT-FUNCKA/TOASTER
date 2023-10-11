@@ -1,4 +1,13 @@
-from .proc import CommandProcessor, InformationProcessor, ReferenceProcessor, FunProcessor
+"""
+Initialization file for the local processors module
+"""
+
+from .proc import (
+    CommandProcessor,
+    InformationProcessor,
+    ReferenceProcessor,
+    FunProcessor
+)
 
 __all__ = (
     "CommandProcessor",
