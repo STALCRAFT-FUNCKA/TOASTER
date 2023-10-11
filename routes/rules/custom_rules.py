@@ -27,9 +27,6 @@ from data import DataBase
 class HandleCommand(ABCRule[BaseMessageMin]):
     """
     A rule indicating that a command is expected to be processed.
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
     """
 
     def __init__(
@@ -69,10 +66,9 @@ class HandleCommand(ABCRule[BaseMessageMin]):
 
 
 class AllowAnswer(ABCRule[BaseMessageMin]):
-    """_summary_
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+    A rule indicating the fact that a message
+    has been approved for forwarded messages or a reply.
     """
 
     def __init__(self, allow_reply: bool = False, allow_fwd: bool = False):
@@ -102,11 +98,7 @@ class AllowAnswer(ABCRule[BaseMessageMin]):
 
 class CollapseCommand(ABCRule[BaseMessageMin]):
     """
-    A rule indicating the fact that a message
-    has been approved for forwarded messages or a reply.
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    The rule by which the original message will be deleted.
     """
 
     def __init__(self):
@@ -131,9 +123,6 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
 class CheckPermission(ABCRule[BaseMessageMin]):
     """
     A rule that checks the level of rights of the message initiator.
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
     """
 
     def __init__(self, access_to: int = 0):
@@ -164,9 +153,6 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
     """
     A rule indicating that any actions for a
     specified permission level should be ignored.
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
     """
 
     def __init__(self, ignore_from: int = 0, mode: str = "TARGET"):
@@ -232,9 +218,6 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
 class HandleIn(ABCRule[BaseMessageMin]):
     """
     A rule that allows or prohibits processing a message in a chat or log.
-
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
     """
 
     def __init__(
@@ -288,9 +271,6 @@ class HandleIn(ABCRule[BaseMessageMin]):
 class OnlyEnrolled(ABCRule[BaseMessageMin]):
     """
     A rule that allows messages to be processed only in registered conversations.
-    
-    Args:
-        ABCRule (BaseMessageMin): vkbottle abstract rule.
     """
 
     def __init__(self, send_respond=True):
