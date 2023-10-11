@@ -1,9 +1,22 @@
-from routes.filters.core import *
-from vkbottle.bot import Message, BotLabeler
+"""
+File with bot age filter bot.
+"""
+
 import datetime
 import requests
+from vkbottle.bot import Message, BotLabeler
 from bs4 import BeautifulSoup
-from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
+from routes.filters.core import (
+    database,
+    com_processor,
+    converter,
+    informer
+)
+from routes.rules import (
+    IgnorePermission,
+    HandleIn,
+    OnlyEnrolled
+)
 
 
 bl = BotLabeler()
@@ -16,6 +29,13 @@ bl = BotLabeler()
     blocking=False
 )
 async def age_filter(message: Message):
+    """
+    This function describes the logic behind the age filter.
+
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     is_muted = database.muted.select(
         ("target_name",),
         peer_id=message.peer_id,
@@ -30,11 +50,11 @@ async def age_filter(message: Message):
         setting_name="Account_Age"
     )
     check = check[0][0]
-    check = True if check == 1 else False
     if not check:
         return
 
-    response = requests.get(f'https://vk.com/foaf.php?id={message.from_id}')
+    response = requests.get(
+        f'https://vk.com/foaf.php?id={message.from_id}', timeout=50)
     user_xml = response.text
 
     soup = BeautifulSoup(user_xml, "xml")
@@ -57,21 +77,25 @@ async def age_filter(message: Message):
                 reason = 'Подозрительный аккаунт'
                 context = {
                     "peer_id": message.peer_id,
-                    "peer_name": await info.peer_name(message.peer_id),
+                    "peer_name": await informer.peer_name(message.peer_id),
                     "chat_id": message.chat_id,
                     "initiator_id": 0,
                     "initiator_name": "Система",
                     "initiator_nametag": "Система",
                     "target_id": message.from_id,
-                    "target_name": await info.user_name(message.from_id, tag=False),
-                    "target_nametag": await info.user_name(message.from_id, tag=True),
+                    "target_name": await informer.user_name(
+                        message.from_id, tag=False
+                    ),
+                    "target_nametag": await informer.user_name(
+                        message.from_id, tag=True
+                    ),
                     "command_name": "kick",
                     "reason": reason,
                     "now_time": converter.now(),
                     "cmids": [message.conversation_message_id]
                 }
 
-                await processor.kick_proc(context, collapse=True, log=True, respond=True)
+                await com_processor.kick_proc(context, collapse=True)
 
-    except Exception as error:
+    except AttributeError as error:
         print('!!!!!!!!!!!Some troubles in XML file!!!!!!!!!!!!: ', error)

@@ -1,8 +1,31 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, PERMISSION_LVL, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
+"""
+File with /permission bot command.
+"""
+
 from typing import Tuple
-from routes.rules import *
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.rules import (
+    HandleIn,
+    HandleCommand,
+    CheckPermission,
+    OnlyEnrolled,
+    CollapseCommand
+)
+from routes.commands.core import (
+    informer,
+    com_processor,
+    converter,
+    get_cuid
+)
+from config import (
+    PERMISSION_ACCESS,
+    PERMISSION_LVL,
+    ALIASES,
+    PREFIXES
+)
 
 
 bl = BotLabeler()
@@ -15,16 +38,23 @@ bl = BotLabeler()
     HandleIn(handle_log=True, handle_chat=True),
     OnlyEnrolled()
 )
-async def permission(message: Message, args: Tuple[str]):
+async def permission(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /permission command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     if not args or message.fwd_messages:
         return
 
     try:
         lvl = int(args[0])
-        if lvl not in PERMISSION_LVL.keys():
+        if lvl not in PERMISSION_LVL:
             lvl = 0
-    except Exception as error:
-        print("Setting standard lvl: ", error)
+    except TypeError:
         lvl = 0
 
     context = {
@@ -44,8 +74,12 @@ async def permission(message: Message, args: Tuple[str]):
 
     if len(args) == 1 and message.reply_message:
         context["target_id"] = message.reply_message.from_id
-        context["target_name"] = await informer.user_name(message.reply_message.from_id, tag=False)
-        context["target_nametag"] = await informer.user_name(message.reply_message.from_id, tag=True)
+        context["target_name"] = await informer.user_name(
+            message.reply_message.from_id, tag=False
+        )
+        context["target_nametag"] = await informer.user_name(
+            message.reply_message.from_id, tag=True
+        )
 
     elif len(args) == 2 and not message.reply_message:
         cuid = await get_cuid(args[1])
@@ -60,4 +94,4 @@ async def permission(message: Message, args: Tuple[str]):
     else:
         return
 
-    await com_processor.permission_proc(context, log=True, respond=False)
+    await com_processor.permission_proc(context, respond=False)

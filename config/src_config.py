@@ -1,43 +1,30 @@
 """
-Полные название времен
-Не рекомендуется к изменению
+File with source settings.
+It is not recommended to change these settings.
 """
+
+# Time type chars
 TIME_TYPE = {
     'h': 'hour(s)',
     'd': 'day(s)',
     'm': 'month(s)',
 }
-"""
-Коэффициенты времени
-Не рекомендуется к изменению
-"""
+
+# Time dimensions expressed in seconds
 TIME_COEFFICIENT = {
     'h': 1 * 60 * 60,
     'd': 1 * 60 * 60 * 24,
     'm': 1 * 60 * 60 * 24 * 31,
 }
 
-"""
-При изменении роли достаточно изменить нужное значение
-Значение слева от знака ":" трогать не рекомендуется
-Если же, вы нарочно не хотите что-то сломать
-Значение не должно быть пустым.
-Данная настройка отвечает за название прав по уровню доступа
-"""
+# Standard set of access rights levels
 PERMISSION_LVL = {
     0: 'User',
     1: 'Moderator',
     2: 'Administrator',
 }
 
-
-"""
-При изменении настроек беседы достаточно изменить нужное значение на True(1) or False(0)
-Значение слева от знака ":" трогать не рекомендуется
-Если же, вы нарочно не хотите что-то сломать
-Значение не должно быть пустым
-Данная настройка определяет по стандарту запрещенные вещи/сущности в беседе
-"""
+# Standard settings that are initialized when a conversation is marked
 SETTINGS = {
     'Allow_Picture': 1,
     'Allow_Video': 1,
@@ -58,7 +45,7 @@ SETTINGS = {
     'Need_PM': 0
 }
 
-
+# "Table" of matching numbers to be represented in the form of an emoji
 EMOJI_NUMBERS = {
     1: '1️⃣',
     2: '2️⃣',
@@ -71,4 +58,3 @@ EMOJI_NUMBERS = {
     9: '9️⃣',
     0: '0️⃣'
 }
-

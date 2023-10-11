@@ -1,8 +1,20 @@
-from routes.filters.core import *
-from vkbottle.bot import Message, BotLabeler
-from config import CURSE_WORDS
-from routes.rules import IgnorePermission, HandleIn, OnlyEnrolled
+"""
+File with bot curse filter bot.
+"""
 
+from vkbottle.bot import Message, BotLabeler
+from routes.filters.core import (
+    database,
+    com_processor,
+    converter,
+    informer
+)
+from routes.rules import (
+    IgnorePermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import CURSE_WORDS
 
 bl = BotLabeler()
 
@@ -14,13 +26,19 @@ bl = BotLabeler()
     blocking=False
 )
 async def curse_filter(message: Message):
+    """
+    This function describes the logic behind the curse filter.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+    
     check = database.settings.select(
         ("setting_status",),
         peer_id=message.peer_id,
         setting_name="Filter_Curse"
     )
     check = check[0][0]
-    check = True if check == 1 else False
     if not check:
         return True
 
@@ -29,7 +47,7 @@ async def curse_filter(message: Message):
             reason = "Нежелательное слово"
             context = {
                 "peer_id": message.peer_id,
-                "peer_name": await info.peer_name(message.peer_id),
+                "peer_name": await informer.peer_name(message.peer_id),
                 "chat_id": message.chat_id,
                 "initiator_id": 0,
                 "initiator_name": "Система",
@@ -40,4 +58,4 @@ async def curse_filter(message: Message):
                 "cmids": [message.conversation_message_id],
             }
 
-            await processor.delete_proc(context, log=True, respond=False)
+            await com_processor.delete_proc(context, log=True, respond=False)

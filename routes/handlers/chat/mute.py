@@ -1,7 +1,15 @@
+"""
+This file describes the inherited class mute handler.
+"""
+
 from routes.handlers.core import ABCHandler
 
 
 class Handler(ABCHandler):
+    """
+    Checks the database for expired mutes. Removes them, if any.
+    """
+
     async def check(self):
         expired = self.database.muted.select(
             ("peer_id", "target_id"),
@@ -17,10 +25,20 @@ class Handler(ABCHandler):
                     "initiator_name": "Система",
                     "initiator_nametag": "Система",
                     "target_id": target_id,
-                    "target_name": await self.informer.user_name(target_id, tag=False),
-                    "target_nametag": await self.informer.user_name(target_id, tag=True),
+                    "target_name": await self.informer.user_name(
+                        target_id, tag=False
+                    ),
+                    "target_nametag": await self.informer.user_name(
+                        target_id, tag=True
+                    ),
                     "command_name": "unmute",
                     "now_time": self.converter.now(),
                 }
 
-                await self.processor.unmute_proc(context, log=True, respond=True)
+                await self.processor.unmute_proc(context)
+
+    def egg(self):
+        """
+        hehe-he :)
+        """
+        return

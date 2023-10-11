@@ -1,7 +1,29 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from routes.rules import *
+"""
+File with /copy bot command.
+"""
+
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    com_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    AllowAnswer,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 
 bl = BotLabeler()
@@ -16,6 +38,13 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def copy(message: Message):
+    """
+    This function describes the logic behind the /copy command.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await informer.peer_name(message.peer_id),
@@ -29,4 +58,4 @@ async def copy(message: Message):
         "copied": message.reply_message.text
     }
 
-    await com_processor.copy_proc(context, log=True, respond=False)
+    await com_processor.copy_proc(context, respond=False)

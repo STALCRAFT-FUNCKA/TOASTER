@@ -1,3 +1,7 @@
+"""
+Initialization file for the local rules module
+"""
+
 from .custom_rules import (
     HandleCommand,
     CollapseCommand,

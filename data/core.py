@@ -1,4 +1,9 @@
-conversations = """
+"""
+This file describes the main queries that form the structure of the database.
+"""
+
+# Table
+CONVERSATIONS = """
 CREATE TABLE IF NOT EXISTS conversations
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -9,7 +14,8 @@ CREATE TABLE IF NOT EXISTS conversations
     );
 """
 
-permissions = """
+# Table
+PERMISSIONS = """
 CREATE TABLE IF NOT EXISTS permissions
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -24,7 +30,8 @@ CREATE TABLE IF NOT EXISTS permissions
     );
 """
 
-settings = """
+# Table
+SETTINGS = """
 CREATE TABLE IF NOT EXISTS settings
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -38,7 +45,8 @@ CREATE TABLE IF NOT EXISTS settings
     );
 """
 
-kicked = """
+# Table
+KICKED = """
 CREATE TABLE IF NOT EXISTS kicked
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -55,7 +63,8 @@ CREATE TABLE IF NOT EXISTS kicked
     );
 """
 
-banned = """
+# Table
+BANNED = """
 CREATE TABLE IF NOT EXISTS banned
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -73,7 +82,8 @@ CREATE TABLE IF NOT EXISTS banned
     );
 """
 
-muted = """
+# Table
+MUTED = """
 CREATE TABLE IF NOT EXISTS muted
    (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -91,7 +101,8 @@ CREATE TABLE IF NOT EXISTS muted
    );
 """
 
-warned = """
+# Table
+WARNED = """
 CREATE TABLE IF NOT EXISTS warned
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -110,7 +121,8 @@ CREATE TABLE IF NOT EXISTS warned
     );
 """
 
-queue = """
+# Table
+QUEUE = """
 CREATE TABLE IF NOT EXISTS queue
     (
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -126,4 +138,5 @@ CREATE TABLE IF NOT EXISTS queue
     );
 """
 
-tables = [conversations, permissions, settings, kicked, banned, muted, warned, queue]
+# Table
+tables = [CONVERSATIONS, PERMISSIONS, SETTINGS, KICKED, BANNED, MUTED, WARNED, QUEUE]

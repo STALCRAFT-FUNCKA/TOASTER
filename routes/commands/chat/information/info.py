@@ -1,9 +1,27 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from typing import Tuple
-from routes.rules import *
+"""
+File with /info bot command.
+"""
 
+from typing import Tuple
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    info_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    AllowAnswer,
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 bl = BotLabeler()
 
@@ -16,6 +34,14 @@ bl = BotLabeler()
     HandleIn(handle_log=True, handle_chat=False)
 )
 async def info(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /info command.
+    
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     context = {
         "peer_id": message.peer_id,
         "chat_id": message.chat_id

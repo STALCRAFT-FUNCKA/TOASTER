@@ -1,8 +1,30 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
+"""
+File with /setting bot command.
+"""
+
 from typing import Tuple
-from routes.rules import *
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    com_processor,
+    converter
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    AllowAnswer,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 
 bl = BotLabeler()
@@ -17,11 +39,18 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def setting(message: Message, args: Tuple):
+    """
+    This function describes the logic behind the /setting command.
+
+    Args:
+        message (Message): vkbottle message object.
+        args (Tuple): tuple of command arguments.
+    """
+
     setting_name = args[0]
     try:
         setting_status = int(args[1])
-    except Exception as error:
-        print("Wrong status:", error)
+    except TypeError:
         setting_status = 0
 
     context = {
@@ -37,4 +66,4 @@ async def setting(message: Message, args: Tuple):
         "now_time": converter.now()
     }
 
-    await com_processor.setting_proc(context, log=True, respond=False)
+    await com_processor.setting_proc(context, respond=False)

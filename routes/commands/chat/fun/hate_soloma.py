@@ -1,8 +1,28 @@
-from routes.commands.core import *
-from config import PERMISSION_ACCESS, ALIASES, PREFIXES
-from vkbottle.bot import Message, BotLabeler
-from typing import Tuple
-from routes.rules import *
+"""
+File with /hate_soloma bot command.
+"""
+
+from vkbottle.bot import (
+    Message,
+    BotLabeler
+)
+from routes.commands.core import (
+    informer,
+    converter,
+    fun_processor
+)
+from routes.rules import (
+    HandleCommand,
+    CollapseCommand,
+    CheckPermission,
+    HandleIn,
+    OnlyEnrolled
+)
+from config import (
+    PERMISSION_ACCESS,
+    ALIASES,
+    PREFIXES
+)
 
 bl = BotLabeler()
 
@@ -15,6 +35,13 @@ bl = BotLabeler()
     OnlyEnrolled()
 )
 async def hate_soloma(message: Message):
+    """
+    This function describes the logic behind the /hate_soloma command.
+    
+    Args:
+        message (Message): vkbottle message object.
+    """
+
     context = {
         "peer_id": message.peer_id,
         "peer_name": await informer.peer_name(message.peer_id),
@@ -26,4 +53,4 @@ async def hate_soloma(message: Message):
         "now_time": converter.now(),
     }
 
-    await fun_processor.fun_hate_soloma_proc(context, log=True, respond=False)
+    await fun_processor.fun_hate_soloma_proc(context, respond=False)
