@@ -1,11 +1,37 @@
-from typing import Optional, Union, Tuple
-from vkbottle import ABCRule, Bot
+"""
+А file containing classes of rules applied to commands, regulating their execution.
+"""
+
+from typing import (
+    Optional,
+    Union,
+    Tuple
+)
+
+
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
-from config import GROUP_ID, TOKEN, STAFF_ADMIN_ID, PREFIXES
+from vkbottle import (
+    ABCRule,
+    CodeException,
+    Bot
+)
+from config import (
+    GROUP_ID,
+    TOKEN,
+    STAFF_ADMIN_ID,
+    PREFIXES
+)
 from data import DataBase
 
 
 class HandleCommand(ABCRule[BaseMessageMin]):
+    """
+    A rule indicating that a command is expected to be processed.
+
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
     def __init__(
             self,
             command_aliases: Optional[Tuple[str]] = None,
@@ -19,45 +45,52 @@ class HandleCommand(ABCRule[BaseMessageMin]):
 
         self.bot = Bot(token=TOKEN)
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        text = message.text
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
+        text = event.text
 
         for prefix in self.prefixes:
             for command_text in self.command_aliases:
                 command_length = len(prefix + command_text)
                 command_length_with_sep = command_length + len(self.sep)
                 if text.lower().startswith((prefix + command_text).lower()):
-                    argstxt = message.text[command_length_with_sep:]
+                    argstxt = event.text[command_length_with_sep:]
                     if argstxt != "":
                         args = argstxt.split(self.sep)
                     else:
                         args = []
 
-                    if (len(args) == self.args_count or self.args_count is None) and all(args):
+                    if (len(args) == self.args_count or self.args_count is None) \
+                            and all(args):
                         return {"args": args}
-                    else:
-                        return False
+
+                    return False
 
         return False
 
 
 class AllowAnswer(ABCRule[BaseMessageMin]):
+    """_summary_
+
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
     def __init__(self, allow_reply: bool = False, allow_fwd: bool = False):
         self.use_reply = allow_reply
         self.use_fwd = allow_fwd
 
         self.bot = Bot(token=TOKEN)
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
         # Может быть упрощено.
-        if message.reply_message is not None:
+        if event.reply_message is not None:
             if self.use_reply:
                 return True
         else:
             if not self.use_reply:
                 return True
 
-        if message.fwd_messages is not None:
+        if event.fwd_messages is not None:
             if self.use_fwd:
                 return True
         else:
@@ -68,36 +101,49 @@ class AllowAnswer(ABCRule[BaseMessageMin]):
 
 
 class CollapseCommand(ABCRule[BaseMessageMin]):
+    """
+    A rule indicating the fact that a message
+    has been approved for forwarded messages or a reply.
+
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
     def __init__(self):
         self.bot = Bot(token=TOKEN)
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
         try:
             await self.bot.api.messages.delete(
                 group_id=GROUP_ID,
-                peer_id=message.peer_id,
-                cmids=message.conversation_message_id,
+                peer_id=event.peer_id,
+                cmids=event.conversation_message_id,
                 delete_for_all=True
             )
-            message.deleted = True
+            event.deleted = True
 
-        except Exception as error:
-            print("Rule aborted command completion:", error)
-            message.deleted = False
+        except CodeException[15]:
+            event.deleted = False
 
         return True
 
 
 class CheckPermission(ABCRule[BaseMessageMin]):
+    """
+    A rule that checks the level of rights of the message initiator.
+
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
 
     def __init__(self, access_to: int = 0):
         self.access_to = access_to
 
         self.database = DataBase()
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        peer_id = message.peer_id
-        initiator_id = message.from_id
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
+        peer_id = event.peer_id
+        initiator_id = event.from_id
 
         if initiator_id == STAFF_ADMIN_ID:
             return True
@@ -115,6 +161,14 @@ class CheckPermission(ABCRule[BaseMessageMin]):
 
 
 class IgnorePermission(ABCRule[BaseMessageMin]):
+    """
+    A rule indicating that any actions for a
+    specified permission level should be ignored.
+
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
     def __init__(self, ignore_from: int = 0, mode: str = "TARGET"):
         self.ignore_from = ignore_from
         self.mode = mode
@@ -134,6 +188,8 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
         lvl = lvl[0][0] if lvl else 0
         if lvl < self.ignore_from:
             return True
+
+        return False
 
     def __check_forward(self, message: BaseMessageMin):
         checked = []
@@ -155,36 +211,46 @@ class IgnorePermission(ABCRule[BaseMessageMin]):
 
         return False
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        peer_id = message.peer_id
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
+        peer_id = event.peer_id
 
         if self.mode == "TARGET":
-            if message.reply_message:
-                return self.__check_permission(peer_id, message.reply_message.from_id)
+            if event.reply_message:
+                return self.__check_permission(peer_id, event.reply_message.from_id)
 
-            elif message.fwd_messages:
-                return self.__check_forward(message)
+            if event.fwd_messages:
+                return self.__check_forward(event)
 
-            else:
-                return await self.__check_mention(message)
+            return await self.__check_mention(event)
 
-        elif self.mode == "SELF":
-            return self.__check_permission(peer_id, message.from_id)
+        if self.mode == "SELF":
+            return self.__check_permission(peer_id, event.from_id)
 
         return False
 
 
 class HandleIn(ABCRule[BaseMessageMin]):
+    """
+    A rule that allows or prohibits processing a message in a chat or log.
 
-    def __init__(self, handle_log: bool = False, handle_chat: bool = False, send_respond=True):
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
+    def __init__(
+        self,
+        handle_log: bool = False,
+        handle_chat: bool = False,
+        send_respond=True
+    ):
         self.handle_log = handle_log
         self.handle_chat = handle_chat
         self.send_respond = send_respond
 
         self.database = DataBase()
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        peer_id = message.peer_id
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
+        peer_id = event.peer_id
 
         peer_type = "LOG"
         if self.database.conversations.select(
@@ -192,14 +258,14 @@ class HandleIn(ABCRule[BaseMessageMin]):
             peer_id=peer_id,
             peer_type=peer_type
         ):
-            if self.handle_log:
-                return True
-
-            else:
+            if not self.handle_log:
                 if self.send_respond:
-                    title = f"Отказ в исполнении команды. Команда не может быть использована в лог-чате."
-                    await message.answer(title)
+                    title = "Отказ в исполнении команды."\
+                            "Команда не может быть использована в лог-чате."
+                    await event.answer(title)
                 return False
+
+            return True
 
         peer_type = "CHAT"
         if self.database.conversations.select(
@@ -207,26 +273,33 @@ class HandleIn(ABCRule[BaseMessageMin]):
             peer_id=peer_id,
             peer_type=peer_type
         ):
-            if self.handle_chat:
-                return True
-
-            else:
+            if not self.handle_chat:
                 if self.send_respond:
-                    title = f"Отказ в исполнении команды. Команда не может быть использована в беседе."
-                    await message.answer(title)
+                    title = "Отказ в исполнении команды."\
+                            "Команда не может быть использована в беседе."
+                    await event.answer(title)
                 return False
+
+            return True
 
         return True
 
 
 class OnlyEnrolled(ABCRule[BaseMessageMin]):
+    """
+    A rule that allows messages to be processed only in registered conversations.
+    
+    Args:
+        ABCRule (BaseMessageMin): vkbottle abstract rule.
+    """
+
     def __init__(self, send_respond=True):
         self.send_respond = send_respond
 
         self.database = DataBase()
 
-    async def check(self, message: BaseMessageMin) -> Union[dict, bool]:
-        peer_id = message.peer_id
+    async def check(self, event: BaseMessageMin) -> Union[dict, bool]:
+        peer_id = event.peer_id
 
         if self.database.conversations.select(
             ("peer_name",),
@@ -243,6 +316,6 @@ class OnlyEnrolled(ABCRule[BaseMessageMin]):
             return True
 
         if self.send_respond:
-            title = f"Отказ в исполнении команды. Беседа не зарегистрирована."
-            await message.answer(title)
+            title = "Отказ в исполнении команды. Беседа не зарегистрирована."
+            await event.answer(title)
         return False
