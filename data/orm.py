@@ -138,8 +138,10 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
+        query += ";"
+        
         self.cur.execute('USE toaster;')
-        self.cur.execute(query + ";")
+        self.cur.execute(query)
         result = self.cur.fetchall()
         return result
 
@@ -170,8 +172,10 @@ class BaseTable:
                         )}
                      """
 
+        query += ";"
+        
         self.cur.execute('USE toaster;')
-        self.cur.execute(query + ";")
+        self.cur.execute(query)
         self.con.commit()
 
     def update(self, new_data: dict, **rows):
@@ -204,8 +208,10 @@ class BaseTable:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
 
+        query += ";"
+        
         self.cur.execute('USE toaster;')
-        self.cur.execute(query + ";")
+        self.cur.execute(query)
         self.con.commit()
 
     def delete(self, **rows):
@@ -229,9 +235,11 @@ class BaseTable:
         if rows:
             summary_rows = ' AND '.join(self._get_ratio(rows))
             query += f" WHERE {summary_rows}"
-
+            
+        query += ";"
+        
         self.cur.execute('USE toaster;')
-        self.cur.execute(query + ";")
+        self.cur.execute(query)
         self.con.commit()
 
 
