@@ -6,6 +6,7 @@ an object relational model for interacting with it.
 import os
 import logging
 import MySQLdb
+from singltone import MetaSingleton
 from .core import tables
 
 
@@ -252,7 +253,7 @@ class BaseTable:
         logging.debug("Result: executed")
 
 
-class DataBase:
+class DataBase(metaclass=MetaSingleton):
     """
     The main class is the database view.
     Organizes a connection and implements
