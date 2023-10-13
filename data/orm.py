@@ -145,6 +145,7 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         result = self.cur.fetchall()
+        self.con.commit()
         logging.debug("Query: %s", query)
         logging.debug("Result: %s", result)
         return result
