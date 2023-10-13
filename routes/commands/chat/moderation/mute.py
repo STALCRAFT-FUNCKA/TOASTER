@@ -53,7 +53,7 @@ async def mute(message: Message, args: Tuple):
     try:
         time = int(args[0])
         coefficient = args[1]
-    except TypeError:
+    except ValueError:
         time = 1
         coefficient = "h"
 
