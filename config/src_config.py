@@ -12,6 +12,7 @@ TIME_TYPE = {
 
 # Time dimensions expressed in seconds
 TIME_COEFFICIENT = {
+    's': 1,
     'h': 1 * 60 * 60,
     'd': 1 * 60 * 60 * 24,
     'm': 1 * 60 * 60 * 24 * 31,
