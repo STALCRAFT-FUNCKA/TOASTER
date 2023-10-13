@@ -13,7 +13,7 @@ from utils import (
 )
 from routes.processors import CommandProcessor
 from config import TOKEN
-
+from data import DataBase
 
 class ABCHandler(ABC):
     """
@@ -24,6 +24,7 @@ class ABCHandler(ABC):
     def __init__(self):
         self.bot = Bot(token=TOKEN)
         self.processor = CommandProcessor()
+        self.database = DataBase()
         self.converter = Converter()
         self.informer = Informer()
 

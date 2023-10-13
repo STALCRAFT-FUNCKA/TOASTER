@@ -3,7 +3,6 @@ This file describes the inherited class ban handler.
 """
 
 from routes.handlers.core import ABCHandler
-from data import DataBase
 
 
 class Handler(ABCHandler):
@@ -11,8 +10,6 @@ class Handler(ABCHandler):
     Checks the database for expired bans. Removes them, if any.
     """
 
-    database = DataBase()
-    
     async def check(self):
         expired = self.database.banned.select(
             ("peer_id", "target_id"),
