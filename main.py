@@ -2,17 +2,10 @@
 Main project file.
 """
 
-import logging
 from vkbottle.bot import Bot
 from config import TOKEN
 from routes import handlers, labelers
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename="toaster_log.log",
-    filemode="w",
-    format="%(asctime)s %(levelname)s %(message)s"
-)
 bot = Bot(token=TOKEN)
 
 

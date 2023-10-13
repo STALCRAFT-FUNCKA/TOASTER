@@ -63,11 +63,11 @@ labelers = [
 ]
 
 handlers = [
+    WarnHandler(),
     MuteHandler(),
     BanHandler(),
-    WarnHandler(),
+    QueueHandler(),
     WarnOverflowHandler(),
-    QueueHandler()
 ]
 
 __all__ = (
