@@ -4,6 +4,7 @@ an object relational model for interacting with it.
 """
 
 import os
+import logging
 import MySQLdb
 from .core import tables
 
@@ -143,6 +144,8 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         result = self.cur.fetchall()
+        logging.debug("Query: %s", query)
+        logging.debug("Result: %s", result)
         return result
 
     def insert(self, on_duplicate=None, **rows):
@@ -177,6 +180,8 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
+        logging.debug("Query: %s", query)
+        logging.debug("Result: executed")
 
     def update(self, new_data: dict, **rows):
         """
@@ -213,6 +218,8 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
+        logging.debug("Query: %s", query)
+        logging.debug("Result: executed")
 
     def delete(self, **rows):
         """
@@ -241,6 +248,8 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         self.con.commit()
+        logging.debug("Query: %s", query)
+        logging.debug("Result: executed")
 
 
 class DataBase:
