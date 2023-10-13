@@ -51,6 +51,7 @@ async def terminate(message: Message, args: Tuple):
         return
 
     context = {
+        "peer_id": message.peer_id,
         "peer_name": "Все беседы",
         "chat_id": message.chat_id,
         "initiator_id": message.from_id,
