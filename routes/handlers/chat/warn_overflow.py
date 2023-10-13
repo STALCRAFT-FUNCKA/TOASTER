@@ -49,7 +49,7 @@ class Handler(BaseHandler):
 
     def egg(self):
         """
-        hehe-he :)
+        Thanks you cherepawwka!
         """
         return
     

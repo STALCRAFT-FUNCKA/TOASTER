@@ -39,6 +39,7 @@ class Handler(BaseHandler):
 
     def egg(self):
         """
-        hehe-he :)
+        Thanks you "Anton? A? Che zval, slark?"! :)
         """
+
         return
