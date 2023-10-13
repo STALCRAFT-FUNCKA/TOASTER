@@ -3,6 +3,7 @@ This file describes the inherited class overflowed warns handler.
 """
 
 from routes.handlers.core import ABCHandler
+from data import DataBase
 
 
 class Handler(ABCHandler):
@@ -11,6 +12,8 @@ class Handler(ABCHandler):
     Removes them, if any, and mute user.
     """
 
+    database = DataBase()
+    
     async def check(self):
         overflow = self.database.warned.select(
             ("peer_id", "target_id"),
