@@ -2,10 +2,10 @@
 This file describes the inherited class queue handler.
 """
 
-from routes.handlers.core import ABCHandler
+from routes.handlers.core import BaseHandler
 
 
-class Handler(ABCHandler):
+class Handler(BaseHandler):
     """
     Checks the database for expired messages in queue. Removes them, if any.
     """

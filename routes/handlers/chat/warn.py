@@ -2,10 +2,10 @@
 This file describes the inherited class expired warns handler.
 """
 
-from routes.handlers.core import ABCHandler
+from routes.handlers.core import BaseHandler
 
 
-class Handler(ABCHandler):
+class Handler(BaseHandler):
     """
     Checks the database for expired warns in queue. Removes them, if any.
     """
@@ -39,7 +39,7 @@ class Handler(ABCHandler):
 
     def egg(self):
         """
-        hehe-he :)
+        Thanks you wr3dmast3r!
         """
         return
     

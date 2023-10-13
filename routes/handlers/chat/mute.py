@@ -2,10 +2,10 @@
 This file describes the inherited class mute handler.
 """
 
-from routes.handlers.core import ABCHandler
+from routes.handlers.core import BaseHandler
 
 
-class Handler(ABCHandler):
+class Handler(BaseHandler):
     """
     Checks the database for expired mutes. Removes them, if any.
     """

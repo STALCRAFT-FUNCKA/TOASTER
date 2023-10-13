@@ -2,10 +2,10 @@
 This file describes the inherited class overflowed warns handler.
 """
 
-from routes.handlers.core import ABCHandler
+from routes.handlers.core import BaseHandler
 
 
-class Handler(ABCHandler):
+class Handler(BaseHandler):
     """
     Checks the database for overflowed warns.
     Removes them, if any, and mute user.
