@@ -114,7 +114,7 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
             )
             event.deleted = True
 
-        except VKAPIError.code:
+        except VKAPIError:
             event.deleted = False
 
         return True
