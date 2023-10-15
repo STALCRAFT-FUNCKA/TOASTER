@@ -20,7 +20,6 @@ class Connection:
         Creates a database named "toaster" if one does not exist.
         """
         self._cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
-        self._connection.commit()
 
     def _fill_tables(self):
         """
@@ -30,8 +29,6 @@ class Connection:
         for table in tables:
             self._cursor.execute(table)
 
-        self._connection.commit()
-
     def __init__(self, allow_debug_text=True):
         try:
             self._connection = MySQLdb.connect(
@@ -40,6 +37,7 @@ class Connection:
                 user=os.getenv("SQL_USER"),
                 password=os.getenv("SQL_PASSWORD")
             )
+            self._connection.autocommit(True)
             self._cursor = self._connection.cursor()
 
             if allow_debug_text:
@@ -145,7 +143,6 @@ class BaseTable:
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
         result = self.cur.fetchall()
-        self.con.commit()
         logging.debug("Query: %s", query)
         logging.debug("Result: %s", result)
         return result
@@ -181,7 +178,6 @@ class BaseTable:
 
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
-        self.con.commit()
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
 
@@ -219,7 +215,6 @@ class BaseTable:
 
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
-        self.con.commit()
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
 
@@ -249,7 +244,6 @@ class BaseTable:
 
         self.cur.execute('USE toaster;')
         self.cur.execute(query)
-        self.con.commit()
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
 
