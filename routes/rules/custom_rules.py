@@ -12,7 +12,7 @@ from typing import (
 from vkbottle.tools.dev.mini_types.base import BaseMessageMin
 from vkbottle import (
     ABCRule,
-    CodeException,
+    VKAPIError,
     Bot
 )
 from config import (
@@ -114,7 +114,7 @@ class CollapseCommand(ABCRule[BaseMessageMin]):
             )
             event.deleted = True
 
-        except CodeException[15]:
+        except VKAPIError.code:
             event.deleted = False
 
         return True
