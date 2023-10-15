@@ -97,5 +97,5 @@ async def age_filter(message: Message):
 
                 await com_processor.kick_proc(context, collapse=True)
 
-    except AttributeError as error:
-        print('!!!!!!!!!!!Some troubles in XML file!!!!!!!!!!!!: ', error)
+    except (AttributeError, ValueError):
+        print('!!!!!!!!!!!Some troubles in XML file!!!!!!!!!!!!: ')
