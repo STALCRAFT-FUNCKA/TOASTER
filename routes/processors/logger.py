@@ -50,14 +50,14 @@ class Logger(metaclass=MetaSingleton):
         Args:
             context (dict): Action contexts. Cumulative required data.
         """
-
+        forward = {}
         if context.get('cmids') is not None:
             forward = {
                 'peer_id': context.get('peer_id'),
                 'conversation_message_ids': context.get('cmids')
             }
 
-            self.log_data['forward'] = forward
+        self.log_data['forward'] = forward
 
     def compose_log_data(self, context):
         """
