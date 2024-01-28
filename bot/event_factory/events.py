@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
+from vk_api import VkApi
 
 
 class ABCEvent(ABC):
 
+    _api: VkApi = None
+    
+    raw_type: int = None
+
     # Main event data
     user_id: int = None
     peer_id: int = None
-
-    raw_type: int = None
 
     @abstractmethod
     def handle(self):
