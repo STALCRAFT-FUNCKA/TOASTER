@@ -18,13 +18,23 @@ class Bot(object):
     """
     Bot main class.
     """
+    # logger object
     __logger = logging.getLogger("TOASTER")
 
+    # VK objects
     __session = None
     __longpoll = None
     api = None
 
+    # CustomEvent factory
     factory = Router()
+
+
+    def __init__(self):
+        self.__create_session()
+        self.__create_longpoll()
+        self.__create_api()
+
 
     def __create_session(self):
         """
@@ -35,6 +45,7 @@ class Bot(object):
             api_version="5.199"
         )
         self.__logger.info("Session created.")
+
 
     def __create_longpoll(self):
         """
@@ -47,12 +58,14 @@ class Bot(object):
         )
         self.__logger.info("Connected to longpoll server.")
 
+
     def __create_api(self):
         """
         Gets VK API object. Can be used to execute VK serverside queries.
         """
         self.api = self.__session.get_api()
         self.__logger.info("API object created.")
+
 
     def __fabricate_event(self, raw_event: Event) -> CustomEvent:
         """
@@ -67,10 +80,6 @@ class Bot(object):
         """
         return self.factory(raw_event, self.api)
 
-    def __init__(self):
-        self.__create_session()
-        self.__create_longpoll()
-        self.__create_api()
 
     def run(self):
         """

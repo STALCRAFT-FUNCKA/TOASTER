@@ -1,10 +1,14 @@
+"""
+File describing classes of custom events.
+"""
 import logging
 from vk_api import VkApi
 from vk_api.longpoll import Event
 
 
 class CustomEvent(object):
-    """_summary_
+    """
+    Custom description of an event coming from a longpoll server.
     """
     # logger object
     __logger = logging.getLogger("TOASTER")
@@ -15,7 +19,7 @@ class CustomEvent(object):
     # and making actions with it
     __api: VkApi = None
 
-    # Raw type of event. VkEventType()
+    # Raw type of event. VkEventType class.
     raw_type: int = None
 
     # Main event data
@@ -45,6 +49,7 @@ class CustomEvent(object):
         # Getting additional event data
         self.__get_additionals()
 
+
     def __get_additionals(self):
         if self.__api is not None:
             # parsing additional user info
@@ -67,6 +72,7 @@ class CustomEvent(object):
                 "Missing API object."
             )
 
+
     def __get_userinfo(self):
         necessary_feilds = [
             "domain",
@@ -79,6 +85,7 @@ class CustomEvent(object):
 
         return information
 
+
     def __get_peerinfo(self):
         information = self.__api.messages.getConversationsById(
             peer_ids=self.peer_id
@@ -87,8 +94,6 @@ class CustomEvent(object):
 
         return information
 
-    def _get_api(self):
-        return self.__api
 
     def get_prnt(self) -> str:
         """
@@ -105,7 +110,21 @@ class CustomEvent(object):
         return summary
 
 
+    @property
+    def api(self):
+        """
+        Returns the VKontakte API object from the parent class.
+
+        Returns:
+            VkApi: vk api object.
+        """
+        return self.__api
+
+
 class MessageEvent(CustomEvent):
+    """
+    Custom message event.
+    """
     # Message id
     cmid: int = None
 
@@ -120,11 +139,13 @@ class MessageEvent(CustomEvent):
         self.__get_cmid(raw_event)
         self.__get_content()
 
+
     def __get_cmid(self, raw_event: Event):
         self.cmid = raw_event.message_id
 
+
     def __get_content(self):
-        api = super()._get_api()
+        api = super().api
         msg = api.messages.getById(
             message_ids=self.cmid,
             extended=1
@@ -135,5 +156,14 @@ class MessageEvent(CustomEvent):
         self.reply_msg = msg.get("reply_message")
 
 
+class ChatEvent(CustomEvent):
+    """
+    Custom inchat action event.
+    """
+
+
 class ButtonEvent(CustomEvent):
+    """
+    Custom callback button event.
+    """
     payload = None
