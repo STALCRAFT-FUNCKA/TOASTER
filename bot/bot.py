@@ -7,7 +7,7 @@ from vk_api.bot_longpoll import (
     VkBotLongPoll,
     VkBotEvent
 )
-from .event_factory import Router
+from .event_factory import Router, BaseEvent
 
 
 class Bot(object):
@@ -24,12 +24,16 @@ class Bot(object):
     # Custom event factory
     factory = Router()
 
+    # Event handlers
+    command_handler = None
+    trigger_handler = None
+    button_handler = None
+    automate_handler = None
 
     def __init__(self):
         self.__create_session()
         self.__create_longpoll()
         self.__create_api()
-
 
     def __create_session(self):
         """Creates VK session with using group acces token.
@@ -39,7 +43,6 @@ class Bot(object):
             api_version="5.199"
         )
         self.__logger.info("Session created.")
-
 
     def __create_longpoll(self):
         """Creating connection to longpoll VK server with using VK session object.
@@ -51,15 +54,13 @@ class Bot(object):
         )
         self.__logger.info("Connected to longpoll server.")
 
-
     def __create_api(self):
         """Gets VK API object. Can be used to execute VK serverside queries.
         """
         self.api = self.__session.get_api()
         self.__logger.info("API object created.")
 
-
-    def __fabricate_event(self, vk_event: VkBotEvent):
+    def __fabricate_event(self, vk_event: VkBotEvent) -> BaseEvent:
         """The function accesses the router object, which selects according to the event type
         the desired custom event class, after which the function returns a new custom event.
 
@@ -71,7 +72,6 @@ class Bot(object):
         """
         return self.factory(vk_event, self.api)
 
-
     def run(self):
         """Starts listening VK longpoll server.
         """
@@ -82,3 +82,16 @@ class Bot(object):
                 self.__logger.info(
                     "New event recived: \n %s ", event.attr_str
                 )
+
+                self.__handle_event(event)
+
+    @staticmethod
+    def __handle_event(event: BaseEvent):
+        """Processes an event received as input.
+        By processing we mean the use of filters, 
+        triggers, command recognition, etc.
+
+        Args:
+            event (BaseEvent): Base custom event.
+        """
+        return
