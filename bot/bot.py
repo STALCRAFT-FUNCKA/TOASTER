@@ -1,22 +1,17 @@
-"""
-A file containing a description of the bot's main class with all its functions.
+"""A file containing a description of the bot's main class with all its functions.
 """
 import os
 import logging
 from vk_api import VkApi
-from vk_api.longpoll import (
-    VkLongPoll,
-    Event
+from vk_api.bot_longpoll import (
+    VkBotLongPoll,
+    VkBotEvent
 )
-from .event_factory import (
-    Router,
-    CustomEvent
-)
+from .event_factory import Router
 
 
 class Bot(object):
-    """
-    Bot main class.
+    """Bot main class.
     """
     # logger object
     __logger = logging.getLogger("TOASTER")
@@ -26,7 +21,7 @@ class Bot(object):
     __longpoll = None
     api = None
 
-    # CustomEvent factory
+    # Custom event factory
     factory = Router()
 
 
@@ -37,8 +32,7 @@ class Bot(object):
 
 
     def __create_session(self):
-        """
-        Creates VK session with using group acces token.
+        """Creates VK session with using group acces token.
         """
         self.__session = VkApi(
             token=os.getenv("TOASTER_DEV_TOKEN"),
@@ -48,10 +42,9 @@ class Bot(object):
 
 
     def __create_longpoll(self):
+        """Creating connection to longpoll VK server with using VK session object.
         """
-        Creating connection to longpoll VK server with using VK session object.
-        """
-        self.__longpoll = VkLongPoll(
+        self.__longpoll = VkBotLongPoll(
             vk=self.__session,
             wait=10,
             group_id=os.getenv("TOASTER_DEV_GROUPID")
@@ -60,35 +53,32 @@ class Bot(object):
 
 
     def __create_api(self):
-        """
-        Gets VK API object. Can be used to execute VK serverside queries.
+        """Gets VK API object. Can be used to execute VK serverside queries.
         """
         self.api = self.__session.get_api()
         self.__logger.info("API object created.")
 
 
-    def __fabricate_event(self, raw_event: Event) -> CustomEvent:
-        """
-        The function accesses the router object, which selects according to the event type
+    def __fabricate_event(self, vk_event: VkBotEvent):
+        """The function accesses the router object, which selects according to the event type
         the desired custom event class, after which the function returns a new custom event.
 
         Args:
-            raw_event (Event): VK longpoll event.
+            vk_event (VkBotEvent): VK bot longpoll event.
 
         Returns:
-            CustomEvent: Base custom event.
+            BaseEvent: Base custom event.
         """
-        return self.factory(raw_event, self.api)
+        return self.factory(vk_event, self.api)
 
 
     def run(self):
-        """
-        Starts listening VK longpoll server.
+        """Starts listening VK longpoll server.
         """
         self.__logger.info("Starting listening longpoll server...")
-        for raw_event in self.__longpoll.listen():
-            event = self.__fabricate_event(raw_event)
+        for vk_event in self.__longpoll.listen():
+            event = self.__fabricate_event(vk_event)
             if event is not None:
                 self.__logger.info(
-                    "New event recived: \n %s ", event.get_prnt()
+                    "New event recived: \n %s ", event.attr_str
                 )

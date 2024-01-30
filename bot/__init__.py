@@ -1,5 +1,4 @@
-"""
-Bot body module. Main workstream
+"""Bot body module. Main workstream
 """
 from .bot import Bot
 

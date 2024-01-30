@@ -1,15 +1,17 @@
-"""
-A file that describes the router class required to create custom event objects.
+"""A file that describes the router class required to create custom event objects.
 """
 import logging
 from vk_api import VkApi
-from vk_api.longpoll import Event, VkEventType
-from .events import CustomEvent, MessageEvent
-
+from vk_api.bot_longpoll import VkBotEvent
+from .events import (
+    BaseEvent,
+    MessageEvent,
+    ChatEvent,
+    ButtonEvent
+)
 
 class Router(object):
-    """
-    A router class that creates custom events
+    """A router class that creates custom events
     according to the type of raw event.
 
     Args:
@@ -21,20 +23,10 @@ class Router(object):
     """
     _logger = logging.getLogger("TOASTER")
 
-    _event_blacklist = (
-        VkEventType.USER_TYPING,
-        VkEventType.USER_TYPING_IN_CHAT
-    )
+    _event_blacklist = ()
 
-    _routes = {
-        VkEventType.MESSAGE_NEW: MessageEvent,
-        VkEventType.MESSAGE_EDIT: MessageEvent
-    }
-
-
-    def _route(self, raw_event: Event, api: VkApi) -> CustomEvent:
-        """
-        The function determines the type of raw event,
+    def _route(self, raw_event: dict, api: VkApi) -> BaseEvent:
+        """The function determines the type of raw event,
         and then routes it to the desired custom event for subsequent redefinition.
 
         Args:
@@ -45,20 +37,33 @@ class Router(object):
             CustomEvent: Custom event object.
         """
         reason = None
-        if raw_event.type not in self._routes:
-            reason = "missing route"
 
-        if raw_event.type in self._event_blacklist:
+        if raw_event.get("type") in self._event_blacklist:
             reason = "black-listed"
 
         if reason is not None:
             self._logger.warning(
-                "Event %s skipped. Reason: %s", raw_event.type, reason
+                "Event <%s|%s> skipped. Reason: %s \n",
+                raw_event.get("event_id"),
+                raw_event.get("type"),
+                reason
             )
             return None
 
-        return self._routes[raw_event.type](raw_event, api)
+        event_object = raw_event.get("object")
+
+        if event_object is not None:
+            if event_object["message"].get("action") is not None:
+                return ChatEvent(raw_event, api)
+
+            elif event_object.get("payload") is not None:
+                return ButtonEvent(raw_event, api)
+
+            else:
+                return MessageEvent(raw_event, api)
+
+        return None
 
 
-    def __call__(self, raw_event: Event, api: VkApi) -> CustomEvent:
-        return self._route(raw_event, api)
+    def __call__(self, vk_event: VkBotEvent, api: VkApi) -> BaseEvent:
+        return self._route(vk_event.raw, api)
