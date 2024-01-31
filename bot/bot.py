@@ -25,10 +25,10 @@ class Bot(object):
     factory = Router()
 
     # Event handlers
-    command_handler = None
-    trigger_handler = None
-    button_handler = None
-    automate_handler = None
+    trigger_handler = None # if message contains text, attachments,forwards or replies
+    action_handler = None # if message contains action
+    command_handler = None # if message text starts with COMMAND_PREFIX
+    button_handler = None # if message contains payload
 
     def __init__(self):
         self.__create_session()
@@ -94,4 +94,5 @@ class Bot(object):
         Args:
             event (BaseEvent): Base custom event.
         """
-        return
+        if event:
+            return
