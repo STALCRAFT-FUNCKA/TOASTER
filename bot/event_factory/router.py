@@ -5,10 +5,9 @@ from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotEvent
 from .events import (
     BaseEvent,
-    MessageEvent,
-    ChatEvent,
-    ButtonEvent
+    MessageEvent
 )
+
 
 class Router(object):
     """A router class that creates custom events
@@ -50,19 +49,7 @@ class Router(object):
             )
             return None
 
-        event_object = raw_event.get("object")
-
-        if event_object is not None:
-            if event_object["message"].get("action") is not None:
-                return ChatEvent(raw_event, api)
-
-            elif event_object.get("payload") is not None:
-                return ButtonEvent(raw_event, api)
-
-            else:
-                return MessageEvent(raw_event, api)
-
-        return None
+        return MessageEvent(raw_event, api)
 
 
     def __call__(self, vk_event: VkBotEvent, api: VkApi) -> BaseEvent:
