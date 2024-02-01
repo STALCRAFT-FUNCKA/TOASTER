@@ -24,10 +24,12 @@ class BaseEvent(object):
     # Event data
     event_id: str = None
     event_type: str = None
+    event_raw: any = None
 
     def __init__(self, raw_event: dict, api: VkApi):
         self.event_type = raw_event.get("type")
         self.event_id = raw_event.get("event_id")
+        self.event_raw = raw_event
         self.__api = api
 
 
@@ -56,12 +58,17 @@ class BaseEvent(object):
         """Returns a string representation of the class's 
         attribute dictionary in a convenient form.
         """
+        blacklisted_keys = (
+            "__api",
+            "event_raw"
+        )
         summary = ""
         separator = "-------------------------------------------------"
 
         summary += separator + "\n"
         for key, value in self.__dict__.items():
-            summary += f"{key}: {value} \n"
+            if key not in blacklisted_keys:
+                summary += f"{key}: {value} \n"
         summary += separator
 
         return summary
