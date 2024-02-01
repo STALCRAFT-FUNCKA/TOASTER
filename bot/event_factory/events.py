@@ -59,7 +59,7 @@ class BaseEvent(object):
         attribute dictionary in a convenient form.
         """
         blacklisted_keys = (
-            "__api",
+            "_BaseEvent__api",
             "event_raw"
         )
         summary = ""
