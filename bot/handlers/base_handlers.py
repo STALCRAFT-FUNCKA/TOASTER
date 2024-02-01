@@ -65,7 +65,7 @@ class ABCMainHandler(ABC):
                 return self._handle(event, args, kwargs)
         else:
             self.__logger.error(
-                "Unable to handle event <%s|%s}>. "
+                "Unable to handle event <%s|%s>. "
                 "Handler <%s> does not have an API object.",
                 event.event_id,
                 event.event_type,
