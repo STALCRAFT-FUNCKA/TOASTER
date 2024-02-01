@@ -18,6 +18,8 @@ class ABCMainHandler(ABC):
         
     Returns:
         bool: Handling status. Returns True if was handled.
+            True - the event did not trigger anything
+            False - if event triggered something, it means event achieved goal
     """
     # logger object
     __logger = logging.getLogger("TOASTER")
@@ -62,7 +64,17 @@ class ABCMainHandler(ABC):
         """
         if self.__api is not None:
             if self._check(event):
-                return self._handle(event, args, kwargs)
+                # because:
+                # True - handler activated
+                # False - handler skiped
+                # It is necessary to reverse the values,
+                # to make the general status of the
+                # main handler from True -> False (False -> True)
+                # For the main handler:
+                # True - the event did not trigger anything
+                # False - if event triggered something, it means event achieved goal
+                return not self._handle(event, args, kwargs)
+
         else:
             self.__logger.error(
                 "Unable to handle event <%s|%s>. "
@@ -72,7 +84,7 @@ class ABCMainHandler(ABC):
                 self.__class__.__name__
             )
 
-        return False
+        return True
 
 
     @property
@@ -107,6 +119,8 @@ class ABCHandler(ABC):
 
     Returns:
         bool: Handling status.
+            True - handler triggered
+            False - handler skiped
     """
     @abstractmethod
     def _handle(self, event: MessageEvent, api: VkApi, args, kwargs) -> bool:
