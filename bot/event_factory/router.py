@@ -5,7 +5,8 @@ from vk_api import VkApi
 from vk_api.bot_longpoll import VkBotEvent
 from .events import (
     BaseEvent,
-    MessageEvent
+    MessageEvent,
+    ButtonEvent
 )
 
 
@@ -24,6 +25,11 @@ class Router(object):
 
     _event_blacklist = ()
 
+    _routes = {
+        "message_new": MessageEvent,
+        "message_event": ButtonEvent
+    }
+
     def _route(self, raw_event: dict, api: VkApi) -> BaseEvent:
         """The function determines the type of raw event,
         and then routes it to the desired custom event for subsequent redefinition.
@@ -36,6 +42,8 @@ class Router(object):
             CustomEvent: Custom event object.
         """
         reason = None
+        if raw_event.get("type") not in self._routes:
+            reason = "missing route"
 
         if raw_event.get("type") in self._event_blacklist:
             reason = "black-listed"
@@ -49,7 +57,7 @@ class Router(object):
             )
             return None
 
-        return MessageEvent(raw_event, api)
+        return self._routes[raw_event.get("type")](raw_event, api)
 
 
     def __call__(self, vk_event: VkBotEvent, api: VkApi) -> BaseEvent:
