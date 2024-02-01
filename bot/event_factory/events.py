@@ -1,6 +1,7 @@
 """File describing classes of custom events.
 """
 import logging
+import time
 from datetime import datetime
 from vk_api import VkApi
 
@@ -91,8 +92,6 @@ class MessageEvent(BaseEvent):
     reply: dict = None # dcit form
     forward: list = None # list of dicts
     attachments: list = None # list of dicts
-    action: dict = None
-    payload: dict = None
 
     # additional
     from_name = None
@@ -143,8 +142,135 @@ class MessageEvent(BaseEvent):
         self.reply = message.get("reply_message")
         self.forward = message.get("fwd_messages")
         self.attachments = message.get("attachments")
-        self.action = message.get("action")
-        self.payload = message.get("payload")
+
+
+    def __get_additionals(self):
+        if super().api is not None:
+            user_info = self.__get_userinfo()
+            peer_info = self.__get_peerinfo()
+
+            self.from_name = " ".join([
+                user_info.get("first_name"),
+                user_info.get("last_name")
+            ])
+            self.from_nickname = user_info.get("domain")
+            self.peer_name = peer_info.get("title")
+
+        else:
+            super().logger.warning(
+                "Unable to obtain additional" \
+                "information about event" \
+                "<%s|%s}>." \
+                "Missing API object.",
+                super().event_id,
+                super().event_type
+            )
+
+
+    def __get_userinfo(self):
+        necessary_feilds = [
+            "domain",
+        ]
+        user_info = super().api.users.get(
+            user_ids=self.from_id,
+            fields=necessary_feilds
+        )
+        if not user_info:
+            user_info = {}
+            super().logger.warning(
+                "Unable to obtain user information." \
+                "Bot don't have administrator rights or" \
+                "user doesn't exist."
+            )
+        else:
+            user_info = user_info[0]
+
+        return user_info
+
+
+    def __get_peerinfo(self):
+        peer_info = super().api.messages.getConversationsById(
+            peer_ids=self.peer_id
+        )
+
+        if peer_info.get("count") == 0:
+            peer_info = {}
+            super().logger.warning(
+                "Unable to obtain conversation information." \
+                "Bot don't have administrator rights or" \
+                "conversation doesn't exist."
+            )
+
+        else:
+            peer_info = peer_info["items"][0]["chat_settings"]
+
+        return peer_info
+
+
+
+
+class ButtonEvent(BaseEvent):
+    """Custom button event.
+    """
+    # message data
+    user_id: int = None
+    peer_id: int = None
+    chat_id: int = None
+    cmid: int = None
+    timestamp: int = None
+    datetime: str = None
+
+    # button content
+    button_event_id: str = None
+    payload: dict = None
+
+    # additional
+    from_name = None
+    from_nickname: str = None
+    peer_name = None
+
+
+    def __init__(self, raw_event: dict, api: VkApi):
+        super().__init__(raw_event, api)
+
+        # custom event_type
+        self.event_type = "button_pressed"
+
+        # building event fields
+        self.__get_data(raw_event)
+        self.__get_content(raw_event)
+        self.__get_additionals()
+
+
+    def __get_data(self, raw_event: dict):
+        event_object = raw_event.get("object")
+        if event_object is None:
+            return
+
+        self.from_id = event_object.get("user_id")
+        self.peer_id = event_object.get("peer_id")
+        self.chat_id = self.peer_id - VK_GROUP_ID_DELAY
+        self.cmid = raw_event.get("conversation_message_id")
+        self.timestamp = time.time()
+
+        if self.timestamp:
+            self.datetime = str(datetime.utcfromtimestamp(self.timestamp))
+
+
+    def __get_content(self, raw_event: dict):
+        event_object = raw_event.get("object")
+        if event_object is None:
+            super().logger.warning(
+                "Unable to obtain message content." \
+                "Missing event object." \
+                "<%s|%s}>",
+                super().event_id,
+                super().event_type
+            )
+            return
+
+        self.payload = event_object.get("payload")
+        self.button_event_id = event_object.get("event_id")
 
 
     def __get_additionals(self):
