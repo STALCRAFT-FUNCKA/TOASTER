@@ -8,6 +8,7 @@ from vk_api.bot_longpoll import (
     VkBotEvent
 )
 from .event_factory import Router, BaseEvent
+from .handlers import CommandHandler
 
 
 class Bot(object):
@@ -34,6 +35,15 @@ class Bot(object):
         self.__create_session()
         self.__create_longpoll()
         self.__create_api()
+        self.__init_handlers()
+
+
+    def __init_handlers(self):
+        #self.trigger_handler = TriggerHandler(self.api)
+        #self.action_handler = ActionHandler(self.api)
+        self.command_handler = CommandHandler(self.api)
+        #self.button_handler = ButtonHandler(self.api)
+
 
     def __create_session(self):
         """Creates VK session with using group acces token.
@@ -85,8 +95,8 @@ class Bot(object):
 
                 self.__handle_event(event)
 
-    @staticmethod
-    def __handle_event(event: BaseEvent):
+
+    def __handle_event(self, event: BaseEvent):
         """Processes an event received as input.
         By processing we mean the use of filters, 
         triggers, command recognition, etc.
@@ -94,5 +104,18 @@ class Bot(object):
         Args:
             event (BaseEvent): Base custom event.
         """
-        if event:
-            return
+        handled = not all((
+            # self.trigger_handler(event),
+            # self.action_handler(event),
+            self.command_handler(event),
+            # self.button_handler(event),
+        ))
+
+        if handled:
+            self.__logger.info(
+                "Event handled successfully."
+            )
+        else:
+            self.__logger.info(
+                "The event did not trigger a single handler."
+            )
