@@ -27,7 +27,6 @@ class Bot(object):
 
     # Event handlers
     trigger_handler = None # if message contains text, attachments,forwards or replies
-    action_handler = None # if message contains action
     command_handler = None # if message text starts with COMMAND_PREFIX
     button_handler = None # if message contains payload
 
@@ -40,7 +39,6 @@ class Bot(object):
 
     def __init_handlers(self):
         #self.trigger_handler = TriggerHandler(self.api)
-        #self.action_handler = ActionHandler(self.api)
         self.command_handler = CommandHandler(self.api)
         #self.button_handler = ButtonHandler(self.api)
 
@@ -106,7 +104,6 @@ class Bot(object):
         """
         handled = not all((
             # self.trigger_handler(event),
-            # self.action_handler(event),
             self.command_handler(event),
             # self.button_handler(event),
         ))
