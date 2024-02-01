@@ -4,7 +4,9 @@ from .handlers import commands
 
 
 class CommandHandler(ABCMainHandler):
-    """_summary_
+    """Event handler class that recognizes commands
+    in the message and executing attached to each command
+    actions.
     """
     # Command prefixes: /test or !test
     COMMAND_PREFIX: tuple = ("!", "/")
@@ -31,7 +33,7 @@ class CommandHandler(ABCMainHandler):
 
         if selected is None:
             super().logger.info(
-                "Could not define command <%s>",
+                "Could not recognize command <%s>",
                 command
             )
             return False
