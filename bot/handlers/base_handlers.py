@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from vk_api import VkApi
-from ..event_factory import MessageEvent
+from ..event_factory import BaseEvent
 
 
 class ABCMainHandler(ABC):
@@ -35,7 +35,7 @@ class ABCMainHandler(ABC):
 
 
     @abstractmethod
-    def _check(self, event: MessageEvent) -> bool:
+    def _check(self, event: BaseEvent) -> bool:
         """The need to check conditions 
         (existence fields, text form).
         
@@ -45,7 +45,7 @@ class ABCMainHandler(ABC):
 
 
     @abstractmethod
-    def _handle(self, event: MessageEvent, args, kwargs) -> bool:
+    def _handle(self, event: BaseEvent, args, kwargs) -> bool:
         """Handle a custom event, returning the processing result.
         Applies all handlers one by one to the custom event object.
 
@@ -57,7 +57,7 @@ class ABCMainHandler(ABC):
         """
 
 
-    def __call__(self, event: MessageEvent, *args, **kwargs) -> bool:
+    def __call__(self, event: BaseEvent, *args, **kwargs) -> bool:
         """Calls the class as a function,
         handling the received input
         BaseEvent object.
@@ -123,7 +123,7 @@ class ABCHandler(ABC):
             False - handler skiped
     """
     @abstractmethod
-    def _handle(self, event: MessageEvent, api: VkApi, args, kwargs) -> bool:
+    def _handle(self, event: BaseEvent, api: VkApi, args, kwargs) -> bool:
         """Handling a custom event that returns the result of processing.
         It is used within the framework of one specific action with a custom event.
 
@@ -136,7 +136,7 @@ class ABCHandler(ABC):
         """
 
 
-    def __call__(self, event: MessageEvent, api: VkApi, *args, **kwargs) -> bool:
+    def __call__(self, event: BaseEvent, api: VkApi, *args, **kwargs) -> bool:
         """Calls the class as a function,
         handling the received input
         BaseEvent object.
