@@ -52,6 +52,7 @@ class Bot(object):
         )
         self.__logger.info("Session created.")
 
+
     def __create_longpoll(self):
         """Creating connection to longpoll VK server with using VK session object.
         """
@@ -62,11 +63,13 @@ class Bot(object):
         )
         self.__logger.info("Connected to longpoll server.")
 
+
     def __create_api(self):
         """Gets VK API object. Can be used to execute VK serverside queries.
         """
         self.api = self.__session.get_api()
         self.__logger.info("API object created.")
+
 
     def __fabricate_event(self, vk_event: VkBotEvent) -> BaseEvent:
         """The function accesses the router object, which selects according to the event type
@@ -79,6 +82,7 @@ class Bot(object):
             BaseEvent: Base custom event.
         """
         return self.factory(vk_event, self.api)
+
 
     def run(self):
         """Starts listening VK longpoll server.
@@ -102,13 +106,23 @@ class Bot(object):
         Args:
             event (BaseEvent): Base custom event.
         """
-        handled = not all((
-            # self.trigger_handler(event),
-            self.command_handler(event),
-            # self.button_handler(event),
+        # Handlers must be placed in order
+        # logical descending
+        handlers = {
+            "message_new": (
+                #self.trigger_handler,
+                self.command_handler,
+            ),
+            "button_pressed": (
+                # self.button_handler(event),
+            )
+        }
+
+        interrupted = not all((
+            handler(event) for handler in handlers[event.event_type]
         ))
 
-        if handled:
+        if interrupted:
             self.__logger.info(
                 "Event handled successfully."
             )
