@@ -144,7 +144,7 @@ class MessageEvent(BaseEvent):
         self.forward = message.get("fwd_messages")
         self.attachments = message.get("attachments")
         self.action = message.get("action")
-        self.action = message.get("payload")
+        self.payload = message.get("payload")
 
 
     def __get_additionals(self):
