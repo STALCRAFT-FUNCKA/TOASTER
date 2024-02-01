@@ -157,7 +157,7 @@ class MessageEvent(BaseEvent):
                 user_info.get("last_name")
             ])
             self.from_nickname = user_info.get("domain")
-            self.peer_name = peer_info.GET("title")
+            self.peer_name = peer_info.get("title")
 
         else:
             super().logger.warning(
