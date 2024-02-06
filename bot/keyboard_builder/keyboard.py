@@ -49,6 +49,8 @@ class Keyboard(object):
 
         self._button_count += len(buttons)
 
+        return self
+
 
     @property
     def json(self):
