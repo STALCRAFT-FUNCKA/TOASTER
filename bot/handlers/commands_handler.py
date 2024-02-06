@@ -1,9 +1,9 @@
-from ..base_handlers import ABCMainHandler
-from ...event_factory import MessageEvent
-from .handlers import commands
+from tools.handler import ABCHandlingHub
+from bot.event_factory import MessageEvent
+from .commands import commands
 
 
-class CommandHandler(ABCMainHandler):
+class CommandHandler(ABCHandlingHub):
     """Event handler class that recognizes commands
     in the message and executing attached to each command
     actions.

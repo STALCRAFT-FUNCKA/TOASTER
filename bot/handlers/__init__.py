@@ -1,4 +1,4 @@
-from .command_handlers import CommandHandler
+from .commands_handler import CommandHandler
 
 
 __all__ = (
