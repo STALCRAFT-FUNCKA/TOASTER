@@ -44,7 +44,7 @@ class Keyboard(object):
             return
 
         self._body["buttons"].append(
-            [button.as_dict for button in buttons]
+            [button.body for button in buttons]
         )
 
         self._button_count += len(buttons)
