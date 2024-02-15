@@ -6,7 +6,11 @@ class MetaSingleton(type):
 
     Returns:
         cls: Class object instance.
+    
+    Easert egg:
+        Hello, cherepawwka! 
     """
+
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
