@@ -1,10 +1,10 @@
-# 🍞 TOASTER #
+# 🍞 TOASTER V3 "LIGHTWEIGHT" #
 
 ![lIp6qFj_oSw](https://user-images.githubusercontent.com/76991612/221510792-38d1cfea-d5a9-4971-bc61-3022da20555e.jpg)
 
 ## ❗ Оглавление ##
 
-- [🍞 TOASTER](#-toaster)
+- [🍞 TOASTER V3 "LIGHTWEIGHT"](#-toaster-v3-lightweight)
   - [❗ Оглавление](#-оглавление)
   - [📄 Введение](#-введение)
   - [⚙️ Настройка VPS](#️-настройка-vps)
