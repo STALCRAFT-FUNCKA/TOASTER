@@ -2,32 +2,32 @@
 This file contains a database connection class and
 an object relational model for interacting with it.
 """
-
 import os
 import logging
 import MySQLdb
-from singltone import MetaSingleton
+from tools import MetaSingleton
 from .core import tables
 
 
 class Connection:
+    """This class provides connection
+    to the MySQL database.
     """
-    This class provides connection to the MySQL database.
-    """
-
     def _fill_schema(self):
-        """
-        Creates a database named "toaster" if one does not exist.
+        """Creates a database named "toaster"
+        if one does not exist.
         """
         self._cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
 
+
     def _fill_tables(self):
-        """
-        Populates the database with a standard table structure.
+        """Populates the database with
+        a standard table structure.
         """
         self._cursor.execute('USE toaster')
         for table in tables:
             self._cursor.execute(table)
+
 
     def __init__(self, allow_debug_text=True):
         try:
@@ -50,22 +50,22 @@ class Connection:
             if allow_debug_text:
                 print("Ошибка при подключении к MySQL Server", error)
 
+
     def get_cursor(self):
-        """
-        Returns database cursor object.
+        """Returns database cursor object.
         """
         return self._cursor
 
+
     def get_connection(self):
-        """
-        Returns database connection object.
+        """Returns database connection object.
         """
         return self._connection
 
 
+
 class BaseTable:
-    """
-    Defines the base object of the table in object-relative
+    """Defines the base object of the table in object-relative
     representation and the main methods of interaction with it.
     """
     _ops = {
@@ -77,8 +77,7 @@ class BaseTable:
     }
 
     def _get_ratio(self, rows: dict) -> list:
-        """
-        When specifying a method for comparing variables in an ORM query method,
+        """When specifying a method for comparing variables in an ORM query method,
         you must use keywords. Key characters are transformed by this
         method into comparison operators. The function returns a list
         of strings that are arranged according to the desired pattern.
@@ -101,14 +100,15 @@ class BaseTable:
 
         return summary
 
+
     def __init__(self, table_name, connection, cursor):
         self.table_name = table_name
         self.con = connection
         self.cur = cursor
 
+
     def select(self, fields: tuple = None, **rows):
-        """
-        Accepts arguments for fields, comparisons, etc., 
+        """Accepts arguments for fields, comparisons, etc., 
         forms a database select query from them and returns the result of its execution.
         Keys that mimic comparison operators:
             1) __le -> <= \n
@@ -147,9 +147,9 @@ class BaseTable:
         logging.debug("Result: %s", result)
         return result
 
+
     def insert(self, on_duplicate=None, **rows):
-        """
-        Takes arguments for fields, comparisons, etc., 
+        """Takes arguments for fields, comparisons, etc., 
         forms a database insert query from them and inserts data when it is executed.
 
         Args:
@@ -181,9 +181,9 @@ class BaseTable:
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
 
+
     def update(self, new_data: dict, **rows):
-        """
-        Accepts arguments for fields, comparisons, etc.,
+        """Accepts arguments for fields, comparisons, etc.,
         forms a query from them to update the database
         and updates the data according to the dictionary
         of correspondences received as input when executing the request.
@@ -218,9 +218,9 @@ class BaseTable:
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
 
+
     def delete(self, **rows):
-        """
-        Takes arguments for fields, comparisons, etc.,
+        """Takes arguments for fields, comparisons, etc.,
         forms a request from them to delete from the
         database and deletes data according to the
         conditions specified by the comparison operators.
@@ -248,9 +248,9 @@ class BaseTable:
         logging.debug("Result: executed")
 
 
+
 class DataBase(metaclass=MetaSingleton):
-    """
-    The main class is the database view.
+    """The main class is the database view.
     Organizes a connection and implements
     access to table properties using
     object-relational methods of the base table.
@@ -260,8 +260,7 @@ class DataBase(metaclass=MetaSingleton):
 
     @property
     def conversations(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the conversion table.
         """
         return self._base_table(
@@ -270,10 +269,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def settings(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the settings table.
         """
         return self._base_table(
@@ -282,10 +281,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def permissions(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the permissions table.
         """
         return self._base_table(
@@ -294,10 +293,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def kicked(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the kicked table.
         """
         return self._base_table(
@@ -306,10 +305,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def banned(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the banned table.
         """
         return self._base_table(
@@ -318,10 +317,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def warned(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the warned table.
         """
         return self._base_table(
@@ -330,10 +329,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def muted(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the muted table.
         """
         return self._base_table(
@@ -342,10 +341,10 @@ class DataBase(metaclass=MetaSingleton):
             cursor=self._tunnel.get_cursor()
         )
 
+
     @property
     def queue(self):
-        """
-        A table property that implements
+        """A table property that implements
         object-relational access to the queue table.
         """
         return self._base_table(
