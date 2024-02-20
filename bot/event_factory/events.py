@@ -2,8 +2,11 @@
 """
 import logging
 import time
-from datetime import datetime
 from vk_api import VkApi
+from tools import (
+    timestamp,
+    msk_now
+)
 
 
 
@@ -26,11 +29,17 @@ class BaseEvent(object):
     event_id: str = None
     event_type: str = None
     event_raw: any = None
+    ts: int = None
+    datetime: str = None
 
     def __init__(self, raw_event: dict, api: VkApi):
         self.event_type = raw_event.get("type")
         self.event_id = raw_event.get("event_id")
         self.event_raw = raw_event
+
+        self.ts = timestamp()
+        self.datetime = msk_now()
+
         self.__api = api
 
 
@@ -84,8 +93,6 @@ class MessageEvent(BaseEvent):
     peer_id: int = None
     chat_id: int = None
     cmid: int = None
-    timestamp: int = None
-    datetime: str = None
 
     # message content
     text: str = None
@@ -119,9 +126,6 @@ class MessageEvent(BaseEvent):
         self.chat_id = self.peer_id - VK_GROUP_ID_DELAY
         self.cmid = message.get("conversation_message_id")
         self.timestamp = message.get("date")
-
-        if self.timestamp:
-            self.datetime = str(datetime.utcfromtimestamp(self.timestamp))
 
 
     def __get_content(self, raw_event: dict):
@@ -217,8 +221,6 @@ class ButtonEvent(BaseEvent):
     peer_id: int = None
     chat_id: int = None
     cmid: int = None
-    timestamp: int = None
-    datetime: str = None
 
     # button content
     button_event_id: str = None
@@ -252,9 +254,6 @@ class ButtonEvent(BaseEvent):
         self.chat_id = self.peer_id - VK_GROUP_ID_DELAY
         self.cmid = raw_event.get("conversation_message_id")
         self.timestamp = time.time()
-
-        if self.timestamp:
-            self.datetime = str(datetime.utcfromtimestamp(self.timestamp))
 
 
     def __get_content(self, raw_event: dict):
