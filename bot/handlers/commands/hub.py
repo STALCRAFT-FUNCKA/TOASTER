@@ -1,6 +1,6 @@
 from tools.handler import ABCHandlingHub
 from bot.event_factory import MessageEvent
-from .commands import commands
+from .handlers import commandlist
 
 
 class CommandHandler(ABCHandlingHub):
@@ -29,7 +29,7 @@ class CommandHandler(ABCHandlingHub):
         #command name
         command: str = arguments.pop(0)
 
-        selected = commands.get(command, None)
+        selected = commandlist.get(command, None)
 
         if selected is None:
             super().logger.info(

@@ -58,7 +58,6 @@ class TestCommand(ABCHandler):
         return True
 
 
-
-commands = {
+commandlist = {
     "test": TestCommand,
 }
