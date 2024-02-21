@@ -8,7 +8,7 @@ from vk_api.bot_longpoll import (
     VkBotEvent
 )
 from .event_factory import Router, BaseEvent
-from .handlers import CommandHandler
+from .handlers.commands import CommandHandler
 
 
 class Bot(object):
