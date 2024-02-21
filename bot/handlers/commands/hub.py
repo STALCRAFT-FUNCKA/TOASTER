@@ -1,5 +1,6 @@
 from tools.handler import ABCHandlingHub
-from bot.event_factory import MessageEvent
+from tools.event import MessageEvent
+from db import DataBase
 from .handlers import commandlist
 
 
@@ -12,6 +13,8 @@ class CommandHandler(ABCHandlingHub):
     COMMAND_PREFIX: tuple = ("!", "/")
     MAX_ARG_COUNT: int = 10
 
+    db = DataBase()
+
     def _check(self, event: MessageEvent) -> bool:
         text: str = event.text
 
@@ -21,7 +24,7 @@ class CommandHandler(ABCHandlingHub):
         return text.startswith(self.COMMAND_PREFIX)
 
 
-    def _handle(self, event: MessageEvent, args, kwargs) -> bool:
+    def _handle(self, event: MessageEvent, kwargs) -> bool:
         command_text: str = event.text
         command_text_wo_prefix: str = command_text[1:]
 
@@ -39,5 +42,5 @@ class CommandHandler(ABCHandlingHub):
             )
             return False
 
-        selected = selected()
-        return selected(event, super().api, argument_list=arguments)
+        selected = selected(self.db, super().api)
+        return selected(event, argument_list=arguments)
