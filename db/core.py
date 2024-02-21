@@ -2,22 +2,16 @@
 This file describes the main queries that form the structure of the database.
 """
 # TODO: add new Tables
-
-QUEUE = """
-CREATE TABLE IF NOT EXISTS queue
+CONVERSATIONS = """
+CREATE TABLE IF NOT EXISTS conversations
     (
-        id INTEGER PRIMARY KEY AUTO_INCREMENT,
+        conv_id BIGINT PRIMARY KEY,
 
-        peer_id INTEGER,
-        target_id INTEGER,
-        target_name VARCHAR(255),
-        send_time INTEGER,
-        next_time INTEGER,
+        conv_name VARCHAR(255),
+        conv_mark VARCHAR(10),
 
-        FOREIGN KEY (peer_id) REFERENCES conversations(peer_id) ON DELETE CASCADE,
-        CONSTRAINT message UNIQUE (peer_id, target_id)
+        CONSTRAINT conversation UNIQUE conv_id
     );
 """
 
-# Tables
-tables = []
+tables = (CONVERSATIONS,)
