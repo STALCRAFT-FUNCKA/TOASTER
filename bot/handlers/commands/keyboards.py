@@ -8,6 +8,13 @@ from tools.keyboard import (
 
 
 # -------------------------------------------------------------------
+EmptyKbd = (
+    Keyboard(inline=True, one_time=False)
+)
+
+
+
+# -------------------------------------------------------------------
 TestCommandKbd = (
     Keyboard(inline=True, one_time=False)
     .add_row()
@@ -15,8 +22,8 @@ TestCommandKbd = (
         Callback(
             label="Позитив",
             payload={
-                "button": "positive",
-                "call_action": "None"
+                "master_command": "test",
+                "call_action": "test"
             }
         ),
         ButtonColor.POSITIVE
@@ -25,8 +32,8 @@ TestCommandKbd = (
         Callback(
             label="Негатив",
             payload={
-                "button": "negative",
-                "call_action": "None"
+                "master_command": "test",
+                "call_action": "test"
             }
         ),
         ButtonColor.NEGATIVE
@@ -65,7 +72,7 @@ MarkCommandKbd =  (
             label="Обновить данные беседы",
             payload={
                 "master_command": "mark",
-                "call_action": "uptade_data"
+                "call_action": "uptade_conv_data"
             }
         ),
         ButtonColor.SECONDARY
