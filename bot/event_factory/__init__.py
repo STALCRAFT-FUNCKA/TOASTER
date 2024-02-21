@@ -4,11 +4,13 @@ and custom events that are created based on them in the router.
 from .router import Router
 from .events import (
     BaseEvent,
-    MessageEvent
+    MessageEvent, 
+    ButtonEvent
 )
 
 __all__ = (
     "Router",
     "BaseEvent",
-    "MessageEvent"
+    "MessageEvent",
+    "ButtonEvent"
 )
