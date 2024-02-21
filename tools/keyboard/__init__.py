@@ -10,6 +10,11 @@ from .action import (
     VKPay,
     Callback
 )
+from .answer import (
+    SnackbarAnswer,
+    AppAnswer,
+    LinkAnswer
+)
 
 
 __all__ = (
@@ -20,5 +25,8 @@ __all__ = (
     "OpenApp",
     "Location",
     "VKPay",
-    "Callback"
+    "Callback",
+    "SnackbarAnswer",
+    "AppAnswer",
+    "LinkAnswer"
 )
