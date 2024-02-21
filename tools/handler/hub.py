@@ -43,7 +43,7 @@ class ABCHandlingHub(ABC):
 
 
     @abstractmethod
-    def _handle(self, event: BaseEvent, args, kwargs) -> bool:
+    def _handle(self, event: BaseEvent, kwargs) -> bool:
         """Handle a custom event, returning the processing result.
         Applies all handlers one by one to the custom event object.
 
@@ -55,7 +55,7 @@ class ABCHandlingHub(ABC):
         """
 
 
-    def __call__(self, event: BaseEvent, *args, **kwargs) -> bool:
+    def __call__(self, event: BaseEvent, **kwargs) -> bool:
         """Calls the class as a function,
         handling the received input
         BaseEvent object.
@@ -71,7 +71,7 @@ class ABCHandlingHub(ABC):
                 # For the main handler:
                 # True - the event did not trigger anything
                 # False - if event triggered something, it means event achieved goal
-                return not self._handle(event, args, kwargs)
+                return not self._handle(event, kwargs)
 
         else:
             self.__logger.error(

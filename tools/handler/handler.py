@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from vk_api import VkApi
 from bot.event_factory import BaseEvent
 
 
@@ -18,7 +17,7 @@ class ABCHandler(ABC):
             False - handler skiped
     """
     @abstractmethod
-    def _handle(self, event: BaseEvent, api: VkApi, args, kwargs) -> bool:
+    def _handle(self, event: BaseEvent, kwargs) -> bool:
         """Handling a custom event that returns the result of processing.
         It is used within the framework of one specific action with a custom event.
 
@@ -31,9 +30,9 @@ class ABCHandler(ABC):
         """
 
 
-    def __call__(self, event: BaseEvent, api: VkApi, *args, **kwargs) -> bool:
+    def __call__(self, event: BaseEvent, **kwargs) -> bool:
         """Calls the class as a function,
         handling the received input
         BaseEvent object.
         """
-        return self._handle(event, api, args, kwargs)
+        return self._handle(event, kwargs)
