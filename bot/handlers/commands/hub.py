@@ -10,6 +10,7 @@ class CommandHandler(ABCHandlingHub):
     """
     # Command prefixes: /test or !test
     COMMAND_PREFIX: tuple = ("!", "/")
+    MAX_ARG_COUNT: int = 10
 
     def _check(self, event: MessageEvent) -> bool:
         text: str = event.text
@@ -25,7 +26,7 @@ class CommandHandler(ABCHandlingHub):
         command_text_wo_prefix: str = command_text[1:]
 
         #command arguments
-        arguments: list = command_text_wo_prefix.split(" ")
+        arguments: list = command_text_wo_prefix.split(" ")[0:self.MAX_ARG_COUNT]
         #command name
         command: str = arguments.pop(0)
 
