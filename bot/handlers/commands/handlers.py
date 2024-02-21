@@ -1,11 +1,10 @@
 from vk_api import VkApi
 from tools.handler import ABCHandler
-from tools.keyboard import (
-    Keyboard,
-    Callback,
-    ButtonColor
-)
 from bot.event_factory import MessageEvent
+from .keyboards import (
+    TestCommandKbd,
+    MarkCommandKbd,
+)
 
 
 
@@ -23,41 +22,44 @@ class TestCommand(ABCHandler):
         answer_text = f"Вызвана комманда <{self.COMMAND_NAME}> " \
                       f"с аргументами {kwargs.get('argument_list')}."
 
-        answer_keyboard = (
-            Keyboard(inline=True, one_time=False)
-            .add_row()
-            .add_button(
-                Callback(
-                    label="Позитив",
-                    payload={
-                        "button": "positive",
-                        "call_action": "None"
-                    }
-                ),
-                ButtonColor.POSITIVE
-            )
-            .add_button(
-                Callback(
-                    label="Негатив",
-                    payload={
-                        "button": "negative",
-                        "call_action": "None"
-                    }
-                ),
-                ButtonColor.NEGATIVE
-            )
-        )
-
         api.messages.send(
             peer_id=event.peer_id,
             random_id=0,
             message=answer_text,
-            keyboard=answer_keyboard.json
+            keyboard=TestCommandKbd.json
         )
 
         return True
 
 
+
+class MarkCommand(ABCHandler):
+    """Mark command.
+    Initializes conversation marking process.
+    Allows:
+        - To mark conversation as "CHAT" or "LOG".
+        - Update the data about conversation.
+        - Delete conversation mark.
+    """
+    COMMAND_NAME = "mark"
+
+    def _handle(self, event: MessageEvent, api: VkApi, args, kwargs) -> bool:
+        answer_text = "⚠️ Вы хотите пометить новую беседу? \n\n" \
+        "Выберите необходимое дествие из меню ниже:"
+
+        api.messages.send(
+            peer_id=event.peer_id,
+            random_id=0,
+            message=answer_text,
+            keyboard=MarkCommandKbd.json
+        )
+
+        return True
+
+
+
+
 commandlist = {
     "test": TestCommand,
+    "mark": MarkCommand
 }
