@@ -84,20 +84,6 @@ class Bot(object):
         return self.factory(vk_event, self.api)
 
 
-    def run(self):
-        """Starts listening VK longpoll server.
-        """
-        self.__logger.info("Starting listening longpoll server...")
-        for vk_event in self.__longpoll.listen():
-            event = self.__fabricate_event(vk_event)
-            if event is not None:
-                self.__logger.info(
-                    "New event recived: \n %s ", event.attr_str
-                )
-
-                self.__handle_event(event)
-
-
     def __handle_event(self, event: BaseEvent):
         """Processes an event received as input.
         By processing we mean the use of filters, 
@@ -130,3 +116,17 @@ class Bot(object):
             self.__logger.info(
                 "The event did not trigger a single handler."
             )
+
+
+    def run(self):
+        """Starts listening VK longpoll server.
+        """
+        self.__logger.info("Starting listening longpoll server...")
+        for vk_event in self.__longpoll.listen():
+            event = self.__fabricate_event(vk_event)
+            if event is not None:
+                self.__logger.info(
+                    "New event recived: \n %s ", event.attr_str
+                )
+
+                self.__handle_event(event)
