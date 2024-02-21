@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from bot.event_factory import BaseEvent
+from tools.event import BaseEvent
 
 
 class ABCHandler(ABC):

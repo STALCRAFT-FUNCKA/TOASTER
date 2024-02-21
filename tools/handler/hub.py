@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from vk_api import VkApi
-from bot.event_factory import BaseEvent
+from tools.event import BaseEvent
 
 
 class ABCHandlingHub(ABC):
