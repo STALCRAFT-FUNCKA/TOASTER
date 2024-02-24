@@ -10,6 +10,7 @@ from vk_api.bot_longpoll import (
 from tools.event import BaseEvent
 from .router import Router
 from .handlers.commands import CommandHandler
+from .handlers.actions import ActionHandler
 
 
 class Bot(object):
@@ -26,11 +27,6 @@ class Bot(object):
     # Custom event factory
     factory = Router()
 
-    # Event handlers
-    trigger_handler = None # if message contains text, attachments,forwards or replies
-    command_handler = None # if message text starts with COMMAND_PREFIX
-    button_handler = None # if message contains payload
-
     def __init__(self):
         self.__create_session()
         self.__create_longpoll()
@@ -41,7 +37,7 @@ class Bot(object):
     def __init_handlers(self):
         #self.trigger_handler = TriggerHandler(self.api)
         self.command_handler = CommandHandler(self.api)
-        #self.button_handler = ButtonHandler(self.api)
+        self.action_handler = ActionHandler(self.api)
 
 
     def __create_session(self):
@@ -101,7 +97,7 @@ class Bot(object):
                 self.command_handler,
             ),
             "button_pressed": (
-                # self.button_handler(event),
+                self.action_handler,
             )
         }
 
@@ -115,7 +111,7 @@ class Bot(object):
             )
         else:
             self.__logger.info(
-                "The event did not trigger a single handler."
+                "The event did not trigger any handler."
             )
 
 
@@ -127,7 +123,7 @@ class Bot(object):
             event = self.__fabricate_event(vk_event)
             if event is not None:
                 self.__logger.info(
-                    "New event recived: \n %s ", event.attr_str
+                    "New event recived: \n %s", event.attr_str
                 )
 
                 self.__handle_event(event)
