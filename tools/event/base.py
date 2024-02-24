@@ -68,7 +68,6 @@ class BaseEvent(object):
         summary = ""
         separator = "-------------------------------------------------"
 
-        summary += separator + "\n"
         for key, value in self.__dict__.items():
             if key not in blacklisted_keys:
                 summary += f"{key}: {value} \n"

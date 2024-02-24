@@ -171,7 +171,7 @@ class ButtonEvent(BaseEvent):
         self.from_id = event_object.get("user_id")
         self.peer_id = event_object.get("peer_id")
         self.chat_id = self.peer_id - VK_GROUP_ID_DELAY
-        self.cmid = raw_event.get("conversation_message_id")
+        self.cmid = event_object.get("conversation_message_id")
 
 
     def __get_content(self, raw_event: dict):
