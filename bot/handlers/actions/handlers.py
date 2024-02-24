@@ -43,9 +43,9 @@ class MarkAsChatAction(BaseAction):
     data about it in the database.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
-        feilds = ("conv_name",)
+        fields = ("conv_mark",)
         mark = self.db.conversations.select(
-            feilds=feilds,
+            fields=fields,
             conv_id=event.peer_id
         )
         already_marked = bool(mark)
@@ -73,9 +73,9 @@ class MarkAsLogAction(BaseAction):
     data about it in the database.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
-        feilds = ("conv_name",)
+        fields = ("conv_mark",)
         mark = self.db.conversations.select(
-            feilds=feilds,
+            fields=fields,
             conv_id=event.peer_id
         )
         already_marked = bool(mark)
@@ -106,9 +106,9 @@ class UpdateConvDataAction(BaseAction):
     conversation.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
-        feilds = ("conv_name",)
+        fields = ("conv_mark",)
         mark = self.db.conversations.select(
-            feilds=feilds,
+            fields=fields,
             conv_id=event.peer_id
         )
         already_marked = bool(mark)
@@ -138,9 +138,9 @@ class DropMarkAction(BaseAction):
     deleting records about it in the database.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
-        feilds = ("conv_name",)
+        fields = ("conv_mark",)
         mark = self.db.conversations.select(
-            feilds=feilds,
+            fields=fields,
             conv_id=event.peer_id
         )
         already_marked = bool(mark)
@@ -168,7 +168,8 @@ class CancelMarkingAction(BaseAction):
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
         self.api.messages.delete(
             peer_id=event.peer_id,
-            cmids=event.cmid
+            cmids=event.cmid,
+            delete_for_all=1
         )
 
         snackbar_message = "❗Отмена команды."
