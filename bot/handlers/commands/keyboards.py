@@ -72,7 +72,7 @@ MarkCommandKbd =  (
             label="Обновить данные беседы",
             payload={
                 "master_command": "mark",
-                "call_action": "uptade_conv_data"
+                "call_action": "update_conv_data"
             }
         ),
         ButtonColor.SECONDARY
