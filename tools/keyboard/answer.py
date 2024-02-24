@@ -1,3 +1,8 @@
+"""File describing the types of answers of VK keyboard buttons.
+"""
+import json
+
+
 class BaseAnswer(object):
     """VK keyboard button action base class.
     """
@@ -16,11 +21,11 @@ class BaseAnswer(object):
             key: value for key, value in vars(self).items()
         }
 
-        return data
+        return json.dumps(data)
 
 
 
-class SnackbarAnswer(object):
+class SnackbarAnswer(BaseAnswer):
     """VK keyboard button action base class.
     """
     def __init__(self, text: str):
@@ -30,7 +35,7 @@ class SnackbarAnswer(object):
 
 
 
-class LinkAnswer(object):
+class LinkAnswer(BaseAnswer):
     """VK keyboard button action base class.
     """
     def __init__(self, url: str):
@@ -40,7 +45,7 @@ class LinkAnswer(object):
 
 
 
-class AppAnswer(object):
+class AppAnswer(BaseAnswer):
     """VK keyboard button action base class.
     """
     def __init__(self, app_hash: str, app_id: int, owner_id: int):
