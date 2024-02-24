@@ -1,29 +1,11 @@
-from vk_api import VkApi
-from tools.handler import ABCHandler
 from tools.event import MessageEvent
-from db import DataBase
+from .base import BaseCommand
 from .keyboards import (
     TestCommandKbd,
     MarkCommandKbd,
 )
 
 
-class BaseCommand(ABCHandler):
-    """Command handler base class.
-    """
-    def __init__(self, db: DataBase, api: VkApi):
-        self.db = db
-        self.api = api
-
-    def log(self):
-        """Sends a log of command execution
-        in log-convs.
-        """
-        # TODO: write me
-
-
-
-# -------------------------------------------------------------------
 class TestCommand(BaseCommand):
     """Test command.
     Sends test content to the chat where the command was called:
@@ -32,6 +14,7 @@ class TestCommand(BaseCommand):
         Keyboard
         e.t.c
     """
+    __permission_lvl = 2
     COMMAND_NAME = "test"
 
     def _handle(self, event: MessageEvent, kwargs) -> bool:
@@ -49,7 +32,6 @@ class TestCommand(BaseCommand):
 
 
 
-# -------------------------------------------------------------------
 class MarkCommand(BaseCommand):
     """Mark command.
     Initializes conversation marking process.
@@ -58,6 +40,7 @@ class MarkCommand(BaseCommand):
         - Update the data about conversation.
         - Delete conversation mark.
     """
+    __permission_lvl = 2
     COMMAND_NAME = "mark"
 
     def _handle(self, event: MessageEvent, kwargs) -> bool:
