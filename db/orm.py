@@ -2,10 +2,10 @@
 This file contains a database connection class and
 an object relational model for interacting with it.
 """
-import os
 import logging
 import MySQLdb
 from tools import MetaSingleton
+import config
 from .core import tables
 
 
@@ -18,10 +18,10 @@ class Connection:
     def __init__(self, allow_debug_text=True):
         try:
             self._connection = MySQLdb.connect(
-                host=os.getenv("TOASTER_SQL_DEV_HOST"),
-                port=int(os.getenv("TOASTER_SQL_DEV_PORT")),
-                user=os.getenv("TOASTER_SQL_DEV_USER"),
-                password=os.getenv("TOASTER_SQL_DEV_PASSWORD")
+                host=config.SQL_HOST,
+                port=config.SQL_PORT,
+                user=config.SQL_USER,
+                password=config.SQL_PSWD
             )
             self._connection.autocommit(True)
             self._cursor = self._connection.cursor()
@@ -264,7 +264,6 @@ class DataBase(metaclass=MetaSingleton):
     _base_table = BaseTable
     _tunnel = Connection()
 
-    # TODO: add normal tables later
     @property
     def conversations(self):
         """A table property that implements
@@ -272,6 +271,17 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="conversations",
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
+        )
+
+    @property
+    def permissions(self):
+        """A table property that implements
+        object-relational access to the conversion table.
+        """
+        return self._base_table(
+            table_name="permissions",
             connection=self._tunnel.connection,
             cursor=self._tunnel.cursor
         )
