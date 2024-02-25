@@ -17,13 +17,16 @@ CREATE TABLE IF NOT EXISTS conversations
 CONVERSATIONS = """
 CREATE TABLE IF NOT EXISTS permissions
     (
-        conv_id BIGINT PRIMARY KEY,
-
+        record_id INT PRIMARY KEY AUTO_INCREMENT,
+        
+        conv_id BIGINT,
         user_id BIGINT,
         user_name VARCHAR(100),
         user_permission TINYINT(10),
 
+        FOREIGN KEY (conv_id) REFERENCES conversations(conv_id) ON DELETE CASCADE,
         CONSTRAINT permission UNIQUE (conv_id, user_id)
+        
     );
 """
 
