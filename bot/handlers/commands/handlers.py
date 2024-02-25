@@ -165,7 +165,7 @@ class PermissionCommand(BaseCommand):
                 Callback(
                     label="Модератор",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "set_moderator_permission"
                     }
                 ),
@@ -175,7 +175,7 @@ class PermissionCommand(BaseCommand):
                 Callback(
                     label="Администратор",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "set_administrator_permission"
                     }
                 ),
@@ -185,7 +185,7 @@ class PermissionCommand(BaseCommand):
                 Callback(
                     label="Пользователь",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "set_user_permission"
                     }
                 ),
@@ -197,7 +197,7 @@ class PermissionCommand(BaseCommand):
                 Callback(
                     label="Отмена команды",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "cancel_command"
                     }
                 ),
