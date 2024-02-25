@@ -1,6 +1,5 @@
 """A file containing a description of the bot's main class with all its functions.
 """
-import os
 import logging
 from vk_api import VkApi
 from vk_api.bot_longpoll import (
@@ -8,6 +7,7 @@ from vk_api.bot_longpoll import (
     VkBotEvent
 )
 from tools.event import BaseEvent
+import config
 from .router import Router
 from .handlers.commands import CommandHandler
 from .handlers.actions import ActionHandler
@@ -44,8 +44,8 @@ class Bot(object):
         """Creates VK session with using group acces token.
         """
         self.__session = VkApi(
-            token=os.getenv("TOASTER_DEV_TOKEN"),
-            api_version="5.199"
+            token=config.TOKEN,
+            api_version=config.API_VERSION
         )
         self.__logger.info("Session created.")
 
@@ -55,8 +55,8 @@ class Bot(object):
         """
         self.__longpoll = VkBotLongPoll(
             vk=self.__session,
-            wait=10,
-            group_id=os.getenv("TOASTER_DEV_GROUPID")
+            wait=config.LONGPOLL_REQUEST_TD,
+            group_id=config.GROUP_ID
         )
         self.__logger.info("Connected to longpoll server.")
 
