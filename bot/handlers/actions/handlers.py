@@ -1,8 +1,10 @@
 from tools.event import ButtonEvent
+from tools.keyboard import Keyboard
 from .base import BaseAction
-from .keyboards import EmptyKbd
 
 
+
+# ------------------------------------------------------------------------
 class NotMessageOwnerAction(BaseAction):
     """Action that denies force
     unless it belongs to the author
@@ -13,21 +15,26 @@ class NotMessageOwnerAction(BaseAction):
 
         self.snackbar(event, snackbar_message)
 
-        return True
+        return False
 
 
 
+# ------------------------------------------------------------------------
 class TestAction(BaseAction):
     """Test action.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
         new_msg_text = "Тест был пройден!"
 
+        keyboard = (
+            Keyboard(inline=True, one_time=False)
+        )
+
         self.api.messages.edit(
             peer_id=event.peer_id,
             conversation_message_id=event.cmid,
             message=new_msg_text,
-            keyboard=EmptyKbd.json
+            keyboard=keyboard.json
         )
 
         snackbar_message = "⚠️ Тест пройден!"
@@ -38,6 +45,7 @@ class TestAction(BaseAction):
 
 
 
+# ------------------------------------------------------------------------
 class MarkAsChatAction(BaseAction):
     """Creates a "chat" mark and stores
     data about it in the database.
@@ -177,6 +185,12 @@ class CancelMarkingAction(BaseAction):
         self.snackbar(event, snackbar_message)
 
         return True
+
+
+
+# ------------------------------------------------------------------------
+
+
 
 
 actionlist = {
