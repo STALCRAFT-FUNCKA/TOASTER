@@ -1,6 +1,7 @@
 from tools.handler import ABCHandlingHub
 from tools.event import MessageEvent
 from db import DataBase
+import config
 from .handlers import commandlist
 
 
@@ -9,11 +10,7 @@ class CommandHandler(ABCHandlingHub):
     in the message and executing attached to each command
     actions.
     """
-    # Command prefixes: /test or !test
-    COMMAND_PREFIX: tuple = ("!", "/")
-    MAX_ARG_COUNT: int = 10
-
-    db = DataBase()
+    db = DataBase("toaster")
 
     def _check(self, event: MessageEvent) -> bool:
         text: str = event.text
@@ -21,7 +18,7 @@ class CommandHandler(ABCHandlingHub):
         if text is None:
             return False
 
-        return text.startswith(self.COMMAND_PREFIX)
+        return text.startswith(config.COMMAND_PREFIXES)
 
 
     def _handle(self, event: MessageEvent, kwargs) -> bool:
@@ -29,11 +26,11 @@ class CommandHandler(ABCHandlingHub):
         command_text_wo_prefix: str = command_text[1:]
 
         #command arguments
-        arguments: list = command_text_wo_prefix.split(" ")[0:self.MAX_ARG_COUNT]
+        arguments: list = command_text_wo_prefix.split(" ")[0:config.MAX_COMMAND_ARG_COUNT]
         #command name
         command: str = arguments.pop(0)
 
-        selected = commandlist.get(command, None)
+        selected = commandlist.get(command)
 
         if selected is None:
             super().logger.info(
@@ -43,4 +40,25 @@ class CommandHandler(ABCHandlingHub):
             return False
 
         selected = selected(self.db, super().api)
-        return selected(event, argument_list=arguments)
+
+        user_lvl = self.__get_userlvl(event)
+        if selected.permission <= user_lvl:
+            return selected(event, argument_list=arguments)
+
+        return False
+
+
+    def __get_userlvl(self, event: MessageEvent) -> int:
+        if event.from_id == config.STAFF_ADMIN_ID:
+            return 2
+
+        user_lvl = self.db.permissions.select(
+            fields=("user_permission",),
+            conv_id=event.peer_id
+        )
+
+        if bool(user_lvl):
+            return int(user_lvl[0][0])
+
+        return 0
+        
