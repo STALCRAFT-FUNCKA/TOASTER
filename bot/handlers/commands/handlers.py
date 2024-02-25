@@ -125,7 +125,7 @@ class MarkCommand(BaseCommand):
                     label="Отмена команды",
                     payload={
                         "keyboard_owner_id": event.peer_id,
-                        "call_action": "cancel_marking"
+                        "call_action": "cancel_command"
                     }
                 ),
                 ButtonColor.NEGATIVE

@@ -10,7 +10,7 @@ class CommandHandler(ABCHandlingHub):
     in the message and executing attached to each command
     actions.
     """
-    db = DataBase("toaster")
+    db = DataBase()
 
     def _check(self, event: MessageEvent) -> bool:
         text: str = event.text

@@ -9,7 +9,7 @@ class ActionHandler(ABCHandlingHub):
     in the message and executing attached to each button
     actions.
     """
-    db = DataBase("toaster")
+    db = DataBase()
 
     def _check(self, event: ButtonEvent) -> bool:
         return bool(event.payload)
