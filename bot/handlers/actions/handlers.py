@@ -1,5 +1,6 @@
 from tools.event import ButtonEvent
 from tools.keyboard import Keyboard
+import config
 from .base import BaseAction
 
 
@@ -16,6 +17,26 @@ class NotMessageOwnerAction(BaseAction):
         self.snackbar(event, snackbar_message)
 
         return False
+
+
+
+# ------------------------------------------------------------------------
+class CancelAction(BaseAction):
+    """Cancels the command, closes the menu,
+    and deletes the message.
+    """
+    def _handle(self, event: ButtonEvent, kwargs) -> bool:
+        self.api.messages.delete(
+            peer_id=event.peer_id,
+            cmids=event.cmid,
+            delete_for_all=1
+        )
+
+        snackbar_message = "❗Отмена команды."
+
+        self.snackbar(event, snackbar_message)
+
+        return True
 
 
 
@@ -169,18 +190,168 @@ class DropMarkAction(BaseAction):
 
 
 
-class CancelMarkingAction(BaseAction):
-    """Cancels the command, closes the menu,
-    and deletes the message.
+# ------------------------------------------------------------------------
+class SetAdministratorPermissionAction(BaseAction):
+    """Sets the user to the "administrator" role,
+    records this in the database.
     """
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
-        self.api.messages.delete(
-            peer_id=event.peer_id,
-            cmids=event.cmid,
-            delete_for_all=1
+        fields = ("user_permission",)
+        target_id=event.payload.get("target")
+        lvl = self.db.permissions.select(
+            fields=fields,
+            user_id=target_id
+        )
+        already_promoted = bool(lvl)
+
+        role = config.PERMISSIONS_DECODING[2]
+        snackbar_message = f"⚒️ Пользователю назначена роль \"{role}\"."
+
+        if already_promoted:
+            lvl = int(lvl[0][0])
+
+            if lvl == 2:
+                role = config.PERMISSIONS_DECODING[lvl]
+                snackbar_message = f"❗Пользователь уже имеет роль \"{role}\"."
+
+                self.snackbar(event, snackbar_message)
+
+                return False
+
+        user_name = self.get_name(target_id)
+
+        self.db.permissions.insert(
+            on_duplicate="update",
+            conv_id=event.peer_id,
+            user_id=target_id,
+            user_name=user_name,
+            user_permission=2
         )
 
-        snackbar_message = "❗Отмена команды."
+        self.snackbar(event, snackbar_message)
+
+        return True
+
+
+    def get_name(self, user_id: int) -> str:
+        """Returns the full name of the user,
+        using its unique ID.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            str: User full name.
+        """
+        name = self.api.users.get(
+            user_ids=user_id
+        )
+
+        if not bool(name):
+            name = "Unknown"
+
+        else:
+            name = name[0].get("first_name") + \
+                " " + name[0].get("last_name")
+
+        return name
+
+
+
+class SetModeratorPermissionAction(BaseAction):
+    """Sets the user to the "moderator" role,
+    records this in the database.
+    """
+    def _handle(self, event: ButtonEvent, kwargs) -> bool:
+        fields = ("user_permission",)
+        target_id=event.payload.get("target")
+        lvl = self.db.permissions.select(
+            fields=fields,
+            user_id=target_id
+        )
+        already_promoted = bool(lvl)
+
+        role = config.PERMISSIONS_DECODING[1]
+        snackbar_message = f"⚒️ Пользователю назначена роль \"{role}\"."
+
+        if already_promoted:
+            lvl = int(lvl[0][0])
+
+            if lvl == 1:
+                role = config.PERMISSIONS_DECODING[lvl]
+                snackbar_message = f"❗Пользователь уже имеет роль \"{role}\"."
+
+                self.snackbar(event, snackbar_message)
+
+                return False
+
+        user_name = self.get_name(target_id)
+
+        self.db.permissions.insert(
+            on_duplicate="update",
+            conv_id=event.peer_id,
+            user_id=target_id,
+            user_name=user_name,
+            user_permission=1
+        )
+
+        self.snackbar(event, snackbar_message)
+
+        return True
+
+
+    def get_name(self, user_id: int) -> str:
+        """Returns the full name of the user,
+        using its unique ID.
+
+        Args:
+            user_id (int): User ID.
+
+        Returns:
+            str: User full name.
+        """
+        name = self.api.users.get(
+            user_ids=user_id
+        )
+
+        if not bool(name):
+            name = "Unknown"
+
+        else:
+            name = name[0].get("first_name") + \
+                " " + name[0].get("last_name")
+
+        return name
+
+
+
+class SetUserPermissionAction(BaseAction):
+    """Sets the user to the "user" role,
+    records this in the database.
+    """
+    def _handle(self, event: ButtonEvent, kwargs) -> bool:
+        fields = ("user_permission",)
+        target_id = event.payload.get("target")
+        lvl = self.db.permissions.select(
+            fields=fields,
+            user_id=target_id
+        )
+        already_promoted = bool(lvl)
+
+        role = config.PERMISSIONS_DECODING[0]
+        snackbar_message = f"⚒️ Пользователю назначена роль \"{role}\"."
+
+        if not already_promoted:
+            role = config.PERMISSIONS_DECODING[lvl]
+            snackbar_message = f"❗Пользователь уже имеет роль \"{role}\"."
+
+            self.snackbar(event, snackbar_message)
+
+            return False
+
+        self.db.permissions.delete(
+            user_id=target_id
+        )
 
         self.snackbar(event, snackbar_message)
 
@@ -188,20 +359,20 @@ class CancelMarkingAction(BaseAction):
 
 
 
-# ------------------------------------------------------------------------
-
-
-
-
 actionlist = {
-    # not msg owner
+    # not msg owner -----------------------------
     "not_msg_owner": NotMessageOwnerAction,
-    # test -----
+    # test --------------------------------------
     "test": TestAction,
-    # mark -----
+    # cancel command ----------------------------
+    "cancel_command": CancelAction,
+    # mark --------------------------------------
     "mark_as_chat": MarkAsChatAction,
     "mark_as_log": MarkAsLogAction,
     "update_conv_data": UpdateConvDataAction,
     "drop_mark": DropMarkAction,
-    "cancel_marking": CancelMarkingAction
+    # permission --------------------------------
+    "set_administrator_permission": SetAdministratorPermissionAction,
+    "set_moderator_permission": SetModeratorPermissionAction,
+    "set_user_permission": SetUserPermissionAction
 }
