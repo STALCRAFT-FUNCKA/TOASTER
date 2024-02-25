@@ -82,7 +82,7 @@ class MarkCommand(BaseCommand):
                 Callback(
                     label="CHAT",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "mark_as_chat"
                     }
                 ),
@@ -92,7 +92,7 @@ class MarkCommand(BaseCommand):
                 Callback(
                     label="LOG",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "mark_as_log"
                     }
                 ),
@@ -103,7 +103,7 @@ class MarkCommand(BaseCommand):
                 Callback(
                     label="Обновить данные беседы",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "update_conv_data"
                     }
                 ),
@@ -114,7 +114,7 @@ class MarkCommand(BaseCommand):
                 Callback(
                     label="Сбросить метку",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "drop_mark"
                     }
                 ),
@@ -124,7 +124,7 @@ class MarkCommand(BaseCommand):
                 Callback(
                     label="Отмена команды",
                     payload={
-                        "keyboard_owner_id": event.peer_id,
+                        "keyboard_owner_id": event.from_id,
                         "call_action": "cancel_command"
                     }
                 ),
@@ -144,7 +144,12 @@ class MarkCommand(BaseCommand):
 
 
 class PermissionCommand(BaseCommand):
-    """_summary_
+    """Permission command.
+    Sets new permission role to user.
+    Allows:
+        - Set "Administrator" role.
+        - Set "Moderator" role.
+        - Set "User" role.
     """
     COMMAND_NAME = "permission"
     __permission_lvl = config.COMMAND_PERMISSIONS[COMMAND_NAME]
@@ -166,7 +171,8 @@ class PermissionCommand(BaseCommand):
                     label="Модератор",
                     payload={
                         "keyboard_owner_id": event.from_id,
-                        "call_action": "set_moderator_permission"
+                        "call_action": "set_moderator_permission",
+                        "target": self.id_from_tag(user_tag)
                     }
                 ),
                 ButtonColor.POSITIVE
@@ -176,7 +182,8 @@ class PermissionCommand(BaseCommand):
                     label="Администратор",
                     payload={
                         "keyboard_owner_id": event.from_id,
-                        "call_action": "set_administrator_permission"
+                        "call_action": "set_administrator_permission",
+                        "target": self.id_from_tag(user_tag)
                     }
                 ),
                 ButtonColor.POSITIVE
@@ -186,7 +193,8 @@ class PermissionCommand(BaseCommand):
                     label="Пользователь",
                     payload={
                         "keyboard_owner_id": event.from_id,
-                        "call_action": "set_user_permission"
+                        "call_action": "set_user_permission",
+                        "target": self.id_from_tag(user_tag)
                     }
                 ),
                 ButtonColor.NEGATIVE
@@ -226,9 +234,21 @@ class PermissionCommand(BaseCommand):
         Returns:
             bool: Is tag?
         """
-        pattern = r"^\[id[-+]?\d+\|\@\w+\]"
+        pattern = r"^\[id[-+]?\d+\|\@?\w+\]"
         return bool(re.search(pattern, tag))
 
+
+    def id_from_tag(self, tag: str) -> int:
+        """_summary_
+
+        Args:
+            tag (str): _description_
+
+        Returns:
+            int: _description_
+        """
+        sep_pos = tag.find("|")
+        return int(tag[3:sep_pos])
 
 
 commandlist = {
