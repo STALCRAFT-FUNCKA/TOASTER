@@ -9,7 +9,7 @@ class ActionHandler(ABCHandlingHub):
     in the message and executing attached to each button
     actions.
     """
-    db = DataBase()
+    db = DataBase("toaster")
 
     def _check(self, event: ButtonEvent) -> bool:
         return bool(event.payload)
@@ -17,15 +17,23 @@ class ActionHandler(ABCHandlingHub):
 
     def _handle(self, event: ButtonEvent, kwargs) -> bool:
         call_action = event.payload.get("call_action")
+        keyboard_owner_id = event.payload.get("keyboard_owner_id")
 
-        if call_action is None:
+        if any([
+            call_action is None,
+            keyboard_owner_id is None
+        ]):
             super().logger.info(
                 "Wrong payload <%s>",
                 event.payload
             )
             return False
 
-        selected = actionlist.get(call_action)
+        if keyboard_owner_id != event.from_id:
+            selected = actionlist.get("not_msg_owner")
+
+        else:
+            selected = actionlist.get(call_action)
 
         if selected is None:
             super().logger.info(
