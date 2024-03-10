@@ -50,13 +50,15 @@ class Connection:
             if allow_debug_text:
                 print("Ошибка при подключении к MySQL Server", error)
 
-    def get_cursor(self):
+    @property
+    def cursor(self):
         """
         Returns database cursor object.
         """
         return self._cursor
 
-    def get_connection(self):
+    @property
+    def connection(self):
         """
         Returns database connection object.
         """
@@ -266,8 +268,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="conversations",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -278,8 +280,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="settings",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -290,8 +292,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="permissions",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -302,8 +304,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="kicked",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -314,8 +316,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="banned",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -326,8 +328,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="warned",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -338,8 +340,8 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="muted",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
 
     @property
@@ -350,6 +352,6 @@ class DataBase(metaclass=MetaSingleton):
         """
         return self._base_table(
             table_name="queue",
-            connection=self._tunnel.get_connection(),
-            cursor=self._tunnel.get_cursor()
+            connection=self._tunnel.connection,
+            cursor=self._tunnel.cursor
         )
