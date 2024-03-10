@@ -17,15 +17,15 @@ class Connection:
 
     def _fill_schema(self):
         """
-        Creates a database named "toaster" if one does not exist.
+        Creates a database named "toaster_old" if one does not exist.
         """
-        self._cursor.execute('CREATE DATABASE IF NOT EXISTS toaster')
+        self._cursor.execute('CREATE DATABASE IF NOT EXISTS toaster_old')
 
     def _fill_tables(self):
         """
         Populates the database with a standard table structure.
         """
-        self._cursor.execute('USE toaster')
+        self._cursor.execute('USE toaster_old')
         for table in tables:
             self._cursor.execute(table)
 
@@ -140,7 +140,7 @@ class BaseTable:
 
         query += ";"
 
-        self.cur.execute('USE toaster;')
+        self.cur.execute('USE toaster_old;')
         self.cur.execute(query)
         result = self.cur.fetchall()
         logging.debug("Query: %s", query)
@@ -176,7 +176,7 @@ class BaseTable:
 
         query += ";"
 
-        self.cur.execute('USE toaster;')
+        self.cur.execute('USE toaster_old;')
         self.cur.execute(query)
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
@@ -213,7 +213,7 @@ class BaseTable:
 
         query += ";"
 
-        self.cur.execute('USE toaster;')
+        self.cur.execute('USE toaster_old;')
         self.cur.execute(query)
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
@@ -242,7 +242,7 @@ class BaseTable:
 
         query += ";"
 
-        self.cur.execute('USE toaster;')
+        self.cur.execute('USE toaster_old;')
         self.cur.execute(query)
         logging.debug("Query: %s", query)
         logging.debug("Result: executed")
